@@ -1,0 +1,3771 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#10162b" />
+  <title>Aetherboard: Auto Chess</title>
+  <style>
+    :root {
+      --bg-0: #080b18;
+      --bg-1: #10162b;
+      --bg-2: #18203d;
+      --panel: rgba(20, 27, 52, 0.9);
+      --panel-2: rgba(29, 39, 72, 0.88);
+      --line: rgba(173, 194, 255, 0.18);
+      --text: #f4f7ff;
+      --muted: #a8b1cf;
+      --gold: #ffd66b;
+      --green: #7ef0aa;
+      --red: #ff8191;
+      --blue: #79b9ff;
+      --violet: #b69cff;
+      --shadow: 0 18px 55px rgba(0, 0, 0, 0.38);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 18% 8%, rgba(92, 110, 255, 0.23), transparent 31rem),
+        radial-gradient(circle at 88% 15%, rgba(168, 92, 255, 0.18), transparent 29rem),
+        radial-gradient(circle at 50% 100%, rgba(53, 209, 196, 0.12), transparent 34rem),
+        linear-gradient(145deg, var(--bg-0), var(--bg-1) 48%, #0b1023);
+      overflow-x: hidden;
+    }
+
+    button, input { font: inherit; }
+
+    button {
+      color: inherit;
+      border: 0;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:focus-visible {
+      outline: 3px solid rgba(121, 185, 255, 0.9);
+      outline-offset: 2px;
+    }
+
+    .app-shell {
+      width: min(1580px, 100%);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 14px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 12px;
+    }
+
+    .topbar,
+    .panel,
+    .shop-panel,
+    .bench-panel {
+      border: 1px solid var(--line);
+      background: linear-gradient(155deg, rgba(31, 41, 76, 0.92), rgba(14, 19, 39, 0.94));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .topbar {
+      border-radius: var(--radius);
+      padding: 11px 14px;
+      display: grid;
+      grid-template-columns: minmax(250px, 1fr) auto auto;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .brand {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .brand-mark {
+      width: 45px;
+      height: 45px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: conic-gradient(from 210deg, #5de5d1, #6c82ff, #c177ff, #ff8ca7, #ffd66b, #5de5d1);
+      color: #10162b;
+      font-size: 24px;
+      box-shadow: inset 0 0 0 3px rgba(255,255,255,.22), 0 8px 24px rgba(94, 114, 255, .28);
+      transform: rotate(-4deg);
+    }
+
+    .brand-copy { min-width: 0; }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(18px, 2.2vw, 29px);
+      line-height: 1;
+      letter-spacing: -0.035em;
+    }
+
+    .brand p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .resource-row {
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .resource {
+      min-width: 76px;
+      padding: 7px 10px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 12px;
+      background: rgba(7, 11, 28, .58);
+      text-align: center;
+    }
+
+    .resource-label {
+      display: block;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .resource-value {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 4px;
+      margin-top: 1px;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .hp-value { color: var(--red); }
+    .gold-value { color: var(--gold); }
+    .level-value { color: var(--blue); }
+
+    .xp-mini {
+      margin-top: 4px;
+      height: 4px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: rgba(255,255,255,.09);
+    }
+
+    .xp-mini > span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #64d7ff, #9d8cff);
+      transition: width .25s ease;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 7px;
+    }
+
+    .icon-button,
+    .small-button,
+    .primary-button,
+    .danger-button {
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 11px;
+      background: rgba(255,255,255,.07);
+      transition: transform .12s ease, background .12s ease, border-color .12s ease, opacity .12s ease;
+    }
+
+    .icon-button:hover,
+    .small-button:hover,
+    .primary-button:hover,
+    .danger-button:hover { transform: translateY(-1px); }
+
+    .icon-button:active,
+    .small-button:active,
+    .primary-button:active,
+    .danger-button:active { transform: translateY(1px); }
+
+    .icon-button {
+      width: 39px;
+      height: 39px;
+      display: grid;
+      place-items: center;
+      font-size: 17px;
+    }
+
+    .small-button {
+      min-height: 34px;
+      padding: 7px 11px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .primary-button {
+      min-height: 42px;
+      padding: 10px 17px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #6a8cff, #8e6dff);
+      box-shadow: 0 8px 24px rgba(100, 110, 255, .26);
+    }
+
+    .danger-button {
+      min-height: 36px;
+      padding: 8px 12px;
+      font-weight: 850;
+      background: rgba(255, 84, 110, .13);
+      border-color: rgba(255, 116, 137, .28);
+      color: #ffadb9;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: .42;
+      transform: none !important;
+    }
+
+    .game-layout {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(210px, 270px) minmax(560px, 1fr) minmax(220px, 290px);
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .panel {
+      border-radius: var(--radius);
+      padding: 13px;
+      min-height: 0;
+    }
+
+    .left-panel,
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    .panel-section {
+      min-height: 0;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.075);
+      background: rgba(5, 9, 24, .35);
+    }
+
+    .panel-section.grow {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 9px;
+    }
+
+    .section-heading h2,
+    .section-heading h3 {
+      margin: 0;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .11em;
+    }
+
+    .section-heading span {
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .trait-list {
+      display: grid;
+      gap: 7px;
+    }
+
+    .trait-chip {
+      display: grid;
+      grid-template-columns: 31px 1fr auto;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 8px;
+      border: 1px solid rgba(255,255,255,.075);
+      border-radius: 11px;
+      background: rgba(255,255,255,.035);
+      opacity: .68;
+    }
+
+    .trait-chip.active {
+      opacity: 1;
+      border-color: rgba(126, 240, 170, .34);
+      background: linear-gradient(135deg, rgba(63, 181, 128, .14), rgba(92, 112, 255, .1));
+      box-shadow: inset 3px 0 0 rgba(126, 240, 170, .65);
+    }
+
+    .trait-icon {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      background: rgba(255,255,255,.075);
+      font-size: 16px;
+    }
+
+    .trait-name { font-size: 11px; font-weight: 850; }
+    .trait-effect { color: var(--muted); font-size: 9px; margin-top: 2px; line-height: 1.25; }
+    .trait-count { font-size: 11px; font-weight: 900; color: var(--green); }
+
+    .battle-log {
+      min-height: 80px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding-right: 4px;
+      scrollbar-width: thin;
+    }
+
+    .log-entry {
+      padding: 6px 7px;
+      border-left: 2px solid rgba(121,185,255,.45);
+      background: rgba(255,255,255,.025);
+      color: #c8d0e8;
+      font-size: 10px;
+      line-height: 1.35;
+    }
+
+    .log-entry.good { border-color: var(--green); }
+    .log-entry.bad { border-color: var(--red); }
+    .log-entry.gold { border-color: var(--gold); }
+
+    .arena-panel {
+      min-height: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(rgba(20,27,52,.76), rgba(11,15,32,.87)),
+        radial-gradient(circle at 50% 20%, rgba(127, 92, 255, .22), transparent 52%);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+    }
+
+    .arena-header {
+      min-height: 55px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: rgba(6, 10, 25, .43);
+    }
+
+    .round-title { font-size: 17px; font-weight: 950; letter-spacing: -.02em; }
+    .round-subtitle { margin-top: 2px; color: var(--muted); font-size: 10px; }
+
+    .phase-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.06);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .phase-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 12px currentColor;
+    }
+
+    .phase-pill.battle .phase-dot { background: var(--red); animation: pulse 1s infinite; }
+    .phase-pill.victory .phase-dot { background: var(--gold); }
+
+    @keyframes pulse {
+      50% { opacity: .35; transform: scale(.75); }
+    }
+
+    .board-area {
+      min-height: 0;
+      padding: 12px;
+      display: grid;
+      place-items: center;
+    }
+
+    .board-wrap {
+      position: relative;
+      width: min(100%, 720px);
+      aspect-ratio: 1 / 1;
+      padding: 7px;
+      border-radius: 19px;
+      border: 1px solid rgba(255,255,255,.14);
+      background:
+        linear-gradient(180deg, rgba(255, 102, 128, .08) 0 49.5%, rgba(121, 185, 255, .09) 50.5% 100%),
+        rgba(4, 7, 20, .7);
+      box-shadow: inset 0 0 42px rgba(0,0,0,.33), 0 16px 45px rgba(0,0,0,.3);
+    }
+
+    .board-grid {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      gap: 5px;
+    }
+
+    .board-cell {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      padding: 0;
+      overflow: visible;
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 12px;
+      background: rgba(255,255,255,.035);
+      transition: background .12s ease, border-color .12s ease, transform .12s ease;
+    }
+
+    .board-cell.enemy-zone { background: rgba(255, 103, 127, .035); }
+    .board-cell.player-zone { background: rgba(98, 160, 255, .045); }
+    .board-cell.player-zone:hover:not(:disabled) {
+      background: rgba(121,185,255,.1);
+      border-color: rgba(121,185,255,.25);
+    }
+
+    .board-cell.center-line::after {
+      content: "";
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      bottom: -4px;
+      height: 2px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.28), transparent);
+      z-index: 9;
+      pointer-events: none;
+    }
+
+    .board-cell.move-target {
+      background: rgba(126, 240, 170, .12);
+      border-color: rgba(126, 240, 170, .45);
+      animation: targetGlow 1.15s ease-in-out infinite;
+    }
+
+    @keyframes targetGlow {
+      50% { box-shadow: inset 0 0 18px rgba(126,240,170,.15); }
+    }
+
+    .board-unit {
+      position: absolute;
+      inset: 4px;
+      width: calc(100% - 8px);
+      height: calc(100% - 8px);
+      padding: 0;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.25);
+      background:
+        radial-gradient(circle at 35% 26%, rgba(255,255,255,.25), transparent 24%),
+        linear-gradient(145deg, var(--unit-a, #5571d6), var(--unit-b, #263260));
+      box-shadow: inset 0 -8px 14px rgba(0,0,0,.22), 0 5px 13px rgba(0,0,0,.3);
+      display: grid;
+      place-items: center;
+      z-index: 3;
+      transition: transform .15s ease, filter .15s ease;
+    }
+
+    .board-unit:hover { filter: brightness(1.1); transform: translateY(-2px); }
+    .board-unit.selected {
+      border-color: var(--gold);
+      box-shadow: inset 0 -8px 14px rgba(0,0,0,.22), 0 0 0 3px rgba(255,214,107,.2), 0 0 21px rgba(255,214,107,.36);
+    }
+    .board-unit.enemy-preview { opacity: .79; filter: saturate(.72); cursor: help; }
+    .board-unit.dead { opacity: 0; transform: scale(.15) rotate(35deg); }
+    .board-unit.hit { animation: hitFlash .18s ease; }
+    .board-unit.attack { animation: attackHop .26s ease; }
+    .board-unit.cast { animation: castBurst .48s ease; }
+    .board-unit.stunned { filter: grayscale(.45) brightness(.85); }
+
+    @keyframes hitFlash { 50% { filter: brightness(1.8); transform: translateX(3px); } }
+    @keyframes attackHop { 50% { transform: scale(1.11) translateY(-3px); } }
+    @keyframes castBurst { 50% { transform: scale(1.16); box-shadow: 0 0 29px var(--unit-a); } }
+
+    .unit-icon {
+      font-size: clamp(19px, 3.2vw, 37px);
+      line-height: 1;
+      transform: translateY(-2px);
+      filter: drop-shadow(0 3px 2px rgba(0,0,0,.28));
+    }
+
+    .unit-stars {
+      position: absolute;
+      top: -7px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      color: var(--gold);
+      font-size: clamp(8px, 1.3vw, 13px);
+      letter-spacing: -2px;
+      text-shadow: 0 1px 4px #000;
+    }
+
+    .unit-name-tiny {
+      position: absolute;
+      left: 50%;
+      bottom: 4px;
+      transform: translateX(-50%);
+      max-width: 93%;
+      padding: 1px 4px;
+      overflow: hidden;
+      border-radius: 5px;
+      background: rgba(3, 5, 13, .64);
+      font-size: clamp(6px, .8vw, 9px);
+      font-weight: 900;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      text-shadow: 0 1px 2px #000;
+    }
+
+    .unit-level-badge {
+      position: absolute;
+      right: -4px;
+      top: -4px;
+      width: 20px;
+      height: 20px;
+      display: grid;
+      place-items: center;
+      border: 2px solid rgba(4,8,20,.8);
+      border-radius: 50%;
+      background: #714cff;
+      font-size: 9px;
+      font-weight: 950;
+    }
+
+    .health-stack {
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      bottom: -5px;
+      display: grid;
+      gap: 2px;
+      z-index: 8;
+      pointer-events: none;
+    }
+
+    .health-bar,
+    .mana-bar {
+      height: 5px;
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,.7);
+      border-radius: 99px;
+      background: rgba(0,0,0,.72);
+    }
+
+    .mana-bar { height: 3px; }
+
+    .health-bar > span,
+    .mana-bar > span {
+      display: block;
+      height: 100%;
+      transition: width .12s linear;
+    }
+
+    .health-bar > span { background: linear-gradient(90deg, #43d98e, #96f07b); }
+    .health-bar.low > span { background: linear-gradient(90deg, #ff5f76, #ff9a7b); }
+    .mana-bar > span { background: linear-gradient(90deg, #58bbff, #b288ff); }
+
+    .status-icons {
+      position: absolute;
+      left: -4px;
+      top: 7px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      font-size: 9px;
+      text-shadow: 0 1px 2px #000;
+    }
+
+    .floating-layer {
+      position: absolute;
+      inset: 7px;
+      pointer-events: none;
+      z-index: 30;
+      overflow: hidden;
+    }
+
+    .float-text {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      font-size: clamp(9px, 1.15vw, 15px);
+      font-weight: 950;
+      text-shadow: 0 2px 4px #000, 0 0 7px #000;
+      animation: floatUp .75s ease-out forwards;
+      white-space: nowrap;
+    }
+
+    .float-text.damage { color: #fff; }
+    .float-text.crit { color: var(--gold); font-size: clamp(11px, 1.4vw, 18px); }
+    .float-text.heal { color: var(--green); }
+    .float-text.shield { color: #78d6ff; }
+    .float-text.ko { color: #ff8ca7; letter-spacing: .08em; }
+
+    @keyframes floatUp {
+      to { transform: translate(-50%, -145%); opacity: 0; }
+    }
+
+    .battle-timer {
+      position: absolute;
+      top: 13px;
+      left: 50%;
+      z-index: 20;
+      transform: translateX(-50%);
+      padding: 5px 9px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 999px;
+      background: rgba(3,6,17,.72);
+      font-size: 10px;
+      font-weight: 900;
+      backdrop-filter: blur(8px);
+    }
+
+    .arena-footer {
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      background: rgba(6, 10, 25, .5);
+    }
+
+    .formation-info {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .formation-info strong { color: var(--text); }
+
+    .footer-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 7px;
+    }
+
+    .selected-card {
+      min-height: 166px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .selected-empty {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      color: var(--muted);
+      font-size: 11px;
+      text-align: center;
+      line-height: 1.5;
+      border: 1px dashed rgba(255,255,255,.1);
+      border-radius: 12px;
+    }
+
+    .unit-profile {
+      display: grid;
+      grid-template-columns: 58px 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .profile-icon {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      border-radius: 17px;
+      border: 1px solid rgba(255,255,255,.17);
+      background: linear-gradient(145deg, var(--unit-a), var(--unit-b));
+      font-size: 29px;
+      box-shadow: inset 0 -8px 14px rgba(0,0,0,.2);
+    }
+
+    .profile-name { font-size: 15px; font-weight: 950; }
+    .profile-stars { color: var(--gold); font-size: 11px; }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+    .tag {
+      padding: 3px 6px;
+      border-radius: 7px;
+      background: rgba(255,255,255,.07);
+      color: #d8def2;
+      font-size: 9px;
+      font-weight: 800;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+    }
+
+    .stat-box {
+      padding: 6px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.04);
+      text-align: center;
+    }
+
+    .stat-box span { display: block; color: var(--muted); font-size: 8px; text-transform: uppercase; letter-spacing: .08em; }
+    .stat-box strong { display: block; margin-top: 2px; font-size: 11px; }
+
+    .ability-box {
+      padding: 8px;
+      border: 1px solid rgba(182,156,255,.17);
+      border-radius: 10px;
+      background: rgba(128, 93, 220, .08);
+    }
+
+    .ability-box strong { display: block; color: #d8ccff; font-size: 10px; }
+    .ability-box p { margin: 3px 0 0; color: var(--muted); font-size: 9px; line-height: 1.35; }
+
+    .awakening-note {
+      padding: 7px 8px;
+      border-left: 3px solid var(--gold);
+      border-radius: 6px;
+      background: rgba(255,214,107,.075);
+      color: #f8e5a7;
+      font-size: 9px;
+      line-height: 1.35;
+    }
+
+    .equipped-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .equipped-item {
+      padding: 5px 7px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 8px;
+      background: rgba(255,255,255,.045);
+      font-size: 9px;
+    }
+
+    .inventory-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .inventory-item {
+      min-height: 58px;
+      padding: 5px;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px;
+      background: rgba(255,255,255,.045);
+      text-align: center;
+      transition: transform .12s ease, border-color .12s ease;
+    }
+
+    .inventory-item:hover { transform: translateY(-2px); border-color: rgba(121,185,255,.35); }
+    .inventory-item .item-icon { display: block; font-size: 20px; }
+    .inventory-item .item-name { display: block; margin-top: 2px; font-size: 8px; font-weight: 850; line-height: 1.1; }
+
+    .enemy-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 5px;
+    }
+
+    .enemy-mini {
+      min-width: 0;
+      padding: 6px 4px;
+      border: 1px solid rgba(255, 129, 145, .13);
+      border-radius: 9px;
+      background: rgba(255, 98, 124, .045);
+      text-align: center;
+    }
+
+    .enemy-mini-icon { font-size: 18px; }
+    .enemy-mini-name { margin-top: 2px; overflow: hidden; color: #e4d7df; font-size: 7px; font-weight: 800; white-space: nowrap; text-overflow: ellipsis; }
+    .enemy-mini-stars { color: var(--gold); font-size: 8px; }
+
+    .bottom-zone {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(330px, 43%);
+      gap: 12px;
+    }
+
+    .shop-panel,
+    .bench-panel {
+      min-width: 0;
+      border-radius: var(--radius);
+      padding: 11px 12px;
+    }
+
+    .bottom-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .bottom-heading h2 {
+      margin: 0;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+
+    .shop-controls { display: flex; align-items: center; gap: 6px; }
+
+    .shop-list {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(105px, 1fr));
+      gap: 7px;
+    }
+
+    .shop-card {
+      position: relative;
+      min-width: 0;
+      min-height: 104px;
+      padding: 9px 8px 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 13px;
+      background:
+        radial-gradient(circle at 82% 10%, var(--rarity-glow, rgba(255,255,255,.08)), transparent 45%),
+        linear-gradient(150deg, rgba(255,255,255,.08), rgba(5,8,20,.76));
+      text-align: left;
+      transition: transform .14s ease, border-color .14s ease, filter .14s ease;
+    }
+
+    .shop-card:hover:not(:disabled) {
+      transform: translateY(-3px);
+      border-color: var(--rarity, rgba(255,255,255,.25));
+      filter: brightness(1.08);
+    }
+
+    .shop-card.bought { opacity: .18; cursor: default; }
+    .shop-icon { display: block; font-size: 28px; }
+    .shop-name { display: block; margin-top: 4px; overflow: hidden; font-size: 11px; font-weight: 950; white-space: nowrap; text-overflow: ellipsis; }
+    .shop-tags { display: block; margin-top: 2px; overflow: hidden; color: var(--muted); font-size: 8px; white-space: nowrap; text-overflow: ellipsis; }
+    .shop-cost {
+      position: absolute;
+      right: 7px;
+      top: 7px;
+      min-width: 23px;
+      height: 23px;
+      padding: 0 5px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: rgba(3,6,15,.72);
+      color: var(--gold);
+      font-size: 10px;
+      font-weight: 950;
+    }
+
+    .shop-ability { display: block; margin-top: 7px; color: #d2d8ed; font-size: 8px; line-height: 1.25; }
+
+    .bench-list {
+      display: grid;
+      grid-template-columns: repeat(9, minmax(34px, 1fr));
+      gap: 5px;
+    }
+
+    .bench-slot {
+      position: relative;
+      min-width: 0;
+      aspect-ratio: 1 / 1;
+      padding: 3px;
+      border: 1px dashed rgba(255,255,255,.12);
+      border-radius: 10px;
+      background: rgba(255,255,255,.025);
+      transition: background .12s ease, border-color .12s ease;
+    }
+
+    .bench-slot:hover:not(:disabled) { border-color: rgba(121,185,255,.34); background: rgba(121,185,255,.06); }
+    .bench-slot.move-target { border-style: solid; border-color: rgba(126,240,170,.45); background: rgba(126,240,170,.09); }
+
+    .bench-unit {
+      position: absolute;
+      inset: 3px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.17);
+      border-radius: 50%;
+      background: linear-gradient(145deg, var(--unit-a), var(--unit-b));
+      font-size: clamp(16px, 2vw, 25px);
+      box-shadow: inset 0 -5px 10px rgba(0,0,0,.2);
+    }
+
+    .bench-unit.selected { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(255,214,107,.22); }
+    .bench-stars { position: absolute; top: -7px; left: 50%; transform: translateX(-50%); color: var(--gold); font-size: 8px; letter-spacing: -2px; text-shadow: 0 1px 3px #000; }
+
+    .kbd {
+      display: inline-grid;
+      min-width: 19px;
+      height: 19px;
+      place-items: center;
+      padding: 0 4px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-bottom-width: 2px;
+      border-radius: 5px;
+      background: rgba(255,255,255,.06);
+      color: #dce3fa;
+      font-size: 8px;
+      font-weight: 900;
+    }
+
+    .toast-layer {
+      position: fixed;
+      top: 78px;
+      left: 50%;
+      z-index: 1000;
+      width: min(94vw, 430px);
+      transform: translateX(-50%);
+      display: grid;
+      gap: 7px;
+      pointer-events: none;
+    }
+
+    .toast {
+      padding: 10px 13px;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 12px;
+      background: rgba(8,12,29,.92);
+      box-shadow: 0 13px 35px rgba(0,0,0,.34);
+      font-size: 11px;
+      text-align: center;
+      animation: toastIn .25s ease, toastOut .3s ease 2.5s forwards;
+      backdrop-filter: blur(12px);
+    }
+
+    .toast.good { border-color: rgba(126,240,170,.35); }
+    .toast.bad { border-color: rgba(255,129,145,.38); }
+    .toast.gold { border-color: rgba(255,214,107,.4); }
+
+    @keyframes toastIn { from { opacity: 0; transform: translateY(-10px) scale(.97); } }
+    @keyframes toastOut { to { opacity: 0; transform: translateY(-8px); } }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      padding: 18px;
+      display: grid;
+      place-items: center;
+      background: rgba(2,4,13,.76);
+      backdrop-filter: blur(9px);
+    }
+
+    .modal-backdrop.hidden { display: none; }
+
+    .modal {
+      width: min(610px, 100%);
+      max-height: min(88vh, 760px);
+      overflow-y: auto;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 20px;
+      background:
+        radial-gradient(circle at 90% 0, rgba(137, 91, 255, .18), transparent 40%),
+        linear-gradient(155deg, #20294b, #0e142a 68%);
+      box-shadow: 0 28px 85px rgba(0,0,0,.58);
+    }
+
+    .modal-title { margin: 0; font-size: 24px; letter-spacing: -.035em; }
+    .modal-subtitle { margin: 6px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .modal-body { margin-top: 17px; }
+    .modal-actions { margin-top: 18px; display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+
+    .tutorial-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .tutorial-step {
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 13px;
+      background: rgba(255,255,255,.035);
+    }
+
+    .tutorial-step .big { font-size: 26px; }
+    .tutorial-step strong { display: block; margin-top: 5px; font-size: 12px; }
+    .tutorial-step p { margin: 4px 0 0; color: var(--muted); font-size: 10px; line-height: 1.45; }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .choice-card {
+      min-height: 150px;
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,.11);
+      border-radius: 15px;
+      background: rgba(255,255,255,.045);
+      text-align: left;
+      transition: transform .14s ease, border-color .14s ease, background .14s ease;
+    }
+
+    .choice-card:hover { transform: translateY(-3px); border-color: rgba(182,156,255,.45); background: rgba(148,108,255,.1); }
+    .choice-icon { font-size: 31px; }
+    .choice-name { display: block; margin-top: 8px; font-size: 13px; font-weight: 950; }
+    .choice-desc { display: block; margin-top: 5px; color: var(--muted); font-size: 10px; line-height: 1.45; }
+
+    .loot-grid { grid-template-columns: repeat(3, 1fr); }
+    .loot-grid .choice-card { min-height: 170px; text-align: center; }
+
+    .result-banner {
+      padding: 12px;
+      border-radius: 13px;
+      background: rgba(255,255,255,.045);
+      text-align: center;
+    }
+    .result-banner .result-icon { font-size: 42px; }
+    .result-banner h3 { margin: 6px 0 0; font-size: 19px; }
+    .result-banner p { margin: 6px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+
+    .noscript {
+      margin: 30px auto;
+      width: min(600px, 92vw);
+      padding: 20px;
+      border-radius: 15px;
+      background: #20294b;
+      color: white;
+      text-align: center;
+    }
+
+    @media (max-width: 1160px) {
+      .game-layout { grid-template-columns: minmax(180px, 230px) minmax(520px, 1fr); }
+      .right-panel { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); }
+      .right-panel .panel-section { min-height: 160px; }
+      .bottom-zone { grid-template-columns: 1fr; }
+      .bench-list { grid-template-columns: repeat(9, minmax(45px, 1fr)); }
+    }
+
+    @media (max-width: 820px) {
+      .app-shell { padding: 8px; gap: 8px; }
+      .topbar { grid-template-columns: 1fr auto; }
+      .resource-row { grid-column: 1 / -1; order: 3; }
+      .resource { flex: 1; min-width: 65px; }
+      .brand p { display: none; }
+      .game-layout { grid-template-columns: 1fr; }
+      .left-panel { display: grid; grid-template-columns: 1fr 1fr; }
+      .left-panel .panel-section.grow { max-height: 220px; }
+      .right-panel { grid-template-columns: 1fr; }
+      .arena-panel { min-height: 620px; }
+      .board-area { padding: 8px; }
+      .shop-list { overflow-x: auto; grid-template-columns: repeat(5, 125px); padding-bottom: 3px; }
+      .bench-list { overflow-x: auto; grid-template-columns: repeat(9, 58px); padding-bottom: 3px; }
+      .inventory-list { grid-template-columns: repeat(6, minmax(50px, 1fr)); overflow-x: auto; }
+    }
+
+    @media (max-width: 540px) {
+      .top-actions .new-label { display: none; }
+      .brand-mark { width: 40px; height: 40px; }
+      .resource { padding: 6px 7px; }
+      .resource-value { font-size: 15px; }
+      .left-panel { grid-template-columns: 1fr; }
+      .arena-panel { min-height: 540px; }
+      .arena-footer { align-items: stretch; flex-direction: column; }
+      .footer-actions { justify-content: stretch; }
+      .footer-actions button { flex: 1; }
+      .choice-grid, .tutorial-grid, .loot-grid { grid-template-columns: 1fr; }
+      .modal { padding: 16px; }
+      .modal-title { font-size: 21px; }
+      .unit-name-tiny { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <noscript><div class="noscript">This game needs JavaScript enabled to run.</div></noscript>
+
+  <main class="app-shell" id="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">✦</div>
+        <div class="brand-copy">
+          <h1>Aetherboard: Auto Chess</h1>
+          <p>Build a six-spirit squad, awaken upgrades, and survive 15 rounds.</p>
+        </div>
+      </div>
+
+      <div class="resource-row" aria-label="Player resources">
+        <div class="resource">
+          <span class="resource-label">Heart</span>
+          <span class="resource-value hp-value">♥ <b id="hpValue">50</b></span>
+        </div>
+        <div class="resource">
+          <span class="resource-label">Gold</span>
+          <span class="resource-value gold-value">● <b id="goldValue">8</b></span>
+        </div>
+        <div class="resource">
+          <span class="resource-label">Level</span>
+          <span class="resource-value level-value"><b id="levelValue">2</b> <small id="levelCap">/ 6</small></span>
+          <div class="xp-mini"><span id="xpBar" style="width:0%"></span></div>
+        </div>
+        <div class="resource">
+          <span class="resource-label">Round</span>
+          <span class="resource-value"><b id="roundValue">1</b> <small>/ 15</small></span>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <button class="icon-button" id="soundButton" title="Toggle sound" aria-label="Toggle sound">🔊</button>
+        <button class="icon-button" id="helpButton" title="How to play" aria-label="How to play">?</button>
+        <button class="small-button" id="newGameButton" title="Start a new run">↻ <span class="new-label">New run</span></button>
+      </div>
+    </header>
+
+    <section class="game-layout">
+      <aside class="panel left-panel">
+        <section class="panel-section">
+          <div class="section-heading">
+            <h2>Synergies</h2>
+            <span>Unique spirits</span>
+          </div>
+          <div class="trait-list" id="traitList"></div>
+        </section>
+
+        <section class="panel-section grow">
+          <div class="section-heading">
+            <h2>Battle log</h2>
+            <span id="streakLabel">No streak</span>
+          </div>
+          <div class="battle-log" id="battleLog" aria-live="polite"></div>
+        </section>
+      </aside>
+
+      <section class="arena-panel">
+        <header class="arena-header">
+          <div>
+            <div class="round-title" id="roundTitle">Round 1 · Whispering Grove</div>
+            <div class="round-subtitle" id="roundSubtitle">Arrange your spirits, then begin the battle.</div>
+          </div>
+          <div class="phase-pill" id="phasePill"><span class="phase-dot"></span><span id="phaseText">Planning</span></div>
+        </header>
+
+        <div class="board-area">
+          <div class="board-wrap" id="boardWrap">
+            <div class="battle-timer" id="battleTimer" hidden>35.0s</div>
+            <div class="board-grid" id="boardGrid" role="grid" aria-label="Battle board"></div>
+            <div class="floating-layer" id="floatingLayer"></div>
+          </div>
+        </div>
+
+        <footer class="arena-footer">
+          <div class="formation-info" id="formationInfo"><strong>2 / 2</strong> spirits deployed · Click a unit, then a space.</div>
+          <div class="footer-actions">
+            <button class="small-button" id="autoPlaceButton">✨ Auto-place</button>
+            <button class="small-button" id="speedButton" disabled>Speed ×1</button>
+            <button class="primary-button" id="battleButton">⚔ Begin battle <span class="kbd">Space</span></button>
+          </div>
+        </footer>
+      </section>
+
+      <aside class="panel right-panel">
+        <section class="panel-section">
+          <div class="section-heading">
+            <h2>Selected spirit</h2>
+            <span id="selectedLocation"></span>
+          </div>
+          <div class="selected-card" id="selectedCard"></div>
+        </section>
+
+        <section class="panel-section">
+          <div class="section-heading">
+            <h2>Items</h2>
+            <span>Equip up to 2</span>
+          </div>
+          <div class="inventory-list" id="inventoryList"></div>
+        </section>
+
+        <section class="panel-section">
+          <div class="section-heading">
+            <h2>Enemy scouts</h2>
+            <span id="enemyPowerLabel">Threat 1</span>
+          </div>
+          <div class="enemy-list" id="enemyList"></div>
+        </section>
+      </aside>
+    </section>
+
+    <section class="bottom-zone">
+      <section class="shop-panel">
+        <div class="bottom-heading">
+          <h2>Spirit shop</h2>
+          <div class="shop-controls">
+            <button class="small-button" id="lockButton" title="Keep this shop next round">🔓 Lock</button>
+            <button class="small-button" id="xpButton" title="Spend 4 gold for 4 XP">＋ XP <span class="gold-value">4●</span> <span class="kbd">E</span></button>
+            <button class="small-button" id="rerollButton" title="Refresh the shop">⟳ Reroll <span class="gold-value">2●</span> <span class="kbd">R</span></button>
+          </div>
+        </div>
+        <div class="shop-list" id="shopList"></div>
+      </section>
+
+      <section class="bench-panel">
+        <div class="bottom-heading">
+          <h2>Bench</h2>
+          <span style="color:var(--muted);font-size:9px">Three matching copies combine automatically</span>
+        </div>
+        <div class="bench-list" id="benchList"></div>
+      </section>
+    </section>
+  </main>
+
+  <div class="toast-layer" id="toastLayer" aria-live="polite"></div>
+
+  <div class="modal-backdrop hidden" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <h2 class="modal-title" id="modalTitle"></h2>
+      <p class="modal-subtitle" id="modalSubtitle"></p>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-actions" id="modalActions"></div>
+    </div>
+  </div>
+
+  <script>
+  "use strict";
+
+  const BOARD_ROWS = 6;
+  const BOARD_COLS = 6;
+  const BOARD_SIZE = BOARD_ROWS * BOARD_COLS;
+  const PLAYER_START_ROW = 3;
+  const BENCH_SIZE = 9;
+  const MAX_LEVEL = 6;
+  const FINAL_ROUND = 15;
+  const SAVE_KEY = "aetherboard-auto-chess-v1";
+
+  const UNIT_DEFS = {
+    cinderCub: {
+      name: "Cinder Cub", icon: "🔥", cost: 1, element: "Ember", role: "Striker",
+      hp: 520, attack: 58, armor: 13, range: 1, attackSpeed: 0.92, manaMax: 70,
+      ability: "Flare Pounce", abilityKey: "flareBurst",
+      abilityText: "Pounces on its target, damaging nearby enemies and leaving them burning.",
+      colors: ["#ff8a57", "#7d2b31"]
+    },
+    thornling: {
+      name: "Thornling", icon: "🌿", cost: 1, element: "Grove", role: "Vanguard",
+      hp: 690, attack: 43, armor: 27, range: 1, attackSpeed: 0.72, manaMax: 65,
+      ability: "Bark Barrier", abilityKey: "barkBarrier",
+      abilityText: "Wraps itself in living bark, gaining a large shield and restoring health.",
+      colors: ["#64ca7b", "#265a3b"]
+    },
+    ripplefin: {
+      name: "Ripplefin", icon: "💧", cost: 1, element: "Tide", role: "Mystic",
+      hp: 470, attack: 46, armor: 10, range: 3, attackSpeed: 0.82, manaMax: 60,
+      ability: "Tidal Mend", abilityKey: "tidalMend",
+      abilityText: "Sends a healing current to the ally with the lowest health.",
+      colors: ["#55c7ef", "#27518b"]
+    },
+    sparkit: {
+      name: "Sparkit", icon: "⚡", cost: 1, element: "Storm", role: "Ranger",
+      hp: 445, attack: 50, armor: 9, range: 3, attackSpeed: 1.06, manaMax: 75,
+      ability: "Chain Flash", abilityKey: "chainSpark",
+      abilityText: "Fires lightning that jumps between up to three enemies.",
+      colors: ["#ffe46b", "#8a6f22"]
+    },
+    frosthorn: {
+      name: "Frosthorn", icon: "❄️", cost: 2, element: "Frost", role: "Vanguard",
+      hp: 790, attack: 61, armor: 33, range: 1, attackSpeed: 0.68, manaMax: 80,
+      ability: "Glacial Ram", abilityKey: "glacialRam",
+      abilityText: "Crashes into its target, dealing damage and stunning it.",
+      colors: ["#bfe8ff", "#4779a7"]
+    },
+    duskmoth: {
+      name: "Duskmoth", icon: "🌙", cost: 2, element: "Umbral", role: "Assassin",
+      hp: 520, attack: 78, armor: 12, range: 1, attackSpeed: 1.04, manaMax: 65,
+      ability: "Shadow Dive", abilityKey: "shadowDive",
+      abilityText: "Warps beside the weakest enemy and strikes with increased critical power.",
+      colors: ["#9b74dc", "#34234e"]
+    },
+    magmole: {
+      name: "Magmole", icon: "🌋", cost: 2, element: "Ember", role: "Vanguard",
+      hp: 820, attack: 57, armor: 30, range: 1, attackSpeed: 0.71, manaMax: 85,
+      ability: "Magma Pulse", abilityKey: "magmaPulse",
+      abilityText: "Erupts, scorching every enemy standing close by.",
+      colors: ["#ff714f", "#6f2520"]
+    },
+    bloombeak: {
+      name: "Bloombeak", icon: "🌸", cost: 2, element: "Grove", role: "Mystic",
+      hp: 530, attack: 49, armor: 14, range: 3, attackSpeed: 0.83, manaMax: 80,
+      ability: "Verdant Song", abilityKey: "verdantSong",
+      abilityText: "Heals the whole team and grants a brief regeneration effect.",
+      colors: ["#f5a7d1", "#477f55"]
+    },
+    tempestral: {
+      name: "Tempestral", icon: "🌪️", cost: 3, element: "Storm", role: "Striker",
+      hp: 700, attack: 84, armor: 19, range: 1, attackSpeed: 0.98, manaMax: 90,
+      ability: "Cyclone Ring", abilityKey: "cyclone",
+      abilityText: "Spins through nearby enemies, striking each one twice.",
+      colors: ["#9ce8ec", "#3d5e85"]
+    },
+    coralSage: {
+      name: "Coral Sage", icon: "🪸", cost: 3, element: "Tide", role: "Mystic",
+      hp: 620, attack: 62, armor: 18, range: 3, attackSpeed: 0.78, manaMax: 80,
+      ability: "Coral Ward", abilityKey: "coralWard",
+      abilityText: "Protects the two most injured allies with shimmering shields.",
+      colors: ["#ff9c9c", "#356e92"]
+    },
+    glacielle: {
+      name: "Glacielle", icon: "🧊", cost: 3, element: "Frost", role: "Ranger",
+      hp: 570, attack: 90, armor: 15, range: 4, attackSpeed: 0.84, manaMax: 90,
+      ability: "Ice Lance", abilityKey: "iceLance",
+      abilityText: "Launches a piercing lance through the three nearest enemies.",
+      colors: ["#a8edff", "#4557a5"]
+    },
+    shadeclaw: {
+      name: "Shadeclaw", icon: "🐾", cost: 3, element: "Umbral", role: "Assassin",
+      hp: 610, attack: 104, armor: 16, range: 1, attackSpeed: 1.08, manaMax: 85,
+      ability: "Eclipse Cut", abilityKey: "eclipseCut",
+      abilityText: "Executes the weakest enemy; the strike becomes stronger below 35% health.",
+      colors: ["#8059ba", "#211d3f"]
+    },
+    solara: {
+      name: "Solara", icon: "☀️", cost: 4, element: "Radiant", role: "Mystic",
+      hp: 720, attack: 80, armor: 22, range: 3, attackSpeed: 0.81, manaMax: 100,
+      ability: "Sunrise Chorus", abilityKey: "sunrise",
+      abilityText: "Heals and shields every ally with a wave of warm light.",
+      colors: ["#ffd66b", "#a55c43"]
+    },
+    ironroot: {
+      name: "Ironroot", icon: "🪨", cost: 4, element: "Grove", role: "Vanguard",
+      hp: 1120, attack: 79, armor: 45, range: 1, attackSpeed: 0.62, manaMax: 100,
+      ability: "Rootquake", abilityKey: "rootquake",
+      abilityText: "Shakes the ground, damaging and briefly stunning nearby enemies.",
+      colors: ["#8aa06d", "#42483e"]
+    },
+    voltDrake: {
+      name: "Volt Drake", icon: "🐉", cost: 4, element: "Storm", role: "Ranger",
+      hp: 760, attack: 112, armor: 20, range: 3, attackSpeed: 1.02, manaMax: 95,
+      ability: "Thunder Arc", abilityKey: "thunderArc",
+      abilityText: "Calls down repeated lightning on the most crowded enemy area.",
+      colors: ["#ffe567", "#6251ad"]
+    },
+    emberWyrm: {
+      name: "Ember Wyrm", icon: "🐲", cost: 4, element: "Ember", role: "Striker",
+      hp: 850, attack: 119, armor: 24, range: 2, attackSpeed: 0.88, manaMax: 100,
+      ability: "Meteor Breath", abilityKey: "meteorBreath",
+      abilityText: "Breathes fire over a wide area, dealing heavy damage and burning enemies.",
+      colors: ["#ff7657", "#72244e"]
+    }
+  };
+
+  const ITEM_DEFS = {
+    swiftFeather: { name: "Swift Feather", icon: "🪶", text: "+22% attack speed.", attackSpeed: 0.22 },
+    vitalSeed: { name: "Vital Seed", icon: "🌱", text: "+180 health and steady regeneration.", hp: 180, regen: 7 },
+    arcCrystal: { name: "Arc Crystal", icon: "🔮", text: "+25% ability power and +20 starting mana.", abilityPower: 0.25, startMana: 20 },
+    ironPlate: { name: "Iron Plate", icon: "🛡️", text: "+28 armour.", armor: 28 },
+    razorFang: { name: "Razor Fang", icon: "🦷", text: "+22 attack and +12% critical chance.", attack: 22, crit: 0.12 },
+    echoShell: { name: "Echo Shell", icon: "🐚", text: "After casting, regain 30 mana once per battle.", echo: true }
+  };
+
+  const TRAIT_INFO = {
+    Ember: {
+      icon: "🔥", thresholds: [2, 4],
+      effects: ["+12% attack", "+28% attack; attacks burn"]
+    },
+    Grove: {
+      icon: "🌿", thresholds: [2, 4],
+      effects: ["+12% maximum health", "+28% health and regeneration"]
+    },
+    Tide: {
+      icon: "💧", thresholds: [2, 4],
+      effects: ["+18 starting mana", "+40 starting mana"]
+    },
+    Storm: {
+      icon: "⚡", thresholds: [2, 4],
+      effects: ["+16% attack speed", "+36% attack speed"]
+    },
+    Frost: {
+      icon: "❄️", thresholds: [2, 4],
+      effects: ["Attacks slow", "18% chance to freeze"]
+    },
+    Umbral: {
+      icon: "🌙", thresholds: [2, 4],
+      effects: ["+16% critical chance", "+30% critical chance"]
+    },
+    Radiant: {
+      icon: "☀️", thresholds: [1, 2],
+      effects: ["Team starts with a small shield", "Shield is doubled"]
+    },
+    Vanguard: {
+      icon: "🛡️", thresholds: [2, 4],
+      effects: ["Vanguards gain +24 armour", "Vanguards gain +52 armour"]
+    },
+    Ranger: {
+      icon: "🏹", thresholds: [2, 4],
+      effects: ["Rangers gain +18% speed", "Rangers gain +40% speed"]
+    },
+    Mystic: {
+      icon: "🔮", thresholds: [2, 4],
+      effects: ["Team gains +18% ability power", "Team gains +40% ability power"]
+    },
+    Striker: {
+      icon: "⚔️", thresholds: [2, 4],
+      effects: ["Strikers gain +18% attack", "Strikers gain +38% attack"]
+    },
+    Assassin: {
+      icon: "🗡️", thresholds: [2, 4],
+      effects: ["Assassins gain stronger criticals", "Assassins blink and gain +25% speed"]
+    }
+  };
+
+  const ROUND_NAMES = [
+    "Whispering Grove", "Copper Crossing", "Moonlit Marsh", "Frostfall Steps", "The Rootbound Guardian",
+    "Crackle Canyon", "Glasswater Reach", "Shaded Canopy", "Tempest Terrace", "The Twin Storms",
+    "Emberglass Hollow", "Astral Garden", "Eclipse Causeway", "Crown of Winter", "The Aetherboard Champion"
+  ];
+
+  const SHOP_ODDS = {
+    2: [0.72, 0.25, 0.03, 0.00],
+    3: [0.56, 0.31, 0.11, 0.02],
+    4: [0.40, 0.34, 0.21, 0.05],
+    5: [0.25, 0.32, 0.31, 0.12],
+    6: [0.12, 0.24, 0.39, 0.25]
+  };
+
+  const XP_TO_NEXT = { 2: 4, 3: 8, 4: 14, 5: 22, 6: 0 };
+  const RARITY_COLORS = { 1: "#8aa1bd", 2: "#62c48d", 3: "#6d9cff", 4: "#bd7dff" };
+
+  const els = {};
+  let state = null;
+  let combat = null;
+  let awakeningQueue = [];
+  let modalLocked = false;
+  let audioContext = null;
+
+
+  function cacheElements() {
+    [
+      "hpValue", "goldValue", "levelValue", "levelCap", "xpBar", "roundValue",
+      "soundButton", "helpButton", "newGameButton", "traitList", "battleLog", "streakLabel",
+      "roundTitle", "roundSubtitle", "phasePill", "phaseText", "boardWrap", "boardGrid",
+      "floatingLayer", "battleTimer", "formationInfo", "autoPlaceButton", "speedButton",
+      "battleButton", "selectedLocation", "selectedCard", "inventoryList", "enemyPowerLabel",
+      "enemyList", "lockButton", "xpButton", "rerollButton", "shopList", "benchList",
+      "toastLayer", "modalBackdrop", "modalTitle", "modalSubtitle", "modalBody", "modalActions"
+    ].forEach(id => { els[id] = document.getElementById(id); });
+  }
+
+  function uid(prefix = "u") {
+    return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+  }
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function formatNumber(value) {
+    return Math.round(value).toLocaleString();
+  }
+
+  function starString(star) {
+    return "★".repeat(clamp(star, 1, 3));
+  }
+
+  function makeUnit(defKey, star = 1, extra = {}) {
+    return {
+      id: uid("spirit"),
+      defKey,
+      star,
+      awakening: extra.awakening || null,
+      items: Array.isArray(extra.items) ? [...extra.items] : []
+    };
+  }
+
+  function createFreshState() {
+    const fresh = {
+      version: 1,
+      hp: 50,
+      gold: 8,
+      level: 2,
+      xp: 0,
+      round: 1,
+      phase: "planning",
+      board: Array(BOARD_SIZE).fill(null),
+      bench: Array(BENCH_SIZE).fill(null),
+      units: {},
+      shop: Array(5).fill(null),
+      shopLocked: false,
+      inventory: [],
+      selected: null,
+      inspectedEnemy: null,
+      streak: 0,
+      speed: 1,
+      sound: true,
+      battleLog: [
+        { text: "Your first two spirits are ready. Scout the enemy and adjust their positions.", type: "good" },
+        { text: "Tip: three matching copies automatically combine into a stronger star level.", type: "gold" }
+      ],
+      enemyPreview: [],
+      tutorialSeen: false
+    };
+
+    const cinder = makeUnit("cinderCub");
+    const ripple = makeUnit("ripplefin");
+    fresh.units[cinder.id] = cinder;
+    fresh.units[ripple.id] = ripple;
+    fresh.board[(4 * BOARD_COLS) + 2] = cinder.id;
+    fresh.board[(5 * BOARD_COLS) + 3] = ripple.id;
+
+    return fresh;
+  }
+
+  function normalizeLoadedState(raw) {
+    if (!raw || typeof raw !== "object" || raw.version !== 1) return null;
+    const clean = { ...raw };
+    clean.phase = "planning";
+    clean.board = Array.isArray(clean.board) ? clean.board.slice(0, BOARD_SIZE) : Array(BOARD_SIZE).fill(null);
+    clean.bench = Array.isArray(clean.bench) ? clean.bench.slice(0, BENCH_SIZE) : Array(BENCH_SIZE).fill(null);
+    while (clean.board.length < BOARD_SIZE) clean.board.push(null);
+    while (clean.bench.length < BENCH_SIZE) clean.bench.push(null);
+    clean.units = clean.units && typeof clean.units === "object" ? clean.units : {};
+    clean.shop = Array.isArray(clean.shop) ? clean.shop.slice(0, 5) : Array(5).fill(null);
+    while (clean.shop.length < 5) clean.shop.push(null);
+    clean.inventory = Array.isArray(clean.inventory) ? clean.inventory.filter(k => ITEM_DEFS[k]) : [];
+    clean.selected = null;
+    clean.inspectedEnemy = null;
+    clean.speed = clean.speed === 2 ? 2 : 1;
+    clean.sound = clean.sound !== false;
+    clean.battleLog = Array.isArray(clean.battleLog) ? clean.battleLog.slice(-35) : [];
+    clean.enemyPreview = [];
+
+    for (const [id, unit] of Object.entries(clean.units)) {
+      if (!unit || !UNIT_DEFS[unit.defKey]) {
+        delete clean.units[id];
+        clean.board = clean.board.map(v => v === id ? null : v);
+        clean.bench = clean.bench.map(v => v === id ? null : v);
+        continue;
+      }
+      unit.id = id;
+      unit.star = clamp(Number(unit.star) || 1, 1, 3);
+      unit.awakening = ["force", "guard"].includes(unit.awakening) ? unit.awakening : null;
+      unit.items = Array.isArray(unit.items) ? unit.items.filter(k => ITEM_DEFS[k]).slice(0, 2) : [];
+    }
+
+    clean.hp = clamp(Number(clean.hp) || 50, 1, 50);
+    clean.gold = clamp(Number(clean.gold) || 0, 0, 999);
+    clean.level = clamp(Number(clean.level) || 2, 2, MAX_LEVEL);
+    clean.xp = clamp(Number(clean.xp) || 0, 0, 999);
+    clean.round = clamp(Number(clean.round) || 1, 1, FINAL_ROUND);
+    clean.streak = clamp(Number(clean.streak) || 0, -99, 99);
+    clean.shopLocked = Boolean(clean.shopLocked);
+    clean.tutorialSeen = Boolean(clean.tutorialSeen);
+    return clean;
+  }
+
+  function saveGame() {
+    if (!state || state.phase !== "planning") return;
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+    } catch (error) {
+      console.warn("Could not save game", error);
+    }
+  }
+
+  function loadGame() {
+    try {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (!raw) return null;
+      return normalizeLoadedState(JSON.parse(raw));
+    } catch (error) {
+      console.warn("Could not load game", error);
+      return null;
+    }
+  }
+
+  function mulberry32(seed) {
+    return function rng() {
+      let t = seed += 0x6D2B79F5;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function weightedPick(entries, rng = Math.random) {
+    const total = entries.reduce((sum, entry) => sum + entry.weight, 0);
+    let roll = rng() * total;
+    for (const entry of entries) {
+      roll -= entry.weight;
+      if (roll <= 0) return entry.value;
+    }
+    return entries.at(-1)?.value;
+  }
+
+  function rollCostForLevel(level, rng = Math.random) {
+    const odds = SHOP_ODDS[level] || SHOP_ODDS[MAX_LEVEL];
+    const roll = rng();
+    let cumulative = 0;
+    for (let i = 0; i < odds.length; i++) {
+      cumulative += odds[i];
+      if (roll <= cumulative) return i + 1;
+    }
+    return 1;
+  }
+
+  function rollShopUnit(level, rng = Math.random) {
+    const cost = rollCostForLevel(level, rng);
+    const pool = Object.entries(UNIT_DEFS).filter(([, def]) => def.cost === cost);
+    if (!pool.length) return Object.keys(UNIT_DEFS)[0];
+    return pool[Math.floor(rng() * pool.length)][0];
+  }
+
+  function refreshShop({ free = false, force = false } = {}) {
+    if (!state || state.phase !== "planning") return false;
+    if (!free) {
+      if (state.gold < 2) {
+        toast("You need 2 gold to reroll.", "bad");
+        playSfx("error");
+        return false;
+      }
+      state.gold -= 2;
+    }
+    if (force || !state.shopLocked) {
+      state.shop = Array.from({ length: 5 }, () => rollShopUnit(state.level));
+    }
+    state.shopLocked = false;
+    state.selected = null;
+    state.inspectedEnemy = null;
+    render();
+    saveGame();
+    if (!free) playSfx("reroll");
+    return true;
+  }
+
+  function currentXpNeed() {
+    return XP_TO_NEXT[state.level] || 0;
+  }
+
+  function gainXp(amount, announce = true) {
+    if (state.level >= MAX_LEVEL) return;
+    state.xp += amount;
+    while (state.level < MAX_LEVEL && state.xp >= currentXpNeed()) {
+      const need = currentXpNeed();
+      state.xp -= need;
+      state.level += 1;
+      if (announce) {
+        toast(`Level ${state.level}! You may deploy ${state.level} spirits.`, "good");
+        addLog(`Commander level increased to ${state.level}; team cap is now ${state.level}.`, "good");
+        playSfx("level");
+      }
+      if (state.level >= MAX_LEVEL) state.xp = 0;
+    }
+  }
+
+  function buyXp() {
+    if (state.phase !== "planning") return;
+    if (state.level >= MAX_LEVEL) {
+      toast("You are already at the maximum level.");
+      return;
+    }
+    if (state.gold < 4) {
+      toast("You need 4 gold to buy experience.", "bad");
+      playSfx("error");
+      return;
+    }
+    state.gold -= 4;
+    gainXp(4);
+    render();
+    saveGame();
+    playSfx("buy");
+  }
+
+  function allUnitLocations() {
+    const locations = [];
+    state.board.forEach((id, index) => {
+      if (id && state.units[id]) locations.push({ area: "board", index, id, unit: state.units[id] });
+    });
+    state.bench.forEach((id, index) => {
+      if (id && state.units[id]) locations.push({ area: "bench", index, id, unit: state.units[id] });
+    });
+    return locations;
+  }
+
+  function findUnitLocation(unitId) {
+    const boardIndex = state.board.indexOf(unitId);
+    if (boardIndex !== -1) return { area: "board", index: boardIndex };
+    const benchIndex = state.bench.indexOf(unitId);
+    if (benchIndex !== -1) return { area: "bench", index: benchIndex };
+    return null;
+  }
+
+  function countCopies(defKey, star) {
+    return allUnitLocations().filter(loc => loc.unit.defKey === defKey && loc.unit.star === star).length;
+  }
+
+  function canBuyWithFullBench(defKey) {
+    return countCopies(defKey, 1) >= 2;
+  }
+
+  function purchaseShop(index) {
+    if (state.phase !== "planning") return;
+    const defKey = state.shop[index];
+    if (!defKey) return;
+    const def = UNIT_DEFS[defKey];
+    if (state.gold < def.cost) {
+      toast(`You need ${def.cost} gold for ${def.name}.`, "bad");
+      playSfx("error");
+      return;
+    }
+
+    const benchIndex = state.bench.indexOf(null);
+    const mergeFromFullBench = benchIndex === -1 && countCopies(defKey, 1) >= 2;
+    if (benchIndex === -1 && !mergeFromFullBench) {
+      toast("Your bench is full. Sell or deploy a spirit first.", "bad");
+      playSfx("error");
+      return;
+    }
+
+    state.gold -= def.cost;
+    state.shop[index] = null;
+    state.selected = null;
+    state.inspectedEnemy = null;
+
+    if (mergeFromFullBench) {
+      mergePurchasedCopy(defKey);
+    } else {
+      const unit = makeUnit(defKey);
+      state.units[unit.id] = unit;
+      state.bench[benchIndex] = unit.id;
+      checkMerges(defKey, 1);
+    }
+
+    addLog(`${def.name} joined your squad for ${def.cost} gold.`, "gold");
+    playSfx("buy");
+    render();
+    saveGame();
+  }
+
+  function transferMergeItems(targetUnit, consumedUnit) {
+    const combined = [...(targetUnit.items || []), ...(consumedUnit?.items || [])];
+    targetUnit.items = combined.slice(0, 2);
+    if (combined.length > 2) state.inventory.push(...combined.slice(2));
+  }
+
+  function mergePurchasedCopy(defKey) {
+    const matches = allUnitLocations()
+      .filter(loc => loc.unit.defKey === defKey && loc.unit.star === 1)
+      .sort((a, b) => {
+        if (a.area === b.area) return a.index - b.index;
+        return a.area === "board" ? -1 : 1;
+      });
+    if (matches.length < 2) return;
+
+    const target = matches[0];
+    const consumed = matches[1];
+    const targetUnit = state.units[target.id];
+    const consumedUnit = state.units[consumed.id];
+    transferMergeItems(targetUnit, consumedUnit);
+    removeUnitFromLocation(consumed);
+    delete state.units[consumed.id];
+    targetUnit.star = 2;
+    targetUnit.awakening = null;
+    addLog(`${UNIT_DEFS[defKey].name} combined into ${starString(2)}!`, "good");
+    toast(`${UNIT_DEFS[defKey].name} reached 2 stars!`, "gold");
+    playSfx("merge");
+    awakeningQueue.push(targetUnit.id);
+    checkMerges(defKey, 2);
+    processAwakeningQueue();
+  }
+
+  function removeUnitFromLocation(location) {
+    if (!location) return;
+    if (location.area === "board") state.board[location.index] = null;
+    if (location.area === "bench") state.bench[location.index] = null;
+  }
+
+  function checkMerges(defKey, star) {
+    if (star >= 3) return;
+    let matches = allUnitLocations().filter(loc => loc.unit.defKey === defKey && loc.unit.star === star);
+    while (matches.length >= 3) {
+      matches.sort((a, b) => {
+        if (a.area === b.area) return a.index - b.index;
+        return a.area === "board" ? -1 : 1;
+      });
+      const target = matches[0];
+      const consumed = matches.slice(1, 3);
+      const targetUnit = state.units[target.id];
+
+      for (const loc of consumed) {
+        const consumedUnit = state.units[loc.id];
+        transferMergeItems(targetUnit, consumedUnit);
+        removeUnitFromLocation(loc);
+        delete state.units[loc.id];
+      }
+
+      targetUnit.star += 1;
+      targetUnit.awakening = targetUnit.star === 2 ? null : targetUnit.awakening;
+      addLog(`${UNIT_DEFS[defKey].name} combined into ${starString(targetUnit.star)}!`, "good");
+      toast(`${UNIT_DEFS[defKey].name} reached ${targetUnit.star} stars!`, "gold");
+      playSfx("merge");
+
+      if (targetUnit.star === 2) {
+        awakeningQueue.push(targetUnit.id);
+      }
+
+      if (targetUnit.star < 3) checkMerges(defKey, targetUnit.star);
+      matches = allUnitLocations().filter(loc => loc.unit.defKey === defKey && loc.unit.star === star);
+    }
+    processAwakeningQueue();
+  }
+
+  function deployedCount() {
+    return state.board.filter((id, index) => id && Math.floor(index / BOARD_COLS) >= PLAYER_START_ROW).length;
+  }
+
+  function selectedUnit() {
+    const id = state.selected?.unitId;
+    return id ? state.units[id] || null : null;
+  }
+
+  function selectPlayerUnit(area, index) {
+    if (state.phase !== "planning") return;
+    const id = area === "board" ? state.board[index] : state.bench[index];
+    if (!id) {
+      state.selected = null;
+      state.inspectedEnemy = null;
+      renderSelected();
+      renderBoard();
+      renderBench();
+      return;
+    }
+    state.selected = { area, index, unitId: id };
+    state.inspectedEnemy = null;
+    playSfx("select");
+    renderSelected();
+    renderBoard();
+    renderBench();
+  }
+
+  function onBoardCellClick(index) {
+    if (state.phase !== "planning") return;
+    const row = Math.floor(index / BOARD_COLS);
+    if (row < PLAYER_START_ROW) {
+      const preview = state.enemyPreview.find(enemy => enemy.pos === index);
+      if (preview) inspectEnemy(preview);
+      return;
+    }
+
+    const targetId = state.board[index];
+    if (!state.selected) {
+      if (targetId) selectPlayerUnit("board", index);
+      return;
+    }
+
+    const source = { ...state.selected };
+    if (source.area === "board" && source.index === index) {
+      state.selected = null;
+      render();
+      return;
+    }
+
+    if (source.area === "bench") {
+      if (!targetId && deployedCount() >= state.level) {
+        toast(`Your level ${state.level} team is full. Buy XP to deploy more spirits.`, "bad");
+        playSfx("error");
+        return;
+      }
+      const sourceId = state.bench[source.index];
+      state.bench[source.index] = targetId || null;
+      state.board[index] = sourceId;
+      if (targetId) {
+        state.selected = { area: "bench", index: source.index, unitId: targetId };
+      } else {
+        state.selected = { area: "board", index, unitId: sourceId };
+      }
+    } else {
+      const sourceId = state.board[source.index];
+      state.board[source.index] = targetId || null;
+      state.board[index] = sourceId;
+      state.selected = { area: "board", index, unitId: sourceId };
+    }
+
+    state.inspectedEnemy = null;
+    playSfx("move");
+    render();
+    saveGame();
+  }
+
+  function onBenchClick(index) {
+    if (state.phase !== "planning") return;
+    const targetId = state.bench[index];
+    if (!state.selected) {
+      if (targetId) selectPlayerUnit("bench", index);
+      return;
+    }
+
+    const source = { ...state.selected };
+    if (source.area === "bench" && source.index === index) {
+      state.selected = null;
+      render();
+      return;
+    }
+
+    if (source.area === "bench") {
+      const sourceId = state.bench[source.index];
+      state.bench[source.index] = targetId || null;
+      state.bench[index] = sourceId;
+      state.selected = { area: "bench", index, unitId: sourceId };
+    } else {
+      const sourceId = state.board[source.index];
+      state.board[source.index] = targetId || null;
+      state.bench[index] = sourceId;
+      state.selected = { area: "bench", index, unitId: sourceId };
+    }
+
+    state.inspectedEnemy = null;
+    playSfx("move");
+    render();
+    saveGame();
+  }
+
+  function sellSelectedUnit() {
+    const unit = selectedUnit();
+    if (!unit || state.phase !== "planning") return;
+    const location = findUnitLocation(unit.id);
+    if (!location) return;
+    const def = UNIT_DEFS[unit.defKey];
+    const copies = unit.star === 1 ? 1 : unit.star === 2 ? 3 : 9;
+    const value = def.cost * copies;
+    if (unit.items.length) state.inventory.push(...unit.items);
+    removeUnitFromLocation(location);
+    delete state.units[unit.id];
+    state.gold += value;
+    state.selected = null;
+    addLog(`Sold ${def.name} for ${value} gold.`, "gold");
+    toast(`Sold for ${value} gold.`, "gold");
+    playSfx("sell");
+    render();
+    saveGame();
+  }
+
+  function autoPlace() {
+    if (state.phase !== "planning") return;
+    const emptyCells = preferredPlayerCells().filter(index => !state.board[index]);
+    const availableSlots = Math.max(0, state.level - deployedCount());
+    const benchUnits = state.bench
+      .map((id, index) => id ? { id, index, unit: state.units[id] } : null)
+      .filter(Boolean)
+      .sort((a, b) => unitScore(b.unit) - unitScore(a.unit));
+
+    const toPlace = benchUnits.slice(0, Math.min(availableSlots, emptyCells.length));
+    if (!toPlace.length) {
+      toast(deployedCount() >= state.level ? "Your deployed team is already full." : "There are no bench spirits to place.");
+      return;
+    }
+
+    for (const entry of toPlace) {
+      const def = UNIT_DEFS[entry.unit.defKey];
+      let targetIndex;
+      if (def.range <= 1) {
+        targetIndex = emptyCells.find(i => Math.floor(i / BOARD_COLS) === PLAYER_START_ROW) ?? emptyCells[0];
+      } else {
+        targetIndex = [...emptyCells].reverse().find(i => Math.floor(i / BOARD_COLS) === BOARD_ROWS - 1) ?? emptyCells.at(-1);
+      }
+      const cellPos = emptyCells.indexOf(targetIndex);
+      if (cellPos !== -1) emptyCells.splice(cellPos, 1);
+      state.board[targetIndex] = entry.id;
+      state.bench[entry.index] = null;
+    }
+
+    state.selected = null;
+    toast(`${toPlace.length} spirit${toPlace.length === 1 ? "" : "s"} moved onto the board.`, "good");
+    playSfx("move");
+    render();
+    saveGame();
+  }
+
+  function preferredPlayerCells() {
+    const order = [];
+    const columns = [2, 3, 1, 4, 0, 5];
+    for (const row of [3, 5, 4]) {
+      for (const col of columns) order.push(row * BOARD_COLS + col);
+    }
+    return order;
+  }
+
+  function unitScore(unit) {
+    const def = UNIT_DEFS[unit.defKey];
+    return unit.star * 1000 + def.cost * 100 + (unit.items?.length || 0) * 25;
+  }
+
+  function inspectEnemy(enemy) {
+    state.selected = null;
+    state.inspectedEnemy = { ...enemy };
+    playSfx("select");
+    renderSelected();
+    renderBoard();
+    renderBench();
+  }
+
+  function generateEnemy(round) {
+    const rng = mulberry32(9361 + round * 7919);
+    const bossRound = round % 5 === 0;
+    const cap = Math.min(6, 2 + Math.floor((round - 1) / 2));
+    const maxCost = round <= 2 ? 1 : round <= 5 ? 2 : round <= 9 ? 3 : 4;
+    let budget = 1.8 + round * 1.65 + (bossRound ? 2.3 : 0);
+    const elements = ["Ember", "Grove", "Tide", "Storm", "Frost", "Umbral"];
+    const primary = elements[Math.floor(rng() * elements.length)];
+    const entries = [];
+
+    if (round === 5) {
+      entries.push({ defKey: "ironroot", star: 1, boss: true });
+      entries.push({ defKey: "bloombeak", star: 1 });
+      entries.push({ defKey: "thornling", star: 1 });
+    } else if (round === 10) {
+      entries.push({ defKey: "voltDrake", star: 2, boss: true });
+      entries.push({ defKey: "tempestral", star: 1 });
+      entries.push({ defKey: "sparkit", star: 2 });
+      entries.push({ defKey: "frosthorn", star: 1 });
+    } else if (round === 15) {
+      entries.push({ defKey: "emberWyrm", star: 2, boss: true });
+      entries.push({ defKey: "solara", star: 2 });
+      entries.push({ defKey: "ironroot", star: 2 });
+      entries.push({ defKey: "glacielle", star: 2 });
+      entries.push({ defKey: "shadeclaw", star: 2 });
+      entries.push({ defKey: "voltDrake", star: 2 });
+    } else {
+      while (entries.length < cap && budget >= 0.9) {
+        const candidates = Object.entries(UNIT_DEFS)
+          .filter(([, def]) => def.cost <= maxCost)
+          .map(([key, def]) => ({
+            value: key,
+            weight: (def.element === primary ? 3.0 : 1.0) * (def.cost <= budget ? 1 : 0.05)
+          }));
+        let defKey = weightedPick(candidates, rng);
+        let def = UNIT_DEFS[defKey];
+        if (def.cost > budget) {
+          const affordable = candidates.filter(entry => UNIT_DEFS[entry.value].cost <= budget);
+          if (!affordable.length) break;
+          defKey = weightedPick(affordable, rng);
+          def = UNIT_DEFS[defKey];
+        }
+
+        let star = 1;
+        const twoStarChance = clamp((round - 4) * 0.055, 0, 0.48);
+        if (round >= 5 && rng() < twoStarChance && budget >= def.cost * 2.25) star = 2;
+        entries.push({ defKey, star });
+        budget -= def.cost * (star === 2 ? 2.25 : 1);
+      }
+    }
+
+    const front = [14, 15, 13, 16, 12, 17];
+    const back = [2, 3, 1, 4, 0, 5, 8, 9, 7, 10, 6, 11];
+    const used = new Set();
+    entries.forEach((entry, idx) => {
+      const def = UNIT_DEFS[entry.defKey];
+      const pool = def.range <= 1 || def.role === "Vanguard" ? front : back;
+      let pos = pool.find(p => !used.has(p));
+      if (pos === undefined) pos = [...front, ...back].find(p => !used.has(p));
+      if (pos === undefined) pos = idx;
+      entry.pos = pos;
+      entry.awakening = entry.star >= 2 ? (rng() < 0.5 ? "force" : "guard") : null;
+      entry.items = [];
+      if (round >= 8 && rng() < 0.25) {
+        const itemKeys = Object.keys(ITEM_DEFS);
+        entry.items.push(itemKeys[Math.floor(rng() * itemKeys.length)]);
+      }
+      used.add(pos);
+    });
+
+    return entries;
+  }
+
+  function prepareEnemy() {
+    state.enemyPreview = generateEnemy(state.round);
+  }
+
+
+  const STAR_HP_MULT = { 1: 1, 2: 1.78, 3: 3.15 };
+  const STAR_ATTACK_MULT = { 1: 1, 2: 1.68, 3: 2.9 };
+
+  function getUnitPreviewStats(unit) {
+    const def = UNIT_DEFS[unit.defKey];
+    let hp = def.hp * STAR_HP_MULT[unit.star];
+    let attack = def.attack * STAR_ATTACK_MULT[unit.star];
+    let armor = def.armor;
+    let attackSpeed = def.attackSpeed;
+    let abilityPower = 1 + (unit.star - 1) * 0.22;
+
+    for (const itemKey of unit.items || []) {
+      const item = ITEM_DEFS[itemKey];
+      if (!item) continue;
+      hp += item.hp || 0;
+      attack += item.attack || 0;
+      armor += item.armor || 0;
+      attackSpeed *= 1 + (item.attackSpeed || 0);
+      abilityPower += item.abilityPower || 0;
+    }
+
+    if (unit.awakening === "force") {
+      attack *= 1.2;
+      abilityPower += 0.22;
+    } else if (unit.awakening === "guard") {
+      hp *= 1.25;
+      armor += 12;
+    }
+
+    return { hp, attack, armor, attackSpeed, abilityPower };
+  }
+
+  function getTraitCountsFromUnitData(units) {
+    const uniqueDefs = new Set();
+    const counts = {};
+    for (const unit of units) {
+      const defKey = unit.defKey;
+      if (!defKey || uniqueDefs.has(defKey)) continue;
+      uniqueDefs.add(defKey);
+      const def = UNIT_DEFS[defKey];
+      if (!def) continue;
+      counts[def.element] = (counts[def.element] || 0) + 1;
+      counts[def.role] = (counts[def.role] || 0) + 1;
+    }
+    return counts;
+  }
+
+  function getPlayerFormationUnits() {
+    return state.board
+      .map((id, index) => {
+        if (!id || Math.floor(index / BOARD_COLS) < PLAYER_START_ROW) return null;
+        return state.units[id] || null;
+      })
+      .filter(Boolean);
+  }
+
+  function traitTier(name, count) {
+    const info = TRAIT_INFO[name];
+    if (!info) return 0;
+    let tier = 0;
+    info.thresholds.forEach((threshold, index) => {
+      if (count >= threshold) tier = index + 1;
+    });
+    return tier;
+  }
+
+  function traitNextText(name, count) {
+    const info = TRAIT_INFO[name];
+    const tier = traitTier(name, count);
+    if (tier === 0) return `${count}/${info.thresholds[0]} · ${info.effects[0]}`;
+    if (tier < info.thresholds.length) return `${count}/${info.thresholds[tier]} · ${info.effects[tier - 1]}`;
+    return `${count} · ${info.effects.at(-1)}`;
+  }
+
+  function render() {
+    renderStats();
+    renderHeader();
+    renderBoard();
+    renderBench();
+    renderShop();
+    renderTraits();
+    renderSelected();
+    renderInventory();
+    renderEnemyList();
+    renderBattleLog();
+    renderControls();
+  }
+
+  function renderStats() {
+    els.hpValue.textContent = Math.max(0, Math.round(state.hp));
+    els.goldValue.textContent = Math.round(state.gold);
+    els.levelValue.textContent = state.level;
+    els.levelCap.textContent = `/ ${MAX_LEVEL}`;
+    els.roundValue.textContent = state.round;
+    const need = currentXpNeed();
+    els.xpBar.style.width = state.level >= MAX_LEVEL ? "100%" : `${clamp((state.xp / need) * 100, 0, 100)}%`;
+    els.soundButton.textContent = state.sound ? "🔊" : "🔇";
+    els.soundButton.title = state.sound ? "Mute sound" : "Turn on sound";
+  }
+
+  function renderHeader() {
+    const roundName = ROUND_NAMES[state.round - 1] || "Aetherboard";
+    els.roundTitle.textContent = `Round ${state.round} · ${roundName}`;
+
+    const phaseTextMap = {
+      planning: "Planning",
+      battle: "Battle",
+      victory: "Victory",
+      gameover: "Run over"
+    };
+    els.phaseText.textContent = phaseTextMap[state.phase] || "Planning";
+    els.phasePill.className = `phase-pill ${state.phase}`;
+
+    if (state.phase === "battle") {
+      els.roundSubtitle.textContent = "Your spirits are fighting automatically. Positioning and synergies decide the outcome.";
+    } else if (state.phase === "planning") {
+      const boss = state.round % 5 === 0;
+      els.roundSubtitle.textContent = boss
+        ? "Boss round: strengthen your formation before entering the arena."
+        : "Arrange your spirits, improve the shop, then begin the battle.";
+    } else if (state.phase === "victory") {
+      els.roundSubtitle.textContent = "The Aetherboard recognizes its new champion.";
+    } else {
+      els.roundSubtitle.textContent = "Your run has ended, but every formation teaches a new strategy.";
+    }
+  }
+
+  function ensureBoardCells() {
+    if (els.boardGrid.children.length === BOARD_SIZE) return;
+    els.boardGrid.innerHTML = "";
+    for (let index = 0; index < BOARD_SIZE; index++) {
+      const row = Math.floor(index / BOARD_COLS);
+      const cell = document.createElement("button");
+      cell.type = "button";
+      cell.className = `board-cell ${row < PLAYER_START_ROW ? "enemy-zone" : "player-zone"}${row === 2 ? " center-line" : ""}`;
+      cell.dataset.index = String(index);
+      cell.setAttribute("role", "gridcell");
+      cell.setAttribute("aria-label", `Board row ${row + 1}, column ${(index % BOARD_COLS) + 1}`);
+      cell.addEventListener("click", () => onBoardCellClick(index));
+      els.boardGrid.appendChild(cell);
+    }
+  }
+
+  function renderBoard() {
+    ensureBoardCells();
+    const cells = [...els.boardGrid.children];
+    const selected = state.selected;
+
+    cells.forEach((cell, index) => {
+      const row = Math.floor(index / BOARD_COLS);
+      cell.innerHTML = "";
+      cell.disabled = state.phase === "battle" || row < PLAYER_START_ROW;
+      cell.classList.toggle("move-target", Boolean(selected) && state.phase === "planning" && row >= PLAYER_START_ROW);
+    });
+
+    if (state.phase === "battle" && combat) {
+      for (const unit of combat.units) {
+        if (!unit.alive) continue;
+        const index = unit.y * BOARD_COLS + unit.x;
+        const cell = cells[index];
+        if (!cell) continue;
+        cell.appendChild(createCombatUnitElement(unit));
+      }
+      renderFloatingTexts();
+      return;
+    }
+
+    els.floatingLayer.innerHTML = "";
+    els.battleTimer.hidden = true;
+
+    for (const enemy of state.enemyPreview || []) {
+      const cell = cells[enemy.pos];
+      if (!cell) continue;
+      const def = UNIT_DEFS[enemy.defKey];
+      const element = createPlanningUnitElement(enemy, true, false);
+      element.setAttribute("aria-label", `Enemy ${def.name}, ${enemy.star} star`);
+      element.addEventListener("click", event => {
+        event.stopPropagation();
+        inspectEnemy(enemy);
+      });
+      cell.appendChild(element);
+    }
+
+    state.board.forEach((id, index) => {
+      const row = Math.floor(index / BOARD_COLS);
+      if (!id || row < PLAYER_START_ROW || !state.units[id]) return;
+      const unit = state.units[id];
+      const isSelected = selected?.unitId === id;
+      const element = createPlanningUnitElement(unit, false, isSelected);
+      element.setAttribute("aria-label", `${UNIT_DEFS[unit.defKey].name}, ${unit.star} star`);
+      element.addEventListener("click", event => {
+        event.stopPropagation();
+        selectPlayerUnit("board", index);
+      });
+      cells[index].appendChild(element);
+    });
+  }
+
+  function createPlanningUnitElement(unit, enemy = false, selected = false) {
+    const def = UNIT_DEFS[unit.defKey];
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `board-unit${enemy ? " enemy-preview" : ""}${selected ? " selected" : ""}`;
+    button.style.setProperty("--unit-a", def.colors[0]);
+    button.style.setProperty("--unit-b", def.colors[1]);
+    button.innerHTML = `
+      <span class="unit-stars">${starString(unit.star)}</span>
+      <span class="unit-icon">${def.icon}</span>
+      <span class="unit-name-tiny">${def.name}</span>
+      ${unit.awakening ? `<span class="unit-level-badge" title="Awakened">${unit.awakening === "force" ? "⚔" : "◆"}</span>` : ""}
+    `;
+    return button;
+  }
+
+  function createCombatUnitElement(unit) {
+    const def = UNIT_DEFS[unit.defKey];
+    const button = document.createElement("button");
+    button.type = "button";
+    const now = combat.elapsed;
+    const actionClass = unit.actionUntil > now ? unit.actionClass : "";
+    const stunned = unit.stunnedUntil > now;
+    button.className = `board-unit ${unit.team}${actionClass ? ` ${actionClass}` : ""}${stunned ? " stunned" : ""}`;
+    button.style.setProperty("--unit-a", def.colors[0]);
+    button.style.setProperty("--unit-b", def.colors[1]);
+    button.title = `${def.name} · ${Math.ceil(unit.hp)}/${Math.ceil(unit.maxHp)} HP`;
+    button.addEventListener("click", event => {
+      event.stopPropagation();
+      inspectCombatUnit(unit);
+    });
+
+    const hpPercent = clamp((unit.hp / unit.maxHp) * 100, 0, 100);
+    const manaPercent = clamp((unit.mana / unit.manaMax) * 100, 0, 100);
+    const status = [];
+    if (unit.shield > 1) status.push("🔷");
+    if (unit.burnUntil > now) status.push("🔥");
+    if (stunned) status.push("💫");
+    if (unit.slowUntil > now) status.push("❄️");
+
+    button.innerHTML = `
+      <span class="unit-stars">${starString(unit.star)}</span>
+      <span class="unit-icon">${def.icon}</span>
+      <span class="unit-name-tiny">${def.name}</span>
+      <span class="status-icons">${status.map(icon => `<span>${icon}</span>`).join("")}</span>
+      <span class="health-stack">
+        <span class="health-bar ${hpPercent < 32 ? "low" : ""}"><span style="width:${hpPercent}%"></span></span>
+        <span class="mana-bar"><span style="width:${manaPercent}%"></span></span>
+      </span>
+    `;
+    return button;
+  }
+
+  function renderFloatingTexts() {
+    if (!combat) return;
+    const now = combat.elapsed;
+    combat.floating = combat.floating.filter(entry => entry.expires > now);
+    els.floatingLayer.innerHTML = combat.floating.map(entry => `
+      <span class="float-text ${entry.kind}" style="left:${((entry.x + 0.5) / BOARD_COLS) * 100}%;top:${((entry.y + 0.5) / BOARD_ROWS) * 100}%">${entry.text}</span>
+    `).join("");
+  }
+
+  function renderBench() {
+    els.benchList.innerHTML = "";
+    for (let index = 0; index < BENCH_SIZE; index++) {
+      const id = state.bench[index];
+      const unit = id ? state.units[id] : null;
+      const slot = document.createElement("button");
+      slot.type = "button";
+      slot.className = `bench-slot${state.selected && state.phase === "planning" ? " move-target" : ""}`;
+      slot.disabled = state.phase !== "planning";
+      slot.setAttribute("aria-label", unit ? `Bench: ${UNIT_DEFS[unit.defKey].name}` : `Empty bench slot ${index + 1}`);
+      slot.addEventListener("click", () => onBenchClick(index));
+      if (unit) {
+        const def = UNIT_DEFS[unit.defKey];
+        const selected = state.selected?.unitId === id;
+        slot.innerHTML = `
+          <span class="bench-unit${selected ? " selected" : ""}" style="--unit-a:${def.colors[0]};--unit-b:${def.colors[1]}">
+            <span class="bench-stars">${starString(unit.star)}</span>${def.icon}
+          </span>
+        `;
+      }
+      els.benchList.appendChild(slot);
+    }
+  }
+
+  function renderShop() {
+    els.shopList.innerHTML = "";
+    state.shop.forEach((defKey, index) => {
+      const card = document.createElement("button");
+      card.type = "button";
+      if (!defKey) {
+        card.className = "shop-card bought";
+        card.disabled = true;
+        card.innerHTML = `<span style="display:grid;place-items:center;height:100%;color:var(--muted);font-size:10px">Purchased</span>`;
+      } else {
+        const def = UNIT_DEFS[defKey];
+        const rarity = RARITY_COLORS[def.cost];
+        card.className = "shop-card";
+        card.disabled = state.phase !== "planning";
+        card.style.setProperty("--rarity", rarity);
+        card.style.setProperty("--rarity-glow", `${rarity}35`);
+        card.innerHTML = `
+          <span class="shop-cost">${def.cost}●</span>
+          <span class="shop-icon">${def.icon}</span>
+          <span class="shop-name">${def.name}</span>
+          <span class="shop-tags">${TRAIT_INFO[def.element].icon} ${def.element} · ${TRAIT_INFO[def.role].icon} ${def.role}</span>
+          <span class="shop-ability">${def.ability}</span>
+        `;
+        card.title = `${def.ability}: ${def.abilityText}`;
+        card.addEventListener("click", () => purchaseShop(index));
+      }
+      els.shopList.appendChild(card);
+    });
+  }
+
+  function renderTraits() {
+    const units = getPlayerFormationUnits();
+    const counts = getTraitCountsFromUnitData(units);
+    const present = Object.keys(TRAIT_INFO)
+      .filter(name => (counts[name] || 0) > 0)
+      .sort((a, b) => {
+        const tierDiff = traitTier(b, counts[b] || 0) - traitTier(a, counts[a] || 0);
+        return tierDiff || (counts[b] || 0) - (counts[a] || 0) || a.localeCompare(b);
+      });
+
+    if (!present.length) {
+      els.traitList.innerHTML = `<div class="selected-empty">Deploy spirits to activate elemental and role synergies.</div>`;
+      return;
+    }
+
+    els.traitList.innerHTML = present.map(name => {
+      const info = TRAIT_INFO[name];
+      const count = counts[name] || 0;
+      const tier = traitTier(name, count);
+      return `
+        <div class="trait-chip ${tier ? "active" : ""}">
+          <div class="trait-icon">${info.icon}</div>
+          <div>
+            <div class="trait-name">${name}</div>
+            <div class="trait-effect">${traitNextText(name, count)}</div>
+          </div>
+          <div class="trait-count">${count}</div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function renderSelected() {
+    if (state.inspectedEnemy) {
+      const enemy = state.inspectedEnemy;
+      const def = UNIT_DEFS[enemy.defKey];
+      els.selectedLocation.textContent = "Enemy scout";
+      els.selectedCard.innerHTML = unitDetailHtml(enemy, true);
+      return;
+    }
+
+    const unit = selectedUnit();
+    if (!unit) {
+      els.selectedLocation.textContent = "";
+      els.selectedCard.innerHTML = `<div class="selected-empty">Select one of your spirits to inspect its ability, equip items, move it, or sell it.</div>`;
+      return;
+    }
+
+    const location = findUnitLocation(unit.id);
+    els.selectedLocation.textContent = location?.area === "board" ? "On board" : "On bench";
+    els.selectedCard.innerHTML = unitDetailHtml(unit, false);
+
+    const sellButton = document.createElement("button");
+    sellButton.type = "button";
+    sellButton.className = "danger-button";
+    const def = UNIT_DEFS[unit.defKey];
+    const value = def.cost * (unit.star === 1 ? 1 : unit.star === 2 ? 3 : 9);
+    sellButton.textContent = `Sell for ${value} gold`;
+    sellButton.disabled = state.phase !== "planning";
+    sellButton.addEventListener("click", sellSelectedUnit);
+    els.selectedCard.appendChild(sellButton);
+
+    if (unit.items.length) {
+      const itemButtons = els.selectedCard.querySelectorAll("[data-unequip-index]");
+      itemButtons.forEach(button => {
+        button.addEventListener("click", () => unequipItem(Number(button.dataset.unequipIndex)));
+      });
+    }
+  }
+
+  function unitDetailHtml(unit, enemy = false) {
+    const def = UNIT_DEFS[unit.defKey];
+    const stats = getUnitPreviewStats({ ...unit, items: unit.items || [] });
+    const awakeningText = unit.awakening === "force"
+      ? "Primal Force: +20% attack and +22% ability power."
+      : unit.awakening === "guard"
+        ? "Adaptive Guard: +25% health and +12 armour."
+        : unit.star >= 2
+          ? "This spirit is ready to choose an Awakening."
+          : "At two stars, this spirit unlocks an Awakening choice.";
+
+    const itemsHtml = (unit.items || []).length
+      ? `<div class="equipped-row">${unit.items.map((key, index) => {
+          const item = ITEM_DEFS[key];
+          if (!item) return "";
+          return enemy
+            ? `<span class="equipped-item">${item.icon} ${item.name}</span>`
+            : `<button class="equipped-item" data-unequip-index="${index}" title="Click to unequip">${item.icon} ${item.name} ×</button>`;
+        }).join("")}</div>`
+      : `<div style="color:var(--muted);font-size:9px">No items equipped.</div>`;
+
+    return `
+      <div class="unit-profile">
+        <div class="profile-icon" style="--unit-a:${def.colors[0]};--unit-b:${def.colors[1]}">${def.icon}</div>
+        <div>
+          <div class="profile-name">${def.name}</div>
+          <div class="profile-stars">${starString(unit.star)} · Cost ${def.cost}</div>
+          <div class="tag-row">
+            <span class="tag">${TRAIT_INFO[def.element].icon} ${def.element}</span>
+            <span class="tag">${TRAIT_INFO[def.role].icon} ${def.role}</span>
+          </div>
+        </div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-box"><span>Health</span><strong>${formatNumber(stats.hp)}</strong></div>
+        <div class="stat-box"><span>Attack</span><strong>${formatNumber(stats.attack)}</strong></div>
+        <div class="stat-box"><span>Armour</span><strong>${formatNumber(stats.armor)}</strong></div>
+        <div class="stat-box"><span>Range</span><strong>${def.range}</strong></div>
+        <div class="stat-box"><span>Speed</span><strong>${stats.attackSpeed.toFixed(2)}</strong></div>
+        <div class="stat-box"><span>Mana</span><strong>${def.manaMax}</strong></div>
+      </div>
+      <div class="ability-box"><strong>${def.ability}</strong><p>${def.abilityText}</p></div>
+      <div class="awakening-note">${awakeningText}</div>
+      ${itemsHtml}
+    `;
+  }
+
+  function inspectCombatUnit(unit) {
+    if (!unit || !combat) return;
+    const source = {
+      defKey: unit.defKey,
+      star: unit.star,
+      awakening: unit.awakening,
+      items: unit.items
+    };
+    state.selected = null;
+    state.inspectedEnemy = source;
+    renderSelected();
+  }
+
+  function renderInventory() {
+    els.inventoryList.innerHTML = "";
+    if (!state.inventory.length) {
+      els.inventoryList.innerHTML = `<div style="grid-column:1/-1;color:var(--muted);font-size:9px;line-height:1.45">Win rounds 3, 6, 9, and 12 to choose items.</div>`;
+      return;
+    }
+    state.inventory.forEach((itemKey, index) => {
+      const item = ITEM_DEFS[itemKey];
+      if (!item) return;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "inventory-item";
+      button.disabled = state.phase !== "planning";
+      button.title = `${item.name}: ${item.text} Select a spirit, then click this item to equip it.`;
+      button.innerHTML = `<span class="item-icon">${item.icon}</span><span class="item-name">${item.name}</span>`;
+      button.addEventListener("click", () => equipItem(index));
+      els.inventoryList.appendChild(button);
+    });
+  }
+
+  function equipItem(inventoryIndex) {
+    if (state.phase !== "planning") return;
+    const unit = selectedUnit();
+    if (!unit) {
+      toast("Select one of your spirits before choosing an item.");
+      playSfx("error");
+      return;
+    }
+    if (unit.items.length >= 2) {
+      toast("That spirit already has two items.", "bad");
+      playSfx("error");
+      return;
+    }
+    const itemKey = state.inventory[inventoryIndex];
+    if (!ITEM_DEFS[itemKey]) return;
+    unit.items.push(itemKey);
+    state.inventory.splice(inventoryIndex, 1);
+    toast(`${ITEM_DEFS[itemKey].name} equipped to ${UNIT_DEFS[unit.defKey].name}.`, "good");
+    playSfx("equip");
+    render();
+    saveGame();
+  }
+
+  function unequipItem(itemIndex) {
+    const unit = selectedUnit();
+    if (!unit || state.phase !== "planning") return;
+    const [itemKey] = unit.items.splice(itemIndex, 1);
+    if (itemKey) state.inventory.push(itemKey);
+    playSfx("move");
+    render();
+    saveGame();
+  }
+
+  function renderEnemyList() {
+    const enemies = state.enemyPreview || [];
+    const power = enemies.reduce((sum, enemy) => sum + UNIT_DEFS[enemy.defKey].cost * (enemy.star === 2 ? 2.3 : 1), 0);
+    els.enemyPowerLabel.textContent = `${state.round % 5 === 0 ? "Boss" : "Threat"} ${Math.max(1, Math.round(power))}`;
+    els.enemyList.innerHTML = enemies.map(enemy => {
+      const def = UNIT_DEFS[enemy.defKey];
+      return `
+        <button class="enemy-mini" data-enemy-pos="${enemy.pos}" title="Inspect ${def.name}">
+          <div class="enemy-mini-icon">${def.icon}</div>
+          <div class="enemy-mini-name">${def.name}</div>
+          <div class="enemy-mini-stars">${starString(enemy.star)}</div>
+        </button>
+      `;
+    }).join("");
+    els.enemyList.querySelectorAll("[data-enemy-pos]").forEach(button => {
+      const pos = Number(button.dataset.enemyPos);
+      button.addEventListener("click", () => {
+        const enemy = enemies.find(entry => entry.pos === pos);
+        if (enemy) inspectEnemy(enemy);
+      });
+    });
+  }
+
+  function renderBattleLog() {
+    els.battleLog.innerHTML = (state.battleLog || []).slice().reverse().map(entry => `
+      <div class="log-entry ${entry.type || ""}">${entry.text}</div>
+    `).join("");
+    if (state.streak >= 2) els.streakLabel.textContent = `${state.streak} win streak`;
+    else if (state.streak <= -2) els.streakLabel.textContent = `${Math.abs(state.streak)} loss streak`;
+    else els.streakLabel.textContent = "No streak";
+  }
+
+  function addLog(text, type = "") {
+    state.battleLog = Array.isArray(state.battleLog) ? state.battleLog : [];
+    state.battleLog.push({ text, type });
+    if (state.battleLog.length > 35) state.battleLog.shift();
+  }
+
+  function renderControls() {
+    const planning = state.phase === "planning";
+    const battling = state.phase === "battle";
+    const deployed = deployedCount();
+    els.formationInfo.innerHTML = `<strong>${deployed} / ${state.level}</strong> spirits deployed · ${planning ? "Click a unit, then a space." : "Formation is locked during battle."}`;
+    els.battleButton.disabled = !planning || deployed === 0;
+    els.battleButton.innerHTML = planning
+      ? `⚔ Begin battle <span class="kbd">Space</span>`
+      : battling
+        ? `⚔ Battle in progress`
+        : `Run complete`;
+    els.autoPlaceButton.disabled = !planning;
+    els.speedButton.disabled = !battling;
+    els.speedButton.textContent = `Speed ×${state.speed}`;
+    els.lockButton.disabled = !planning;
+    els.lockButton.innerHTML = `${state.shopLocked ? "🔒 Locked" : "🔓 Lock"}`;
+    els.xpButton.disabled = !planning || state.level >= MAX_LEVEL;
+    els.rerollButton.disabled = !planning;
+  }
+
+  function toast(message, type = "") {
+    const div = document.createElement("div");
+    div.className = `toast ${type}`;
+    div.textContent = message;
+    els.toastLayer.appendChild(div);
+    setTimeout(() => div.remove(), 2900);
+  }
+
+  function openModal({ title, subtitle = "", body = "", actions = [], locked = false }) {
+    modalLocked = locked;
+    els.modalTitle.textContent = title;
+    els.modalSubtitle.textContent = subtitle;
+    if (typeof body === "string") {
+      els.modalBody.innerHTML = body;
+    } else {
+      els.modalBody.innerHTML = "";
+      if (body) els.modalBody.appendChild(body);
+    }
+    els.modalActions.innerHTML = "";
+    actions.forEach(action => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = action.className || "small-button";
+      button.textContent = action.label;
+      button.addEventListener("click", action.onClick);
+      els.modalActions.appendChild(button);
+    });
+    els.modalBackdrop.classList.remove("hidden");
+  }
+
+  function closeModal(force = false) {
+    if (modalLocked && !force) return;
+    modalLocked = false;
+    els.modalBackdrop.classList.add("hidden");
+    els.modalBody.innerHTML = "";
+    els.modalActions.innerHTML = "";
+  }
+
+  function showHelp() {
+    openModal({
+      title: "How to play",
+      subtitle: "Aetherboard is a single-player auto-battler. Your decisions happen before the fight; your spirits act on their own once battle begins.",
+      body: `
+        <div class="tutorial-grid">
+          <div class="tutorial-step"><div class="big">🛒</div><strong>1. Build your squad</strong><p>Buy spirits from the shop. Reroll for new choices or lock a shop to keep it for the next round.</p></div>
+          <div class="tutorial-step"><div class="big">♟️</div><strong>2. Choose positions</strong><p>Click a spirit, then click a board or bench space. Put tough Vanguards in front and ranged units behind them.</p></div>
+          <div class="tutorial-step"><div class="big">★★</div><strong>3. Combine copies</strong><p>Three identical one-star spirits become a two-star spirit. At two stars, choose a powerful Awakening.</p></div>
+          <div class="tutorial-step"><div class="big">⚔️</div><strong>4. Battle automatically</strong><p>Abilities charge with mana. Active elements and roles give your entire formation useful bonuses.</p></div>
+        </div>
+        <div class="awakening-note" style="margin-top:10px">Keyboard: <span class="kbd">R</span> rerolls, <span class="kbd">E</span> buys XP, <span class="kbd">Space</span> begins battle, and <span class="kbd">Esc</span> clears your selection.</div>
+      `,
+      actions: [{ label: "Got it", className: "primary-button", onClick: () => { closeModal(true); state.tutorialSeen = true; saveGame(); } }]
+    });
+  }
+
+  function confirmNewGame() {
+    openModal({
+      title: "Start a new run?",
+      subtitle: "This will replace your current saved formation and return you to round 1.",
+      body: `<div class="result-banner"><div class="result-icon">↻</div><h3>Fresh Aetherboard</h3><p>Your current run cannot be restored after starting over.</p></div>`,
+      actions: [
+        { label: "Keep playing", className: "small-button", onClick: () => closeModal(true) },
+        { label: "Start new run", className: "danger-button", onClick: resetGame }
+      ]
+    });
+  }
+
+  function resetGame() {
+    if (combat?.raf) cancelAnimationFrame(combat.raf);
+    combat = null;
+    awakeningQueue = [];
+    closeModal(true);
+    state = createFreshState();
+    prepareEnemy();
+    refreshShop({ free: true, force: true });
+    state.tutorialSeen = true;
+    saveGame();
+    render();
+    toast("New run started.", "good");
+    playSfx("start");
+  }
+
+  function processAwakeningQueue() {
+    if (state.phase !== "planning" || !els.modalBackdrop.classList.contains("hidden")) return;
+    while (awakeningQueue.length) {
+      const unitId = awakeningQueue.shift();
+      const unit = state.units[unitId];
+      if (!unit || unit.star < 2 || unit.awakening) continue;
+      showAwakening(unitId);
+      return;
+    }
+  }
+
+  function showAwakening(unitId) {
+    const unit = state.units[unitId];
+    if (!unit) return;
+    const def = UNIT_DEFS[unit.defKey];
+    const body = document.createElement("div");
+    body.className = "choice-grid";
+    body.innerHTML = `
+      <button class="choice-card" data-choice="force">
+        <span class="choice-icon">⚔️</span>
+        <span class="choice-name">Primal Force</span>
+        <span class="choice-desc">Gain 20% attack and 22% ability power. Best for aggressive carries and burst damage.</span>
+      </button>
+      <button class="choice-card" data-choice="guard">
+        <span class="choice-icon">💠</span>
+        <span class="choice-name">Adaptive Guard</span>
+        <span class="choice-desc">Gain 25% maximum health and 12 armour. Best for frontline units and reliable casting.</span>
+      </button>
+    `;
+    openModal({
+      title: `${def.icon} ${def.name} awakened!`,
+      subtitle: "Every two-star spirit chooses one permanent specialization for this run.",
+      body,
+      locked: true
+    });
+    body.querySelectorAll("[data-choice]").forEach(button => {
+      button.addEventListener("click", () => {
+        const current = state.units[unitId];
+        if (current) current.awakening = button.dataset.choice;
+        addLog(`${def.name} chose ${button.dataset.choice === "force" ? "Primal Force" : "Adaptive Guard"}.`, "gold");
+        playSfx("awaken");
+        closeModal(true);
+        render();
+        saveGame();
+        setTimeout(processAwakeningQueue, 0);
+      });
+    });
+  }
+
+
+  function calculateTeamBonuses(unitData) {
+    const counts = getTraitCountsFromUnitData(unitData);
+    const bonuses = {
+      counts,
+      attackAll: 1,
+      hpAll: 1,
+      speedAll: 1,
+      startMana: 0,
+      abilityAll: 1,
+      critAll: 0,
+      regenAll: 0,
+      radiantShield: 0,
+      vanguardArmor: 0,
+      rangerSpeed: 1,
+      strikerAttack: 1,
+      assassinCritMult: 1.5,
+      assassinSpeed: 1,
+      assassinBlink: false,
+      frostSlow: false,
+      frostFreezeChance: 0,
+      emberBurn: false
+    };
+
+    const ember = traitTier("Ember", counts.Ember || 0);
+    if (ember === 1) bonuses.attackAll *= 1.12;
+    if (ember >= 2) {
+      bonuses.attackAll *= 1.28;
+      bonuses.emberBurn = true;
+    }
+
+    const grove = traitTier("Grove", counts.Grove || 0);
+    if (grove === 1) bonuses.hpAll *= 1.12;
+    if (grove >= 2) {
+      bonuses.hpAll *= 1.28;
+      bonuses.regenAll += 7;
+    }
+
+    const tide = traitTier("Tide", counts.Tide || 0);
+    if (tide === 1) bonuses.startMana += 18;
+    if (tide >= 2) bonuses.startMana += 40;
+
+    const storm = traitTier("Storm", counts.Storm || 0);
+    if (storm === 1) bonuses.speedAll *= 1.16;
+    if (storm >= 2) bonuses.speedAll *= 1.36;
+
+    const frost = traitTier("Frost", counts.Frost || 0);
+    if (frost >= 1) bonuses.frostSlow = true;
+    if (frost >= 2) bonuses.frostFreezeChance = 0.18;
+
+    const umbral = traitTier("Umbral", counts.Umbral || 0);
+    if (umbral === 1) bonuses.critAll += 0.16;
+    if (umbral >= 2) bonuses.critAll += 0.30;
+
+    const radiant = traitTier("Radiant", counts.Radiant || 0);
+    if (radiant === 1) bonuses.radiantShield = 70;
+    if (radiant >= 2) bonuses.radiantShield = 145;
+
+    const vanguard = traitTier("Vanguard", counts.Vanguard || 0);
+    if (vanguard === 1) bonuses.vanguardArmor = 24;
+    if (vanguard >= 2) bonuses.vanguardArmor = 52;
+
+    const ranger = traitTier("Ranger", counts.Ranger || 0);
+    if (ranger === 1) bonuses.rangerSpeed = 1.18;
+    if (ranger >= 2) bonuses.rangerSpeed = 1.40;
+
+    const mystic = traitTier("Mystic", counts.Mystic || 0);
+    if (mystic === 1) bonuses.abilityAll = 1.18;
+    if (mystic >= 2) bonuses.abilityAll = 1.40;
+
+    const striker = traitTier("Striker", counts.Striker || 0);
+    if (striker === 1) bonuses.strikerAttack = 1.18;
+    if (striker >= 2) bonuses.strikerAttack = 1.38;
+
+    const assassin = traitTier("Assassin", counts.Assassin || 0);
+    if (assassin === 1) bonuses.assassinCritMult = 1.9;
+    if (assassin >= 2) {
+      bonuses.assassinCritMult = 2.15;
+      bonuses.assassinSpeed = 1.25;
+      bonuses.assassinBlink = true;
+    }
+
+    return bonuses;
+  }
+
+  function buildCombatUnit(source, team, position, bonuses) {
+    const def = UNIT_DEFS[source.defKey];
+    const star = source.star || 1;
+    let maxHp = def.hp * STAR_HP_MULT[star];
+    let attack = def.attack * STAR_ATTACK_MULT[star];
+    let armor = def.armor;
+    let attackSpeed = def.attackSpeed;
+    let abilityPower = (1 + (star - 1) * 0.22) * bonuses.abilityAll;
+    let startMana = bonuses.startMana;
+    let regenPerSecond = bonuses.regenAll;
+    let critChance = 0.05 + bonuses.critAll;
+    let critMult = 1.5;
+    let manaMax = def.manaMax;
+    let echoAvailable = false;
+
+    for (const itemKey of source.items || []) {
+      const item = ITEM_DEFS[itemKey];
+      if (!item) continue;
+      maxHp += item.hp || 0;
+      attack += item.attack || 0;
+      armor += item.armor || 0;
+      attackSpeed *= 1 + (item.attackSpeed || 0);
+      abilityPower += item.abilityPower || 0;
+      startMana += item.startMana || 0;
+      regenPerSecond += item.regen || 0;
+      critChance += item.crit || 0;
+      if (item.echo) echoAvailable = true;
+    }
+
+    if (source.awakening === "force") {
+      attack *= 1.20;
+      abilityPower += 0.22;
+    } else if (source.awakening === "guard") {
+      maxHp *= 1.25;
+      armor += 12;
+      startMana += 10;
+    }
+
+    maxHp *= bonuses.hpAll;
+    attack *= bonuses.attackAll;
+    attackSpeed *= bonuses.speedAll;
+
+    if (def.role === "Vanguard") armor += bonuses.vanguardArmor;
+    if (def.role === "Ranger") attackSpeed *= bonuses.rangerSpeed;
+    if (def.role === "Striker") attack *= bonuses.strikerAttack;
+    if (def.role === "Assassin") {
+      critMult = bonuses.assassinCritMult;
+      attackSpeed *= bonuses.assassinSpeed;
+    }
+
+    if (source.boss) {
+      maxHp *= 1.24;
+      attack *= 1.12;
+      armor += 8;
+    }
+
+    const x = position % BOARD_COLS;
+    const y = Math.floor(position / BOARD_COLS);
+    return {
+      combatId: uid("combat"),
+      sourceId: source.id || null,
+      defKey: source.defKey,
+      team,
+      star,
+      awakening: source.awakening || null,
+      items: [...(source.items || [])],
+      boss: Boolean(source.boss),
+      x,
+      y,
+      maxHp,
+      hp: maxHp,
+      shield: 0,
+      attack,
+      armor,
+      range: def.range,
+      attackSpeed,
+      attackInterval: 1000 / Math.max(0.25, attackSpeed),
+      abilityPower,
+      manaMax,
+      mana: clamp(startMana, 0, manaMax - 1),
+      regenPerSecond,
+      critChance: clamp(critChance, 0, 0.78),
+      critMult,
+      bonuses,
+      alive: true,
+      targetId: null,
+      attackCooldown: 350 + Math.random() * 180,
+      moveCooldown: 120 + Math.random() * 130,
+      castLock: 0,
+      stunnedUntil: 0,
+      slowUntil: 0,
+      burnUntil: 0,
+      burnDps: 0,
+      burnAccumulator: 0,
+      temporaryRegen: 0,
+      temporaryRegenUntil: 0,
+      echoAvailable,
+      actionClass: "",
+      actionUntil: 0
+    };
+  }
+
+  function startBattle() {
+    if (state.phase !== "planning") return;
+    const playerEntries = state.board
+      .map((id, pos) => id && Math.floor(pos / BOARD_COLS) >= PLAYER_START_ROW ? { ...state.units[id], pos } : null)
+      .filter(Boolean);
+    if (!playerEntries.length) {
+      toast("Deploy at least one spirit before starting battle.", "bad");
+      playSfx("error");
+      return;
+    }
+
+    state.phase = "battle";
+    state.selected = null;
+    state.inspectedEnemy = null;
+    const enemyEntries = state.enemyPreview.map(entry => ({ ...entry }));
+    const playerBonuses = calculateTeamBonuses(playerEntries);
+    const enemyBonuses = calculateTeamBonuses(enemyEntries);
+
+    const units = [
+      ...playerEntries.map(entry => buildCombatUnit(entry, "player", entry.pos, playerBonuses)),
+      ...enemyEntries.map(entry => buildCombatUnit(entry, "enemy", entry.pos, enemyBonuses))
+    ];
+
+    combat = {
+      units,
+      elapsed: 0,
+      lastTimestamp: null,
+      raf: null,
+      floating: [],
+      ended: false,
+      maxTime: 35000,
+      lastSoundAt: -999,
+      resultTimeout: null
+    };
+
+    applyBattleStartEffects();
+    addLog(`Round ${state.round} began against ${enemyEntries.length} enemy spirit${enemyEntries.length === 1 ? "" : "s"}.`);
+    playSfx("start");
+    render();
+    els.battleTimer.hidden = false;
+    combat.raf = requestAnimationFrame(battleFrame);
+  }
+
+  function applyBattleStartEffects() {
+    const teams = ["player", "enemy"];
+    for (const team of teams) {
+      const teamUnits = livingUnits(team);
+      const bonuses = teamUnits[0]?.bonuses;
+      if (!bonuses) continue;
+      if (bonuses.radiantShield > 0) {
+        teamUnits.forEach(unit => addShield(unit, bonuses.radiantShield * unit.abilityPower, false));
+      }
+    }
+
+    const blinkers = combat.units.filter(unit => unit.alive && unit.bonuses.assassinBlink && UNIT_DEFS[unit.defKey].role === "Assassin");
+    for (const unit of blinkers) {
+      const enemies = livingUnits(unit.team === "player" ? "enemy" : "player");
+      if (!enemies.length) continue;
+      const target = [...enemies].sort((a, b) => a.hp - b.hp)[0];
+      teleportAdjacent(unit, target);
+    }
+  }
+
+  function battleFrame(timestamp) {
+    if (!combat || combat.ended) return;
+    if (combat.lastTimestamp === null) combat.lastTimestamp = timestamp;
+    const rawDt = clamp(timestamp - combat.lastTimestamp, 0, 85);
+    combat.lastTimestamp = timestamp;
+    const dt = rawDt * state.speed;
+    combat.elapsed += dt;
+
+    updateBattle(dt);
+    renderBoard();
+    const remaining = Math.max(0, combat.maxTime - combat.elapsed);
+    els.battleTimer.textContent = `${(remaining / 1000).toFixed(1)}s · ×${state.speed}`;
+
+    if (!combat.ended) combat.raf = requestAnimationFrame(battleFrame);
+  }
+
+  function updateBattle(dt) {
+    if (!combat || combat.ended) return;
+    const now = combat.elapsed;
+    const acting = combat.units.filter(unit => unit.alive);
+
+    for (const unit of acting) {
+      if (!unit.alive) continue;
+      unit.attackCooldown -= dt;
+      unit.moveCooldown -= dt;
+      unit.castLock -= dt;
+
+      const regen = unit.regenPerSecond + (unit.temporaryRegenUntil > now ? unit.temporaryRegen : 0);
+      if (regen > 0 && unit.hp > 0 && unit.hp < unit.maxHp) {
+        unit.hp = Math.min(unit.maxHp, unit.hp + regen * dt / 1000);
+      }
+
+      if (unit.burnUntil > now && unit.burnDps > 0) {
+        unit.burnAccumulator += dt;
+        while (unit.burnAccumulator >= 500 && unit.alive) {
+          unit.burnAccumulator -= 500;
+          dealPureDamage(null, unit, unit.burnDps * 0.5, "damage", false);
+        }
+      }
+
+      if (!unit.alive || unit.stunnedUntil > now || unit.castLock > 0) continue;
+
+      let target = combat.units.find(candidate => candidate.combatId === unit.targetId && candidate.alive);
+      if (!target || target.team === unit.team) {
+        target = findBestTarget(unit);
+        unit.targetId = target?.combatId || null;
+      }
+      if (!target) continue;
+
+      const dist = gridDistance(unit, target);
+      if (unit.mana >= unit.manaMax && unit.castLock <= 0) {
+        castAbility(unit, target);
+        continue;
+      }
+
+      if (dist <= unit.range && unit.attackCooldown <= 0) {
+        performBasicAttack(unit, target);
+      } else if (dist > unit.range && unit.moveCooldown <= 0) {
+        moveTowardTarget(unit, target);
+      }
+    }
+
+    const playerAlive = livingUnits("player");
+    const enemyAlive = livingUnits("enemy");
+    if (!playerAlive.length || !enemyAlive.length) {
+      const playerWon = playerAlive.length > 0 && enemyAlive.length === 0;
+      finishBattle(playerWon, false);
+      return;
+    }
+
+    if (combat.elapsed >= combat.maxTime) {
+      const playerRatio = playerAlive.reduce((sum, unit) => sum + unit.hp / unit.maxHp, 0);
+      const enemyRatio = enemyAlive.reduce((sum, unit) => sum + unit.hp / unit.maxHp, 0);
+      finishBattle(playerRatio >= enemyRatio, true);
+    }
+  }
+
+  function livingUnits(team) {
+    if (!combat) return [];
+    return combat.units.filter(unit => unit.alive && (!team || unit.team === team));
+  }
+
+  function gridDistance(a, b) {
+    return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+  }
+
+  function findBestTarget(unit) {
+    const enemies = livingUnits(unit.team === "player" ? "enemy" : "player");
+    if (!enemies.length) return null;
+    const role = UNIT_DEFS[unit.defKey].role;
+    return enemies.sort((a, b) => {
+      if (role === "Assassin") {
+        const healthDiff = (a.hp / a.maxHp) - (b.hp / b.maxHp);
+        if (Math.abs(healthDiff) > 0.15) return healthDiff;
+      }
+      const distanceDiff = gridDistance(unit, a) - gridDistance(unit, b);
+      if (distanceDiff !== 0) return distanceDiff;
+      return (a.hp / a.maxHp) - (b.hp / b.maxHp);
+    })[0];
+  }
+
+  function occupiedPositionSet(excludeCombatId = null) {
+    return new Set(livingUnits().filter(unit => unit.combatId !== excludeCombatId).map(unit => `${unit.x},${unit.y}`));
+  }
+
+  function moveTowardTarget(unit, target) {
+    const occupied = occupiedPositionSet(unit.combatId);
+    const startKey = `${unit.x},${unit.y}`;
+    const queue = [{ x: unit.x, y: unit.y, first: null }];
+    const visited = new Set([startKey]);
+    let nextStep = null;
+
+    while (queue.length) {
+      const current = queue.shift();
+      if (current.first && Math.abs(current.x - target.x) + Math.abs(current.y - target.y) <= unit.range) {
+        nextStep = current.first;
+        break;
+      }
+
+      const neighbors = [
+        { x: current.x + 1, y: current.y },
+        { x: current.x - 1, y: current.y },
+        { x: current.x, y: current.y + 1 },
+        { x: current.x, y: current.y - 1 }
+      ].filter(pos => pos.x >= 0 && pos.x < BOARD_COLS && pos.y >= 0 && pos.y < BOARD_ROWS)
+       .sort((a, b) => (Math.abs(a.x - target.x) + Math.abs(a.y - target.y)) - (Math.abs(b.x - target.x) + Math.abs(b.y - target.y)));
+
+      for (const neighbor of neighbors) {
+        const key = `${neighbor.x},${neighbor.y}`;
+        if (visited.has(key) || occupied.has(key)) continue;
+        visited.add(key);
+        queue.push({ x: neighbor.x, y: neighbor.y, first: current.first || neighbor });
+      }
+    }
+
+    if (nextStep) {
+      unit.x = nextStep.x;
+      unit.y = nextStep.y;
+      const slowed = unit.slowUntil > combat.elapsed;
+      unit.moveCooldown = slowed ? 760 : 480;
+    } else {
+      unit.moveCooldown = 320;
+      unit.targetId = null;
+    }
+  }
+
+  function performBasicAttack(attacker, target) {
+    if (!attacker.alive || !target.alive || gridDistance(attacker, target) > attacker.range) return;
+    const isCrit = Math.random() < attacker.critChance;
+    const rawDamage = attacker.attack * (isCrit ? attacker.critMult : 1);
+    dealDamage(attacker, target, rawDamage, isCrit ? "crit" : "damage");
+    attacker.mana = clamp(attacker.mana + 12, 0, attacker.manaMax);
+    target.mana = clamp(target.mana + 6, 0, target.manaMax);
+    attacker.actionClass = "attack";
+    attacker.actionUntil = combat.elapsed + 260;
+
+    if (attacker.bonuses.emberBurn) applyBurn(target, attacker.attack * 0.12, 2600);
+    if (attacker.bonuses.frostSlow) target.slowUntil = Math.max(target.slowUntil, combat.elapsed + 1300);
+    if (attacker.bonuses.frostFreezeChance > 0 && Math.random() < attacker.bonuses.frostFreezeChance) {
+      target.stunnedUntil = Math.max(target.stunnedUntil, combat.elapsed + 650);
+      addFloating(target, "❄ Freeze", "shield");
+    }
+
+    const slowMultiplier = attacker.slowUntil > combat.elapsed ? 1.35 : 1;
+    attacker.attackCooldown = attacker.attackInterval * slowMultiplier;
+  }
+
+  function armorMultiplier(armor) {
+    if (armor >= 0) return 100 / (100 + armor);
+    return 2 - (100 / (100 - armor));
+  }
+
+  function dealDamage(attacker, target, rawDamage, kind = "damage", show = true) {
+    if (!target?.alive) return 0;
+    const damage = Math.max(1, rawDamage * armorMultiplier(target.armor));
+    return applyDamageAmount(attacker, target, damage, kind, show);
+  }
+
+  function dealPureDamage(attacker, target, damage, kind = "damage", show = true) {
+    if (!target?.alive) return 0;
+    return applyDamageAmount(attacker, target, Math.max(1, damage), kind, show);
+  }
+
+  function applyDamageAmount(attacker, target, damage, kind, show) {
+    let remaining = damage;
+    if (target.shield > 0) {
+      const absorbed = Math.min(target.shield, remaining);
+      target.shield -= absorbed;
+      remaining -= absorbed;
+    }
+    if (remaining > 0) target.hp -= remaining;
+    target.actionClass = "hit";
+    target.actionUntil = combat.elapsed + 170;
+    if (show) addFloating(target, `-${Math.round(damage)}`, kind);
+
+    if (target.hp <= 0) {
+      target.hp = 0;
+      killUnit(target, attacker);
+    }
+    return damage;
+  }
+
+  function killUnit(target, attacker) {
+    if (!target.alive) return;
+    target.alive = false;
+    target.targetId = null;
+    addFloating(target, "KO", "ko");
+    const targetName = UNIT_DEFS[target.defKey].name;
+    if (attacker) {
+      const attackerName = UNIT_DEFS[attacker.defKey].name;
+      addLog(`${attackerName} knocked out ${targetName}.`, attacker.team === "player" ? "good" : "bad");
+    }
+    playSfx("ko");
+  }
+
+  function addFloating(unit, text, kind = "damage") {
+    if (!combat) return;
+    combat.floating.push({
+      x: unit.x,
+      y: unit.y,
+      text,
+      kind,
+      expires: combat.elapsed + 760
+    });
+  }
+
+  function healUnit(unit, amount, show = true) {
+    if (!unit?.alive || amount <= 0) return 0;
+    const actual = Math.min(amount, unit.maxHp - unit.hp);
+    unit.hp += actual;
+    if (show && actual > 1) addFloating(unit, `+${Math.round(actual)}`, "heal");
+    return actual;
+  }
+
+  function addShield(unit, amount, show = true) {
+    if (!unit?.alive || amount <= 0) return;
+    unit.shield += amount;
+    if (show) addFloating(unit, `+${Math.round(amount)} shield`, "shield");
+  }
+
+  function applyBurn(unit, dps, duration) {
+    if (!unit?.alive) return;
+    unit.burnDps = Math.max(unit.burnDps, dps);
+    unit.burnUntil = Math.max(unit.burnUntil, combat.elapsed + duration);
+  }
+
+  function unitsNearPosition(x, y, team, radius) {
+    return livingUnits(team).filter(unit => Math.abs(unit.x - x) + Math.abs(unit.y - y) <= radius);
+  }
+
+  function teleportAdjacent(unit, target) {
+    const occupied = occupiedPositionSet(unit.combatId);
+    const candidates = [
+      { x: target.x + 1, y: target.y },
+      { x: target.x - 1, y: target.y },
+      { x: target.x, y: target.y + 1 },
+      { x: target.x, y: target.y - 1 }
+    ].filter(pos => pos.x >= 0 && pos.x < BOARD_COLS && pos.y >= 0 && pos.y < BOARD_ROWS && !occupied.has(`${pos.x},${pos.y}`));
+    if (!candidates.length) return false;
+    candidates.sort((a, b) => {
+      const preferredA = unit.team === "player" ? a.y : BOARD_ROWS - 1 - a.y;
+      const preferredB = unit.team === "player" ? b.y : BOARD_ROWS - 1 - b.y;
+      return preferredA - preferredB;
+    });
+    unit.x = candidates[0].x;
+    unit.y = candidates[0].y;
+    unit.moveCooldown = 420;
+    return true;
+  }
+
+  function castAbility(caster, currentTarget) {
+    if (!caster.alive) return;
+    const def = UNIT_DEFS[caster.defKey];
+    const enemyTeam = caster.team === "player" ? "enemy" : "player";
+    const enemies = livingUnits(enemyTeam);
+    const allies = livingUnits(caster.team);
+    if (!enemies.length) return;
+    let castSucceeded = true;
+
+    switch (def.abilityKey) {
+      case "flareBurst": {
+        const target = currentTarget?.alive ? currentTarget : findBestTarget(caster);
+        if (!target) { castSucceeded = false; break; }
+        const victims = unitsNearPosition(target.x, target.y, enemyTeam, 1);
+        victims.forEach((victim, index) => {
+          dealDamage(caster, victim, (caster.attack * 0.72 + 105 * caster.abilityPower) * (index === 0 ? 1 : 0.68));
+          applyBurn(victim, 23 * caster.abilityPower, 3200);
+        });
+        break;
+      }
+      case "barkBarrier": {
+        addShield(caster, 165 * caster.abilityPower + caster.maxHp * 0.15);
+        healUnit(caster, caster.maxHp * 0.09 * caster.abilityPower);
+        break;
+      }
+      case "tidalMend": {
+        const ally = [...allies].sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp))[0];
+        healUnit(ally, 165 * caster.abilityPower + caster.attack * 0.55);
+        ally.mana = clamp(ally.mana + 10, 0, ally.manaMax);
+        break;
+      }
+      case "chainSpark": {
+        let target = currentTarget?.alive ? currentTarget : findBestTarget(caster);
+        const hit = new Set();
+        for (let jump = 0; jump < 3 && target; jump++) {
+          hit.add(target.combatId);
+          dealDamage(caster, target, (122 * caster.abilityPower + caster.attack * 0.35) * (1 - jump * 0.18));
+          target = enemies.filter(enemy => enemy.alive && !hit.has(enemy.combatId))
+            .sort((a, b) => gridDistance(target, a) - gridDistance(target, b))[0] || null;
+        }
+        break;
+      }
+      case "glacialRam": {
+        const target = currentTarget?.alive ? currentTarget : findBestTarget(caster);
+        if (!target) { castSucceeded = false; break; }
+        dealDamage(caster, target, 130 * caster.abilityPower + caster.attack * 0.82);
+        target.stunnedUntil = Math.max(target.stunnedUntil, combat.elapsed + 1400);
+        target.slowUntil = Math.max(target.slowUntil, combat.elapsed + 2600);
+        addFloating(target, "Stunned", "shield");
+        break;
+      }
+      case "shadowDive": {
+        const target = [...enemies].sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp))[0];
+        if (!target) { castSucceeded = false; break; }
+        teleportAdjacent(caster, target);
+        dealDamage(caster, target, caster.attack * 1.2 + 95 * caster.abilityPower, "crit");
+        break;
+      }
+      case "magmaPulse": {
+        const victims = unitsNearPosition(caster.x, caster.y, enemyTeam, 1);
+        if (!victims.length) {
+          const target = findBestTarget(caster);
+          if (target) dealDamage(caster, target, 130 * caster.abilityPower);
+        } else {
+          victims.forEach(victim => {
+            dealDamage(caster, victim, 138 * caster.abilityPower + caster.attack * 0.42);
+            applyBurn(victim, 20 * caster.abilityPower, 2600);
+          });
+        }
+        break;
+      }
+      case "verdantSong": {
+        allies.forEach(ally => {
+          healUnit(ally, 68 * caster.abilityPower + ally.maxHp * 0.035);
+          ally.temporaryRegen = Math.max(ally.temporaryRegen, 11 * caster.abilityPower);
+          ally.temporaryRegenUntil = Math.max(ally.temporaryRegenUntil, combat.elapsed + 4200);
+        });
+        break;
+      }
+      case "cyclone": {
+        const victims = unitsNearPosition(caster.x, caster.y, enemyTeam, 2);
+        if (!victims.length) { castSucceeded = false; break; }
+        victims.forEach(victim => {
+          dealDamage(caster, victim, 92 * caster.abilityPower + caster.attack * 0.55);
+          if (victim.alive) dealDamage(caster, victim, 58 * caster.abilityPower + caster.attack * 0.25);
+        });
+        break;
+      }
+      case "coralWard": {
+        const protectedAllies = [...allies].sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp)).slice(0, 2);
+        protectedAllies.forEach(ally => addShield(ally, 185 * caster.abilityPower + ally.maxHp * 0.06));
+        break;
+      }
+      case "iceLance": {
+        [...enemies].sort((a, b) => gridDistance(caster, a) - gridDistance(caster, b)).slice(0, 3).forEach((victim, index) => {
+          dealDamage(caster, victim, (160 * caster.abilityPower + caster.attack * 0.38) * (1 - index * 0.15));
+          victim.slowUntil = Math.max(victim.slowUntil, combat.elapsed + 2300);
+        });
+        break;
+      }
+      case "eclipseCut": {
+        const target = [...enemies].sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp))[0];
+        if (!target) { castSucceeded = false; break; }
+        teleportAdjacent(caster, target);
+        const execute = target.hp / target.maxHp < 0.35 ? 1.85 : 1;
+        dealDamage(caster, target, (caster.attack * 1.18 + 125 * caster.abilityPower) * execute, execute > 1 ? "crit" : "damage");
+        break;
+      }
+      case "sunrise": {
+        allies.forEach(ally => {
+          healUnit(ally, 88 * caster.abilityPower + ally.maxHp * 0.04);
+          addShield(ally, 95 * caster.abilityPower);
+        });
+        break;
+      }
+      case "rootquake": {
+        const victims = unitsNearPosition(caster.x, caster.y, enemyTeam, 2);
+        victims.forEach(victim => {
+          dealDamage(caster, victim, 135 * caster.abilityPower + caster.attack * 0.45);
+          victim.stunnedUntil = Math.max(victim.stunnedUntil, combat.elapsed + 900);
+        });
+        break;
+      }
+      case "thunderArc": {
+        const clusterTarget = [...enemies].sort((a, b) => {
+          const aCount = unitsNearPosition(a.x, a.y, enemyTeam, 1).length;
+          const bCount = unitsNearPosition(b.x, b.y, enemyTeam, 1).length;
+          return bCount - aCount;
+        })[0];
+        if (!clusterTarget) { castSucceeded = false; break; }
+        const victims = unitsNearPosition(clusterTarget.x, clusterTarget.y, enemyTeam, 1);
+        victims.forEach(victim => dealDamage(caster, victim, 145 * caster.abilityPower + caster.attack * 0.42));
+        const second = [...enemies].filter(enemy => enemy.alive).sort((a, b) => a.hp - b.hp)[0];
+        if (second) dealDamage(caster, second, 105 * caster.abilityPower + caster.attack * 0.25);
+        break;
+      }
+      case "meteorBreath": {
+        const target = currentTarget?.alive ? currentTarget : findBestTarget(caster);
+        if (!target) { castSucceeded = false; break; }
+        const victims = unitsNearPosition(target.x, target.y, enemyTeam, 2);
+        victims.forEach(victim => {
+          dealDamage(caster, victim, 175 * caster.abilityPower + caster.attack * 0.52);
+          applyBurn(victim, 31 * caster.abilityPower, 4200);
+        });
+        break;
+      }
+      default:
+        castSucceeded = false;
+    }
+
+    if (!castSucceeded) return;
+    caster.mana = 0;
+    if (caster.echoAvailable) {
+      caster.mana = clamp(caster.mana + 30, 0, caster.manaMax);
+      caster.echoAvailable = false;
+      addFloating(caster, "+30 mana", "shield");
+    }
+    caster.castLock = 360;
+    caster.attackCooldown = Math.max(caster.attackCooldown, 500);
+    caster.actionClass = "cast";
+    caster.actionUntil = combat.elapsed + 470;
+    playSfx("cast");
+  }
+
+  function finishBattle(playerWon, timedOut) {
+    if (!combat || combat.ended) return;
+    combat.ended = true;
+    if (combat.raf) cancelAnimationFrame(combat.raf);
+    const enemySurvivors = livingUnits("enemy").map(unit => ({ star: unit.star, boss: unit.boss }));
+    const playerSurvivors = livingUnits("player").length;
+    els.battleTimer.textContent = timedOut ? "Time!" : playerWon ? "Victory!" : "Defeat";
+    toast(playerWon ? "Battle won!" : "Your formation was defeated.", playerWon ? "good" : "bad");
+    playSfx(playerWon ? "win" : "loss");
+    combat.resultTimeout = setTimeout(() => resolveRound(playerWon, enemySurvivors, playerSurvivors, timedOut), 900);
+  }
+
+  function resolveRound(playerWon, enemySurvivors, playerSurvivors, timedOut) {
+    const completedRound = state.round;
+    const interest = Math.min(5, Math.floor(state.gold / 10));
+
+    if (playerWon) {
+      state.streak = state.streak > 0 ? state.streak + 1 : 1;
+    } else {
+      state.streak = state.streak < 0 ? state.streak - 1 : -1;
+    }
+
+    const streakBonus = playerWon ? Math.min(3, Math.floor(Math.max(0, state.streak - 1) / 2)) : 0;
+    const baseGold = playerWon ? 5 : 4;
+    const reward = baseGold + interest + streakBonus;
+    state.gold += reward;
+
+    if (playerWon) {
+      addLog(`Round ${completedRound} won${timedOut ? " on remaining health" : ""}: +${reward} gold (${interest} interest${streakBonus ? `, ${streakBonus} streak` : ""}).`, "good");
+    } else {
+      const survivorPower = enemySurvivors.reduce((sum, unit) => sum + unit.star + (unit.boss ? 1 : 0), 0);
+      const damage = clamp(2 + survivorPower, 2, 14);
+      state.hp -= damage;
+      addLog(`Round ${completedRound} lost: -${damage} heart, +${reward} gold (${interest} interest).`, "bad");
+    }
+
+    gainXp(2);
+    combat = null;
+    state.selected = null;
+    state.inspectedEnemy = null;
+
+    if (state.hp <= 0) {
+      state.hp = 0;
+      state.phase = "gameover";
+      try { localStorage.removeItem(SAVE_KEY); } catch (_) {}
+      render();
+      showEndModal(false, completedRound);
+      return;
+    }
+
+    if (playerWon && completedRound >= FINAL_ROUND) {
+      state.phase = "victory";
+      try { localStorage.removeItem(SAVE_KEY); } catch (_) {}
+      render();
+      showEndModal(true, completedRound);
+      return;
+    }
+
+    state.round = Math.min(FINAL_ROUND, completedRound + 1);
+    state.phase = "planning";
+    prepareEnemy();
+    if (state.shopLocked) {
+      state.shopLocked = false;
+    } else {
+      state.shop = Array.from({ length: 5 }, () => rollShopUnit(state.level));
+    }
+    render();
+    saveGame();
+
+    if (playerWon && completedRound % 3 === 0) {
+      showLootChoice(completedRound);
+    } else {
+      toast(`Round ${state.round} planning phase.`, "good");
+    }
+  }
+
+  function showLootChoice(completedRound) {
+    const itemKeys = Object.keys(ITEM_DEFS);
+    const shuffled = [...itemKeys].sort(() => Math.random() - 0.5).slice(0, 3);
+    const body = document.createElement("div");
+    body.className = "choice-grid loot-grid";
+    body.innerHTML = shuffled.map(itemKey => {
+      const item = ITEM_DEFS[itemKey];
+      return `
+        <button class="choice-card" data-item-key="${itemKey}">
+          <span class="choice-icon">${item.icon}</span>
+          <span class="choice-name">${item.name}</span>
+          <span class="choice-desc">${item.text}</span>
+        </button>
+      `;
+    }).join("");
+
+    openModal({
+      title: `Round ${completedRound} reward`,
+      subtitle: "Choose one item. Select a spirit afterward and click the item in your inventory to equip it.",
+      body,
+      locked: true
+    });
+
+    body.querySelectorAll("[data-item-key]").forEach(button => {
+      button.addEventListener("click", () => {
+        const itemKey = button.dataset.itemKey;
+        state.inventory.push(itemKey);
+        addLog(`Found ${ITEM_DEFS[itemKey].name}.`, "gold");
+        closeModal(true);
+        render();
+        saveGame();
+        toast(`${ITEM_DEFS[itemKey].name} added to your inventory.`, "gold");
+        playSfx("loot");
+      });
+    });
+  }
+
+  function showEndModal(victory, completedRound) {
+    openModal({
+      title: victory ? "Aetherboard Champion!" : "Run complete",
+      subtitle: victory
+        ? "Your formation defeated every challenger and claimed the arena crown."
+        : `Your squad reached round ${completedRound}. Try a different economy, formation, or synergy on the next run.`,
+      body: `
+        <div class="result-banner">
+          <div class="result-icon">${victory ? "🏆" : "🌌"}</div>
+          <h3>${victory ? "Victory" : `Round ${completedRound}`}</h3>
+          <p>${victory ? "You survived all 15 rounds." : "Three matching copies create stars, active synergies reward focused teams, and positioning can protect fragile damage dealers."}</p>
+        </div>
+      `,
+      actions: [{ label: "Start a new run", className: "primary-button", onClick: resetGame }],
+      locked: true
+    });
+  }
+
+
+  function toggleShopLock() {
+    if (state.phase !== "planning") return;
+    state.shopLocked = !state.shopLocked;
+    toast(state.shopLocked ? "Shop locked for the next round." : "Shop unlocked.");
+    playSfx("select");
+    renderControls();
+    saveGame();
+  }
+
+  function toggleSpeed() {
+    if (state.phase !== "battle") return;
+    state.speed = state.speed === 1 ? 2 : 1;
+    renderControls();
+    playSfx("select");
+  }
+
+  function toggleSound() {
+    state.sound = !state.sound;
+    if (state.sound) playSfx("select");
+    renderStats();
+    saveGame();
+  }
+
+  function getAudioContext() {
+    if (!audioContext) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return null;
+      audioContext = new AudioCtx();
+    }
+    if (audioContext.state === "suspended") audioContext.resume().catch(() => {});
+    return audioContext;
+  }
+
+  function playTone(frequency, duration = 0.08, type = "sine", volume = 0.025, delay = 0) {
+    if (!state?.sound) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const start = ctx.currentTime + delay;
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, start);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, volume), start + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+    oscillator.start(start);
+    oscillator.stop(start + duration + 0.02);
+  }
+
+  function playSfx(name) {
+    if (!state?.sound) return;
+    if (combat && ["cast", "ko"].includes(name)) {
+      if (combat.elapsed - combat.lastSoundAt < 100) return;
+      combat.lastSoundAt = combat.elapsed;
+    }
+    switch (name) {
+      case "select": playTone(410, 0.055, "sine", 0.018); break;
+      case "move": playTone(330, 0.045, "triangle", 0.018); break;
+      case "buy": playTone(520, 0.07, "triangle", 0.025); playTone(690, 0.08, "triangle", 0.018, 0.055); break;
+      case "sell": playTone(490, 0.07, "triangle", 0.022); playTone(350, 0.09, "triangle", 0.017, 0.06); break;
+      case "reroll": playTone(280, 0.05, "sine", 0.018); playTone(410, 0.06, "sine", 0.018, 0.045); break;
+      case "equip": playTone(620, 0.07, "sine", 0.023); break;
+      case "error": playTone(150, 0.11, "square", 0.018); break;
+      case "start": playTone(220, 0.12, "sawtooth", 0.025); playTone(440, 0.14, "triangle", 0.025, 0.08); break;
+      case "cast": playTone(650, 0.085, "sine", 0.013); playTone(880, 0.10, "triangle", 0.01, 0.03); break;
+      case "ko": playTone(180, 0.10, "square", 0.018); break;
+      case "merge": playTone(440, 0.08, "triangle", 0.026); playTone(660, 0.09, "triangle", 0.024, 0.07); playTone(880, 0.12, "sine", 0.022, 0.14); break;
+      case "awaken": playTone(380, 0.10, "sine", 0.025); playTone(570, 0.12, "sine", 0.024, 0.08); playTone(850, 0.18, "sine", 0.021, 0.16); break;
+      case "level": playTone(390, 0.08, "triangle", 0.024); playTone(520, 0.08, "triangle", 0.024, 0.07); playTone(780, 0.14, "triangle", 0.02, 0.14); break;
+      case "loot": playTone(720, 0.10, "sine", 0.026); playTone(960, 0.16, "sine", 0.022, 0.09); break;
+      case "win": playTone(440, 0.11, "triangle", 0.025); playTone(554, 0.11, "triangle", 0.025, 0.09); playTone(659, 0.19, "triangle", 0.025, 0.18); break;
+      case "loss": playTone(280, 0.13, "triangle", 0.022); playTone(210, 0.19, "triangle", 0.019, 0.10); break;
+    }
+  }
+
+  function bindEvents() {
+    els.helpButton.addEventListener("click", showHelp);
+    els.newGameButton.addEventListener("click", confirmNewGame);
+    els.soundButton.addEventListener("click", toggleSound);
+    els.battleButton.addEventListener("click", startBattle);
+    els.autoPlaceButton.addEventListener("click", autoPlace);
+    els.speedButton.addEventListener("click", toggleSpeed);
+    els.lockButton.addEventListener("click", toggleShopLock);
+    els.xpButton.addEventListener("click", buyXp);
+    els.rerollButton.addEventListener("click", () => refreshShop());
+
+    els.modalBackdrop.addEventListener("click", event => {
+      if (event.target === els.modalBackdrop && !modalLocked) closeModal(true);
+    });
+
+    window.addEventListener("keydown", event => {
+      const tag = document.activeElement?.tagName?.toLowerCase();
+      if (tag === "input" || tag === "textarea") return;
+      const modalOpen = !els.modalBackdrop.classList.contains("hidden");
+      if (event.key === "Escape") {
+        if (modalOpen && !modalLocked) closeModal(true);
+        else if (!modalOpen && state.phase === "planning") {
+          state.selected = null;
+          state.inspectedEnemy = null;
+          render();
+        }
+        return;
+      }
+      if (modalOpen) return;
+      if (event.code === "Space") {
+        event.preventDefault();
+        startBattle();
+      } else if (event.key.toLowerCase() === "r") {
+        refreshShop();
+      } else if (event.key.toLowerCase() === "e") {
+        buyXp();
+      }
+    });
+  }
+
+  function init() {
+    cacheElements();
+    bindEvents();
+    const loaded = loadGame();
+    state = loaded || createFreshState();
+    prepareEnemy();
+    if (!state.shop.some(Boolean)) {
+      state.shop = Array.from({ length: 5 }, () => rollShopUnit(state.level));
+    }
+    awakeningQueue = allUnitLocations()
+      .filter(loc => loc.unit.star >= 2 && !loc.unit.awakening)
+      .map(loc => loc.id);
+    render();
+    saveGame();
+    if (loaded) {
+      toast("Saved run restored.", "good");
+      setTimeout(processAwakeningQueue, 0);
+    } else if (!state.tutorialSeen) {
+      showHelp();
+    }
+  }
+
+  window.AetherboardDebug = {
+    getState: () => JSON.parse(JSON.stringify(state)),
+    getCombat: () => combat ? JSON.parse(JSON.stringify({ elapsed: combat.elapsed, units: combat.units })) : null,
+    startBattle,
+    resetGame,
+    resolveRound: (won = true) => resolveRound(Boolean(won), won ? [] : [{ star: 1, boss: false }], won ? 1 : 0, false)
+  };
+
+  init();
+  </script>
+</body>
+</html>
