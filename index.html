@@ -427,7 +427,7 @@
     .board-wrap {
       position: relative;
       width: min(100%, 720px);
-      aspect-ratio: 1 / 1;
+      aspect-ratio: 4 / 3;
       padding: 7px;
       border-radius: 19px;
       border: 1px solid rgba(255,255,255,.14);
@@ -1073,7 +1073,7 @@
       text-align: center;
     }
 
-    @media (max-width: 1160px) {
+    @media (max-width: 980px) {
       .game-layout { grid-template-columns: minmax(180px, 230px) minmax(520px, 1fr); }
       .right-panel { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); }
       .right-panel .panel-section { min-height: 160px; }
@@ -1113,6 +1113,180 @@
       .modal-title { font-size: 21px; }
       .unit-name-tiny { display: none; }
     }
+
+
+    /* Version 2: full-viewport desktop layout and enlarged 8-column by 6-row arena. */
+    .mode-value { color: #c9b7ff; font-size: 12px; white-space: nowrap; }
+    .type-bond-note {
+      padding: 7px 8px;
+      border-left: 3px solid #79b9ff;
+      border-radius: 6px;
+      background: rgba(121,185,255,.075);
+      color: #cfe5ff;
+      font-size: 9px;
+      line-height: 1.35;
+    }
+    .draft-progress {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .draft-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.2);
+      background: rgba(255,255,255,.06);
+    }
+    .draft-dot.filled { background: var(--gold); box-shadow: 0 0 12px rgba(255,214,107,.45); }
+    .draft-card-meta { display:block; margin-top:5px; color:var(--gold); font-size:9px; font-weight:900; }
+    .mode-grid .choice-card { min-height: 188px; }
+    .mode-grid .choice-name { font-size: 16px; }
+    .mode-badge {
+      display:inline-flex;
+      margin-top:9px;
+      padding:4px 7px;
+      border-radius:999px;
+      background:rgba(255,255,255,.07);
+      color:#e5e9fa;
+      font-size:9px;
+      font-weight:900;
+    }
+
+    @media (min-width: 981px) {
+      html, body { height: 100%; overflow: hidden; }
+      .app-shell {
+        width: min(1920px, 100%);
+        height: 100dvh;
+        min-height: 0;
+        padding: 8px;
+        gap: 8px;
+        grid-template-rows: auto minmax(0, 1fr) 132px;
+      }
+      .topbar { min-height: 54px; padding: 6px 10px; gap: 9px; }
+      .brand-mark { width: 40px; height: 40px; border-radius: 12px; font-size: 21px; }
+      .brand h1 { font-size: clamp(17px, 1.7vw, 25px); }
+      .brand p { margin-top: 3px; font-size: 10px; }
+      .resource-row { gap: 5px; flex-wrap: nowrap; }
+      .resource { min-width: 66px; padding: 5px 7px; border-radius: 10px; }
+      .resource-label { font-size: 8px; }
+      .resource-value { font-size: 15px; }
+      .mode-resource { min-width: 88px; }
+      .top-actions { gap: 5px; }
+      .icon-button { width: 34px; height: 34px; }
+      .small-button { min-height: 31px; padding: 6px 9px; font-size: 11px; }
+      .primary-button { min-height: 37px; padding: 8px 14px; }
+
+      .game-layout {
+        min-height: 0;
+        grid-template-columns: minmax(178px, 218px) minmax(520px, 1fr) minmax(185px, 225px);
+        gap: 8px;
+      }
+      .panel { padding: 8px; border-radius: 14px; }
+      .left-panel, .right-panel { gap: 7px; overflow-y: auto; scrollbar-width: thin; }
+      .panel-section { padding: 8px; border-radius: 11px; }
+      .panel-section.grow { min-height: 115px; }
+      .section-heading { margin-bottom: 6px; }
+      .section-heading h2, .section-heading h3 { font-size: 10px; }
+      .section-heading span { font-size: 8px; }
+      .trait-list { gap: 4px; }
+      .trait-chip { grid-template-columns: 25px 1fr auto; gap: 5px; padding: 4px 5px; border-radius: 8px; }
+      .trait-icon { width: 24px; height: 24px; border-radius: 7px; font-size: 13px; }
+      .trait-name { font-size: 9px; }
+      .trait-effect { font-size: 7px; }
+      .trait-count { font-size: 9px; }
+      .battle-log { gap: 3px; }
+      .log-entry { padding: 4px 5px; font-size: 8px; }
+
+      .arena-panel { height: 100%; min-height: 0; border-radius: 14px; }
+      .arena-header { min-height: 43px; padding: 5px 10px; }
+      .round-title { font-size: 14px; }
+      .round-subtitle { font-size: 8px; }
+      .phase-pill { padding: 5px 8px; font-size: 8px; }
+      .board-area { min-height: 0; padding: 5px; overflow: hidden; }
+      .board-wrap {
+        height: 100%;
+        width: auto;
+        max-width: 100%;
+        max-height: 100%;
+        aspect-ratio: 4 / 3;
+        padding: 5px;
+        border-radius: 15px;
+      }
+      .board-grid {
+        grid-template-columns: repeat(8, 1fr);
+        grid-template-rows: repeat(6, 1fr);
+        gap: 3px;
+      }
+      .board-cell { border-radius: 8px; }
+      .board-unit { inset: 2px; width: calc(100% - 4px); height: calc(100% - 4px); }
+      .unit-icon { font-size: clamp(15px, 2.2vw, 28px); }
+      .unit-name-tiny { bottom: 2px; font-size: clamp(5px, .55vw, 7px); }
+      .unit-stars { top: -6px; font-size: clamp(7px, .8vw, 10px); }
+      .health-stack { bottom: -4px; }
+      .arena-footer { padding: 6px 9px; gap: 6px; }
+      .formation-info { font-size: 9px; }
+      .footer-actions { gap: 5px; }
+
+      .selected-card { min-height: 125px; gap: 6px; }
+      .selected-empty { padding: 10px; font-size: 9px; }
+      .unit-profile { grid-template-columns: 44px 1fr; gap: 7px; }
+      .profile-icon { width: 44px; height: 44px; border-radius: 13px; font-size: 23px; }
+      .profile-name { font-size: 12px; }
+      .stat-grid { gap: 3px; }
+      .stat-box { padding: 4px; }
+      .stat-box span { font-size: 6px; }
+      .stat-box strong { font-size: 9px; }
+      .ability-box { padding: 6px; }
+      .ability-box p { font-size: 8px; }
+      .inventory-item { min-height: 44px; }
+      .inventory-item .item-icon { font-size: 16px; }
+      .enemy-list { gap: 3px; }
+      .enemy-mini { padding: 4px 2px; }
+      .enemy-mini-icon { font-size: 15px; }
+
+      .bottom-zone { min-height: 0; height: 132px; grid-template-columns: minmax(0, 1.2fr) minmax(400px, .8fr); gap: 8px; }
+      .shop-panel, .bench-panel { height: 100%; padding: 7px 8px; border-radius: 14px; overflow: hidden; }
+      .bottom-heading { margin-bottom: 4px; }
+      .bottom-heading h2 { font-size: 9px; }
+      .shop-list { height: calc(100% - 31px); gap: 5px; }
+      .shop-card { min-height: 0; height: 100%; padding: 6px; border-radius: 10px; }
+      .shop-icon { font-size: 23px; }
+      .shop-name { margin-top: 2px; font-size: 9px; }
+      .shop-tags { font-size: 7px; }
+      .shop-ability { margin-top: 4px; font-size: 7px; }
+      .shop-cost { right: 5px; top: 5px; min-width: 20px; height: 20px; font-size: 8px; }
+      .bench-list { height: calc(100% - 27px); grid-template-columns: repeat(12, minmax(30px, 1fr)); align-items: start; gap: 4px; }
+      .bench-slot { max-height: 64px; }
+      .bench-unit { font-size: clamp(13px, 1.45vw, 20px); }
+    }
+
+    @media (min-width: 981px) and (max-height: 790px) {
+      .app-shell { grid-template-rows: auto minmax(0, 1fr) 120px; padding: 6px; gap: 6px; }
+      .topbar { min-height: 48px; }
+      .brand p { display: none; }
+      .resource { padding: 3px 6px; }
+      .board-wrap { height: 100%; width: auto; max-width: 100%; }
+      .bottom-zone { height: 120px; }
+      .shop-panel, .bench-panel { padding: 6px; }
+      .shop-card { padding: 5px; }
+      .shop-ability { display: none; }
+      .panel-section { padding: 6px; }
+      .trait-chip { padding: 3px 4px; }
+    }
+
+    @media (max-width: 980px) {
+      html, body { height: auto; overflow-x: hidden; overflow-y: auto; }
+      .app-shell { height: auto; min-height: 100dvh; }
+      .game-layout { grid-template-columns: 1fr; }
+      .right-panel { grid-column: auto; }
+      .board-grid { grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(6, 1fr); gap: 3px; }
+      .board-wrap { width: min(100%, 720px); }
+      .bench-list { grid-template-columns: repeat(12, 58px); }
+    }
+
   </style>
 </head>
 <body>
@@ -1124,7 +1298,7 @@
         <div class="brand-mark" aria-hidden="true">✦</div>
         <div class="brand-copy">
           <h1>Aetherboard: Auto Chess</h1>
-          <p>Build a six-spirit squad, awaken upgrades, and survive 15 rounds.</p>
+          <p>Draft from 40 spirits, build an eight-spirit squad, and master powerful type bonds.</p>
         </div>
       </div>
 
@@ -1139,12 +1313,16 @@
         </div>
         <div class="resource">
           <span class="resource-label">Level</span>
-          <span class="resource-value level-value"><b id="levelValue">2</b> <small id="levelCap">/ 6</small></span>
+          <span class="resource-value level-value"><b id="levelValue">3</b> <small id="levelCap">/ 8</small></span>
           <div class="xp-mini"><span id="xpBar" style="width:0%"></span></div>
         </div>
         <div class="resource">
           <span class="resource-label">Round</span>
-          <span class="resource-value"><b id="roundValue">1</b> <small>/ 15</small></span>
+          <span class="resource-value"><b id="roundValue">1</b> <small id="roundCap">/ 25</small></span>
+        </div>
+        <div class="resource mode-resource">
+          <span class="resource-label">Mode</span>
+          <span class="resource-value mode-value"><b id="modeValue">25 Round</b></span>
         </div>
       </div>
 
@@ -1159,8 +1337,8 @@
       <aside class="panel left-panel">
         <section class="panel-section">
           <div class="section-heading">
-            <h2>Synergies</h2>
-            <span>Unique spirits</span>
+            <h2>Types &amp; roles</h2>
+            <span>Type copies count</span>
           </div>
           <div class="trait-list" id="traitList"></div>
         </section>
@@ -1192,7 +1370,7 @@
         </div>
 
         <footer class="arena-footer">
-          <div class="formation-info" id="formationInfo"><strong>2 / 2</strong> spirits deployed · Click a unit, then a space.</div>
+          <div class="formation-info" id="formationInfo"><strong>0 / 3</strong> spirits deployed · Draft your opening team.</div>
           <div class="footer-actions">
             <button class="small-button" id="autoPlaceButton">✨ Auto-place</button>
             <button class="small-button" id="speedButton" disabled>Speed ×1</button>
@@ -1266,126 +1444,308 @@
   "use strict";
 
   const BOARD_ROWS = 6;
-  const BOARD_COLS = 6;
+  const BOARD_COLS = 8;
   const BOARD_SIZE = BOARD_ROWS * BOARD_COLS;
   const PLAYER_START_ROW = 3;
-  const BENCH_SIZE = 9;
-  const MAX_LEVEL = 6;
-  const FINAL_ROUND = 15;
-  const SAVE_KEY = "aetherboard-auto-chess-v1";
+  const BENCH_SIZE = 12;
+  const MAX_LEVEL = 8;
+  const EXPEDITION_ROUNDS = 25;
+  const SAVE_KEY = "aetherboard-auto-chess-v2";
+  const ELEMENT_TYPES = ["Fire", "Water", "Nature", "Electric", "Ice", "Shadow", "Light", "Earth", "Wind", "Arcane"];
+  const TYPE_DAMAGE_TIERS = [
+    { count: 2, bonus: 0.08 },
+    { count: 3, bonus: 0.15 },
+    { count: 4, bonus: 0.25 },
+    { count: 5, bonus: 0.40 },
+    { count: 6, bonus: 0.55 },
+    { count: 7, bonus: 0.72 },
+    { count: 8, bonus: 0.90 }
+  ];
 
   const UNIT_DEFS = {
     cinderCub: {
-      name: "Cinder Cub", icon: "🔥", cost: 1, element: "Ember", role: "Striker",
+      name: "Cinder Cub", icon: "🔥", cost: 1, element: "Fire", role: "Striker",
       hp: 520, attack: 58, armor: 13, range: 1, attackSpeed: 0.92, manaMax: 70,
       ability: "Flare Pounce", abilityKey: "flareBurst",
       abilityText: "Pounces on its target, damaging nearby enemies and leaving them burning.",
       colors: ["#ff8a57", "#7d2b31"]
     },
     thornling: {
-      name: "Thornling", icon: "🌿", cost: 1, element: "Grove", role: "Vanguard",
+      name: "Thornling", icon: "🌿", cost: 1, element: "Nature", role: "Vanguard",
       hp: 690, attack: 43, armor: 27, range: 1, attackSpeed: 0.72, manaMax: 65,
       ability: "Bark Barrier", abilityKey: "barkBarrier",
       abilityText: "Wraps itself in living bark, gaining a large shield and restoring health.",
       colors: ["#64ca7b", "#265a3b"]
     },
     ripplefin: {
-      name: "Ripplefin", icon: "💧", cost: 1, element: "Tide", role: "Mystic",
+      name: "Ripplefin", icon: "💧", cost: 1, element: "Water", role: "Mystic",
       hp: 470, attack: 46, armor: 10, range: 3, attackSpeed: 0.82, manaMax: 60,
       ability: "Tidal Mend", abilityKey: "tidalMend",
       abilityText: "Sends a healing current to the ally with the lowest health.",
       colors: ["#55c7ef", "#27518b"]
     },
     sparkit: {
-      name: "Sparkit", icon: "⚡", cost: 1, element: "Storm", role: "Ranger",
+      name: "Sparkit", icon: "⚡", cost: 1, element: "Electric", role: "Ranger",
       hp: 445, attack: 50, armor: 9, range: 3, attackSpeed: 1.06, manaMax: 75,
       ability: "Chain Flash", abilityKey: "chainSpark",
       abilityText: "Fires lightning that jumps between up to three enemies.",
       colors: ["#ffe46b", "#8a6f22"]
     },
+    snowpuff: {
+      name: "Snowpuff", icon: "☃️", cost: 1, element: "Ice", role: "Mystic",
+      hp: 455, attack: 44, armor: 12, range: 3, attackSpeed: 0.80, manaMax: 62,
+      ability: "Winter Wish", abilityKey: "snowBlessing",
+      abilityText: "Heals injured allies and freezes the closest enemy for a moment.",
+      colors: ["#d9f6ff", "#6177a8"]
+    },
+    gloomimp: {
+      name: "Gloomimp", icon: "👿", cost: 1, element: "Shadow", role: "Striker",
+      hp: 505, attack: 61, armor: 11, range: 2, attackSpeed: 0.91, manaMax: 68,
+      ability: "Dread Bolt", abilityKey: "gloomBolt",
+      abilityText: "Blasts the weakest enemy, dealing extra damage when it is below half health.",
+      colors: ["#9062bb", "#2a173c"]
+    },
+    glimmerbug: {
+      name: "Glimmerbug", icon: "✨", cost: 1, element: "Light", role: "Mystic",
+      hp: 465, attack: 42, armor: 11, range: 3, attackSpeed: 0.86, manaMax: 58,
+      ability: "Guiding Glow", abilityKey: "sparkleWard",
+      abilityText: "Shields the most injured ally and gives it a burst of mana.",
+      colors: ["#fff0a8", "#a16f8f"]
+    },
+    pebblit: {
+      name: "Pebblit", icon: "🪨", cost: 1, element: "Earth", role: "Vanguard",
+      hp: 720, attack: 42, armor: 31, range: 1, attackSpeed: 0.66, manaMax: 65,
+      ability: "Stoneguard", abilityKey: "stoneGuard",
+      abilityText: "Hardens its body, gaining a huge shield and restoring a little health.",
+      colors: ["#b6a17b", "#554a42"]
+    },
+    breezle: {
+      name: "Breezle", icon: "🍃", cost: 1, element: "Wind", role: "Ranger",
+      hp: 440, attack: 52, armor: 9, range: 4, attackSpeed: 1.02, manaMax: 66,
+      ability: "Gust Shot", abilityKey: "gustShot",
+      abilityText: "Launches slicing wind through the two nearest enemies.",
+      colors: ["#a9f1dc", "#397477"]
+    },
+    runelet: {
+      name: "Runelet", icon: "🔹", cost: 1, element: "Arcane", role: "Mystic",
+      hp: 450, attack: 48, armor: 10, range: 3, attackSpeed: 0.84, manaMax: 60,
+      ability: "Rune Nova", abilityKey: "runeNova",
+      abilityText: "Detonates a rune around its target, damaging nearby enemies.",
+      colors: ["#9cc9ff", "#5545a0"]
+    },
+
     frosthorn: {
-      name: "Frosthorn", icon: "❄️", cost: 2, element: "Frost", role: "Vanguard",
+      name: "Frosthorn", icon: "❄️", cost: 2, element: "Ice", role: "Vanguard",
       hp: 790, attack: 61, armor: 33, range: 1, attackSpeed: 0.68, manaMax: 80,
       ability: "Glacial Ram", abilityKey: "glacialRam",
       abilityText: "Crashes into its target, dealing damage and stunning it.",
       colors: ["#bfe8ff", "#4779a7"]
     },
     duskmoth: {
-      name: "Duskmoth", icon: "🌙", cost: 2, element: "Umbral", role: "Assassin",
+      name: "Duskmoth", icon: "🌙", cost: 2, element: "Shadow", role: "Assassin",
       hp: 520, attack: 78, armor: 12, range: 1, attackSpeed: 1.04, manaMax: 65,
       ability: "Shadow Dive", abilityKey: "shadowDive",
       abilityText: "Warps beside the weakest enemy and strikes with increased critical power.",
       colors: ["#9b74dc", "#34234e"]
     },
     magmole: {
-      name: "Magmole", icon: "🌋", cost: 2, element: "Ember", role: "Vanguard",
+      name: "Magmole", icon: "🌋", cost: 2, element: "Fire", role: "Vanguard",
       hp: 820, attack: 57, armor: 30, range: 1, attackSpeed: 0.71, manaMax: 85,
       ability: "Magma Pulse", abilityKey: "magmaPulse",
       abilityText: "Erupts, scorching every enemy standing close by.",
       colors: ["#ff714f", "#6f2520"]
     },
+    shellsprout: {
+      name: "Shellsprout", icon: "🐢", cost: 2, element: "Water", role: "Vanguard",
+      hp: 850, attack: 52, armor: 35, range: 1, attackSpeed: 0.66, manaMax: 78,
+      ability: "Tide Shell", abilityKey: "shellWard",
+      abilityText: "Protects the two weakest allies with watery shields and a small heal.",
+      colors: ["#79d4d4", "#2f5f72"]
+    },
+    mosskit: {
+      name: "Mosskit", icon: "🐈", cost: 2, element: "Nature", role: "Assassin",
+      hp: 540, attack: 82, armor: 13, range: 1, attackSpeed: 1.08, manaMax: 70,
+      ability: "Vine Ambush", abilityKey: "vineAmbush",
+      abilityText: "Leaps to the weakest enemy, strikes it, and heals from the damage dealt.",
+      colors: ["#7fd275", "#2d6044"]
+    },
+    zapfin: {
+      name: "Zapfin", icon: "🐟", cost: 2, element: "Electric", role: "Assassin",
+      hp: 515, attack: 76, armor: 12, range: 1, attackSpeed: 1.12, manaMax: 72,
+      ability: "Static Dash", abilityKey: "staticDash",
+      abilityText: "Dashes to a weak enemy and arcs lightning to a second target.",
+      colors: ["#f9e55e", "#476ca4"]
+    },
+    prismtail: {
+      name: "Prismtail", icon: "🦚", cost: 2, element: "Light", role: "Ranger",
+      hp: 535, attack: 73, armor: 13, range: 4, attackSpeed: 0.95, manaMax: 78,
+      ability: "Prism Volley", abilityKey: "prismVolley",
+      abilityText: "Fires radiant feathers at three enemies and shields itself.",
+      colors: ["#ffe69d", "#8e67bd"]
+    },
+    cloudram: {
+      name: "Cloudram", icon: "🐏", cost: 2, element: "Wind", role: "Vanguard",
+      hp: 805, attack: 59, armor: 29, range: 1, attackSpeed: 0.72, manaMax: 82,
+      ability: "Cloud Crash", abilityKey: "cloudCrash",
+      abilityText: "Charges into the enemy line, damaging and briefly stunning nearby foes.",
+      colors: ["#d5f4ef", "#5a6e91"]
+    },
+    runebear: {
+      name: "Runebear", icon: "🐻", cost: 2, element: "Arcane", role: "Vanguard",
+      hp: 825, attack: 58, armor: 31, range: 1, attackSpeed: 0.69, manaMax: 84,
+      ability: "Arcane Bulwark", abilityKey: "arcaneBulwark",
+      abilityText: "Shields the whole team and grants a little mana to nearby allies.",
+      colors: ["#9b9cff", "#443c7a"]
+    },
+    ashwing: {
+      name: "Ashwing", icon: "🦅", cost: 2, element: "Fire", role: "Ranger",
+      hp: 545, attack: 79, armor: 14, range: 4, attackSpeed: 0.96, manaMax: 78,
+      ability: "Cinder Volley", abilityKey: "fireVolley",
+      abilityText: "Rains burning feathers onto up to three enemies.",
+      colors: ["#ffab69", "#803b3c"]
+    },
+
     bloombeak: {
-      name: "Bloombeak", icon: "🌸", cost: 2, element: "Grove", role: "Mystic",
-      hp: 530, attack: 49, armor: 14, range: 3, attackSpeed: 0.83, manaMax: 80,
+      name: "Bloombeak", icon: "🌸", cost: 3, element: "Nature", role: "Mystic",
+      hp: 620, attack: 57, armor: 17, range: 3, attackSpeed: 0.83, manaMax: 80,
       ability: "Verdant Song", abilityKey: "verdantSong",
       abilityText: "Heals the whole team and grants a brief regeneration effect.",
       colors: ["#f5a7d1", "#477f55"]
     },
     tempestral: {
-      name: "Tempestral", icon: "🌪️", cost: 3, element: "Storm", role: "Striker",
+      name: "Tempestral", icon: "🌪️", cost: 3, element: "Wind", role: "Striker",
       hp: 700, attack: 84, armor: 19, range: 1, attackSpeed: 0.98, manaMax: 90,
       ability: "Cyclone Ring", abilityKey: "cyclone",
       abilityText: "Spins through nearby enemies, striking each one twice.",
       colors: ["#9ce8ec", "#3d5e85"]
     },
+    tideclaw: {
+      name: "Tideclaw", icon: "🦀", cost: 3, element: "Water", role: "Striker",
+      hp: 760, attack: 88, armor: 24, range: 1, attackSpeed: 0.86, manaMax: 88,
+      ability: "Riptide Crash", abilityKey: "tidalCrash",
+      abilityText: "Smashes a cluster of enemies and heals itself for part of the damage.",
+      colors: ["#5fcbd8", "#315986"]
+    },
+    rootfox: {
+      name: "Rootfox", icon: "🦊", cost: 3, element: "Nature", role: "Ranger",
+      hp: 610, attack: 91, armor: 16, range: 4, attackSpeed: 0.93, manaMax: 84,
+      ability: "Thorn Volley", abilityKey: "thornVolley",
+      abilityText: "Fires thorns into three enemies, slowing each one.",
+      colors: ["#88d47a", "#705235"]
+    },
+    obsidianOx: {
+      name: "Obsidian Ox", icon: "🐂", cost: 3, element: "Earth", role: "Striker",
+      hp: 890, attack: 92, armor: 30, range: 1, attackSpeed: 0.72, manaMax: 92,
+      ability: "Obsidian Smash", abilityKey: "obsidianSmash",
+      abilityText: "Crushes its target and nearby enemies, stunning the main target.",
+      colors: ["#77707f", "#292733"]
+    },
+    arcwhale: {
+      name: "Arcwhale", icon: "🐋", cost: 3, element: "Electric", role: "Mystic",
+      hp: 715, attack: 70, armor: 22, range: 3, attackSpeed: 0.78, manaMax: 86,
+      ability: "Arc Surge", abilityKey: "arcSurge",
+      abilityText: "Sends a powerful surge through up to four enemies.",
+      colors: ["#ffe574", "#4d5d9d"]
+    },
+
     coralSage: {
-      name: "Coral Sage", icon: "🪸", cost: 3, element: "Tide", role: "Mystic",
-      hp: 620, attack: 62, armor: 18, range: 3, attackSpeed: 0.78, manaMax: 80,
+      name: "Coral Sage", icon: "🪸", cost: 4, element: "Water", role: "Mystic",
+      hp: 700, attack: 70, armor: 21, range: 4, attackSpeed: 0.78, manaMax: 80,
       ability: "Coral Ward", abilityKey: "coralWard",
       abilityText: "Protects the two most injured allies with shimmering shields.",
       colors: ["#ff9c9c", "#356e92"]
     },
     glacielle: {
-      name: "Glacielle", icon: "🧊", cost: 3, element: "Frost", role: "Ranger",
-      hp: 570, attack: 90, armor: 15, range: 4, attackSpeed: 0.84, manaMax: 90,
+      name: "Glacielle", icon: "🧊", cost: 4, element: "Ice", role: "Ranger",
+      hp: 650, attack: 103, armor: 18, range: 5, attackSpeed: 0.88, manaMax: 90,
       ability: "Ice Lance", abilityKey: "iceLance",
       abilityText: "Launches a piercing lance through the three nearest enemies.",
       colors: ["#a8edff", "#4557a5"]
     },
     shadeclaw: {
-      name: "Shadeclaw", icon: "🐾", cost: 3, element: "Umbral", role: "Assassin",
-      hp: 610, attack: 104, armor: 16, range: 1, attackSpeed: 1.08, manaMax: 85,
+      name: "Shadeclaw", icon: "🐾", cost: 4, element: "Shadow", role: "Assassin",
+      hp: 690, attack: 116, armor: 18, range: 1, attackSpeed: 1.10, manaMax: 85,
       ability: "Eclipse Cut", abilityKey: "eclipseCut",
       abilityText: "Executes the weakest enemy; the strike becomes stronger below 35% health.",
       colors: ["#8059ba", "#211d3f"]
     },
     solara: {
-      name: "Solara", icon: "☀️", cost: 4, element: "Radiant", role: "Mystic",
-      hp: 720, attack: 80, armor: 22, range: 3, attackSpeed: 0.81, manaMax: 100,
+      name: "Solara", icon: "☀️", cost: 4, element: "Light", role: "Mystic",
+      hp: 760, attack: 82, armor: 24, range: 4, attackSpeed: 0.81, manaMax: 100,
       ability: "Sunrise Chorus", abilityKey: "sunrise",
       abilityText: "Heals and shields every ally with a wave of warm light.",
       colors: ["#ffd66b", "#a55c43"]
     },
     ironroot: {
-      name: "Ironroot", icon: "🪨", cost: 4, element: "Grove", role: "Vanguard",
+      name: "Ironroot", icon: "🌳", cost: 4, element: "Earth", role: "Vanguard",
       hp: 1120, attack: 79, armor: 45, range: 1, attackSpeed: 0.62, manaMax: 100,
       ability: "Rootquake", abilityKey: "rootquake",
       abilityText: "Shakes the ground, damaging and briefly stunning nearby enemies.",
       colors: ["#8aa06d", "#42483e"]
     },
+    voidseer: {
+      name: "Voidseer", icon: "🔮", cost: 4, element: "Shadow", role: "Mystic",
+      hp: 690, attack: 88, armor: 19, range: 4, attackSpeed: 0.82, manaMax: 92,
+      ability: "Void Pulse", abilityKey: "voidPulse",
+      abilityText: "Drains life from every enemy near its target and heals itself.",
+      colors: ["#a36ed0", "#251738"]
+    },
+    starmage: {
+      name: "Starmage", icon: "🌠", cost: 4, element: "Arcane", role: "Ranger",
+      hp: 670, attack: 101, armor: 18, range: 5, attackSpeed: 0.87, manaMax: 95,
+      ability: "Starfall", abilityKey: "starfall",
+      abilityText: "Calls down four stars on the most dangerous enemies.",
+      colors: ["#b4b8ff", "#5a3d91"]
+    },
+
     voltDrake: {
-      name: "Volt Drake", icon: "🐉", cost: 4, element: "Storm", role: "Ranger",
-      hp: 760, attack: 112, armor: 20, range: 3, attackSpeed: 1.02, manaMax: 95,
+      name: "Volt Drake", icon: "🐉", cost: 5, element: "Electric", role: "Ranger",
+      hp: 850, attack: 124, armor: 23, range: 4, attackSpeed: 1.04, manaMax: 95,
       ability: "Thunder Arc", abilityKey: "thunderArc",
       abilityText: "Calls down repeated lightning on the most crowded enemy area.",
       colors: ["#ffe567", "#6251ad"]
     },
     emberWyrm: {
-      name: "Ember Wyrm", icon: "🐲", cost: 4, element: "Ember", role: "Striker",
-      hp: 850, attack: 119, armor: 24, range: 2, attackSpeed: 0.88, manaMax: 100,
+      name: "Ember Wyrm", icon: "🐲", cost: 5, element: "Fire", role: "Striker",
+      hp: 960, attack: 132, armor: 28, range: 3, attackSpeed: 0.90, manaMax: 100,
       ability: "Meteor Breath", abilityKey: "meteorBreath",
       abilityText: "Breathes fire over a wide area, dealing heavy damage and burning enemies.",
       colors: ["#ff7657", "#72244e"]
+    },
+    blizzardOwl: {
+      name: "Blizzard Owl", icon: "🦉", cost: 5, element: "Ice", role: "Mystic",
+      hp: 820, attack: 98, armor: 25, range: 5, attackSpeed: 0.84, manaMax: 105,
+      ability: "Whiteout", abilityKey: "blizzard",
+      abilityText: "Blankets the whole enemy team in damaging ice and deep slowing.",
+      colors: ["#e6f8ff", "#6078b7"]
+    },
+    sunlion: {
+      name: "Sunlion", icon: "🦁", cost: 5, element: "Light", role: "Striker",
+      hp: 980, attack: 128, armor: 31, range: 1, attackSpeed: 0.91, manaMax: 102,
+      ability: "Solar Roar", abilityKey: "solarRoar",
+      abilityText: "Damages every enemy and wraps all allies in radiant shields.",
+      colors: ["#ffd86f", "#9c573a"]
+    },
+    terraTitan: {
+      name: "Terra Titan", icon: "🗿", cost: 5, element: "Earth", role: "Vanguard",
+      hp: 1320, attack: 101, armor: 53, range: 1, attackSpeed: 0.58, manaMax: 110,
+      ability: "Earthshatter", abilityKey: "earthshatter",
+      abilityText: "Shatters the arena around itself, stunning enemies and gaining a shield.",
+      colors: ["#a79273", "#463f3b"]
+    },
+    skySerpent: {
+      name: "Sky Serpent", icon: "🐍", cost: 5, element: "Wind", role: "Assassin",
+      hp: 840, attack: 137, armor: 22, range: 1, attackSpeed: 1.13, manaMax: 98,
+      ability: "Sky Dive", abilityKey: "skyDive",
+      abilityText: "Dives onto the weakest enemy in a burst of slicing wind.",
+      colors: ["#a3efdd", "#396886"]
+    },
+    aetherion: {
+      name: "Aetherion", icon: "🌌", cost: 5, element: "Arcane", role: "Striker",
+      hp: 900, attack: 130, armor: 26, range: 4, attackSpeed: 0.92, manaMax: 108,
+      ability: "Aether Beam", abilityKey: "aetherBeam",
+      abilityText: "Fires a devastating beam through the strongest cluster of enemies.",
+      colors: ["#a8a0ff", "#3c286f"]
     }
   };
 
@@ -1399,72 +1759,42 @@
   };
 
   const TRAIT_INFO = {
-    Ember: {
-      icon: "🔥", thresholds: [2, 4],
-      effects: ["+12% attack", "+28% attack; attacks burn"]
-    },
-    Grove: {
-      icon: "🌿", thresholds: [2, 4],
-      effects: ["+12% maximum health", "+28% health and regeneration"]
-    },
-    Tide: {
-      icon: "💧", thresholds: [2, 4],
-      effects: ["+18 starting mana", "+40 starting mana"]
-    },
-    Storm: {
-      icon: "⚡", thresholds: [2, 4],
-      effects: ["+16% attack speed", "+36% attack speed"]
-    },
-    Frost: {
-      icon: "❄️", thresholds: [2, 4],
-      effects: ["Attacks slow", "18% chance to freeze"]
-    },
-    Umbral: {
-      icon: "🌙", thresholds: [2, 4],
-      effects: ["+16% critical chance", "+30% critical chance"]
-    },
-    Radiant: {
-      icon: "☀️", thresholds: [1, 2],
-      effects: ["Team starts with a small shield", "Shield is doubled"]
-    },
-    Vanguard: {
-      icon: "🛡️", thresholds: [2, 4],
-      effects: ["Vanguards gain +24 armour", "Vanguards gain +52 armour"]
-    },
-    Ranger: {
-      icon: "🏹", thresholds: [2, 4],
-      effects: ["Rangers gain +18% speed", "Rangers gain +40% speed"]
-    },
-    Mystic: {
-      icon: "🔮", thresholds: [2, 4],
-      effects: ["Team gains +18% ability power", "Team gains +40% ability power"]
-    },
-    Striker: {
-      icon: "⚔️", thresholds: [2, 4],
-      effects: ["Strikers gain +18% attack", "Strikers gain +38% attack"]
-    },
-    Assassin: {
-      icon: "🗡️", thresholds: [2, 4],
-      effects: ["Assassins gain stronger criticals", "Assassins blink and gain +25% speed"]
-    }
+    Fire: { icon: "🔥", thresholds: [2, 3, 4, 5, 6, 7, 8], effects: ["+8% Fire damage", "+15% Fire damage", "+25% Fire damage", "+40% Fire damage", "+55% Fire damage", "+72% Fire damage", "+90% Fire damage"] },
+    Water: { icon: "💧", thresholds: [2, 3, 4, 5, 6, 7, 8], effects: ["+8% Water damage", "+15% Water damage", "+25% Water damage", "+40% Water damage", "+55% Water damage", "+72% Water damage", "+90% Water damage"] },
+    Nature: { icon: "🌿", thresholds: [2, 3, 4, 5, 6, 7, 8], effects: ["+8% Nature damage", "+15% Nature damage", "+25% Nature damage", "+40% Nature damage", "+55% Nature damage", "+72% Nature damage", "+90% Nature damage"] },
+    Electric: { icon: "⚡", thresholds: [2, 3, 4, 5, 6, 7, 8], effects: ["+8% Electric damage", "+15% Electric damage", "+25% Electric damage", "+40% Electric damage", "+55% Electric damage", "+72% Electric damage", "+90% Electric damage"] },
+    Ice: { icon: "❄️", thresholds: [2, 3, 4, 5, 6, 7, 8], effects: ["+8% Ice damage", "+15% Ice damage", "+25% Ice damage", "+40% Ice damage", "+55% Ice damage", "+72% Ice damage", "+90% Ice damage"] },
+    Shadow: { icon: "🌙", thresholds: [2, 3, 4, 5, 6, 7, 8], effects: ["+8% Shadow damage", "+15% Shadow damage", "+25% Shadow damage", "+40% Shadow damage", "+55% Shadow damage", "+72% Shadow damage", "+90% Shadow damage"] },
+    Light: { icon: "☀️", thresholds: [2, 3, 4, 5, 6, 7, 8], effects: ["+8% Light damage", "+15% Light damage", "+25% Light damage", "+40% Light damage", "+55% Light damage", "+72% Light damage", "+90% Light damage"] },
+    Earth: { icon: "🪨", thresholds: [2, 3, 4, 5, 6, 7, 8], effects: ["+8% Earth damage", "+15% Earth damage", "+25% Earth damage", "+40% Earth damage", "+55% Earth damage", "+72% Earth damage", "+90% Earth damage"] },
+    Wind: { icon: "🌪️", thresholds: [2, 3, 4, 5, 6, 7, 8], effects: ["+8% Wind damage", "+15% Wind damage", "+25% Wind damage", "+40% Wind damage", "+55% Wind damage", "+72% Wind damage", "+90% Wind damage"] },
+    Arcane: { icon: "✨", thresholds: [2, 3, 4, 5, 6, 7, 8], effects: ["+8% Arcane damage", "+15% Arcane damage", "+25% Arcane damage", "+40% Arcane damage", "+55% Arcane damage", "+72% Arcane damage", "+90% Arcane damage"] },
+    Vanguard: { icon: "🛡️", thresholds: [2, 4, 6], effects: ["Vanguards gain +20 armour", "Vanguards gain +42 armour", "Vanguards gain +70 armour"] },
+    Ranger: { icon: "🏹", thresholds: [2, 4, 6], effects: ["Rangers gain +15% speed", "Rangers gain +32% speed", "Rangers gain +55% speed"] },
+    Mystic: { icon: "🔮", thresholds: [2, 4, 6], effects: ["Team gains +15% ability power", "Team gains +32% ability power", "Team gains +55% ability power"] },
+    Striker: { icon: "⚔️", thresholds: [2, 4, 6], effects: ["Strikers gain +15% attack", "Strikers gain +32% attack", "Strikers gain +55% attack"] },
+    Assassin: { icon: "🗡️", thresholds: [2, 4, 6], effects: ["Assassins gain stronger criticals", "Assassins blink and gain speed", "Assassins gain devastating criticals"] }
   };
 
   const ROUND_NAMES = [
     "Whispering Grove", "Copper Crossing", "Moonlit Marsh", "Frostfall Steps", "The Rootbound Guardian",
     "Crackle Canyon", "Glasswater Reach", "Shaded Canopy", "Tempest Terrace", "The Twin Storms",
-    "Emberglass Hollow", "Astral Garden", "Eclipse Causeway", "Crown of Winter", "The Aetherboard Champion"
+    "Emberglass Hollow", "Astral Garden", "Eclipse Causeway", "Crown of Winter", "The Inferno Wyrm",
+    "Prismatic Coast", "Obsidian March", "Howling Summit", "Runic Observatory", "The Starbound Colossus",
+    "Voidwater Rift", "Celestial Orchard", "Thunderhead Citadel", "Aetherfall Gate", "The Tenfold Convergence"
   ];
 
   const SHOP_ODDS = {
-    2: [0.72, 0.25, 0.03, 0.00],
-    3: [0.56, 0.31, 0.11, 0.02],
-    4: [0.40, 0.34, 0.21, 0.05],
-    5: [0.25, 0.32, 0.31, 0.12],
-    6: [0.12, 0.24, 0.39, 0.25]
+    3: [0.70, 0.25, 0.05, 0.00, 0.00],
+    4: [0.50, 0.32, 0.15, 0.03, 0.00],
+    5: [0.34, 0.32, 0.24, 0.09, 0.01],
+    6: [0.22, 0.28, 0.30, 0.17, 0.03],
+    7: [0.12, 0.20, 0.31, 0.27, 0.10],
+    8: [0.06, 0.14, 0.27, 0.33, 0.20]
   };
 
-  const XP_TO_NEXT = { 2: 4, 3: 8, 4: 14, 5: 22, 6: 0 };
-  const RARITY_COLORS = { 1: "#8aa1bd", 2: "#62c48d", 3: "#6d9cff", 4: "#bd7dff" };
+  const XP_TO_NEXT = { 3: 4, 4: 8, 5: 14, 6: 22, 7: 32, 8: 0 };
+  const RARITY_COLORS = { 1: "#8aa1bd", 2: "#62c48d", 3: "#6d9cff", 4: "#bd7dff", 5: "#ffb65f" };
 
   const els = {};
   let state = null;
@@ -1476,7 +1806,7 @@
 
   function cacheElements() {
     [
-      "hpValue", "goldValue", "levelValue", "levelCap", "xpBar", "roundValue",
+      "hpValue", "goldValue", "levelValue", "levelCap", "xpBar", "roundValue", "roundCap", "modeValue",
       "soundButton", "helpButton", "newGameButton", "traitList", "battleLog", "streakLabel",
       "roundTitle", "roundSubtitle", "phasePill", "phaseText", "boardWrap", "boardGrid",
       "floatingLayer", "battleTimer", "formationInfo", "autoPlaceButton", "speedButton",
@@ -1484,6 +1814,43 @@
       "enemyList", "lockButton", "xpButton", "rerollButton", "shopList", "benchList",
       "toastLayer", "modalBackdrop", "modalTitle", "modalSubtitle", "modalBody", "modalActions"
     ].forEach(id => { els[id] = document.getElementById(id); });
+  }
+
+
+  function modeName(mode = state?.mode) {
+    return mode === "endless" ? "Endless" : "25 Round";
+  }
+
+  function getRoundLimit() {
+    return state?.mode === "endless" ? Infinity : EXPEDITION_ROUNDS;
+  }
+
+  function getRoundName(round) {
+    if (ROUND_NAMES[round - 1]) return ROUND_NAMES[round - 1];
+    const cycle = Math.floor((round - 1) / ROUND_NAMES.length) + 1;
+    const base = ROUND_NAMES[(round - 1) % ROUND_NAMES.length];
+    return `${base} · Ascension ${cycle}`;
+  }
+
+  function typeDamageBonus(count) {
+    let bonus = 0;
+    for (const tier of TYPE_DAMAGE_TIERS) {
+      if (count >= tier.count) bonus = tier.bonus;
+    }
+    return bonus;
+  }
+
+  function centeredColumns() {
+    const order = [];
+    const left = Math.floor((BOARD_COLS - 1) / 2);
+    const right = Math.ceil((BOARD_COLS - 1) / 2);
+    for (let offset = 0; order.length < BOARD_COLS; offset++) {
+      const a = left - offset;
+      const b = right + offset;
+      if (a >= 0 && !order.includes(a)) order.push(a);
+      if (b < BOARD_COLS && !order.includes(b)) order.push(b);
+    }
+    return order;
   }
 
   function uid(prefix = "u") {
@@ -1512,14 +1879,15 @@
     };
   }
 
-  function createFreshState() {
-    const fresh = {
-      version: 1,
-      hp: 50,
-      gold: 8,
-      level: 2,
+  function createFreshState(mode = "expedition") {
+    return {
+      version: 2,
+      hp: 60,
+      gold: 10,
+      level: 3,
       xp: 0,
       round: 1,
+      mode: mode === "endless" ? "endless" : "expedition",
       phase: "planning",
       board: Array(BOARD_SIZE).fill(null),
       bench: Array(BENCH_SIZE).fill(null),
@@ -1533,26 +1901,21 @@
       speed: 1,
       sound: true,
       battleLog: [
-        { text: "Your first two spirits are ready. Scout the enemy and adjust their positions.", type: "good" },
-        { text: "Tip: three matching copies automatically combine into a stronger star level.", type: "gold" }
+        { text: "Your board is empty. Draft three free spirits to build your opening team.", type: "good" },
+        { text: "Type Bond: 5 spirits of one type give those five spirits +40% damage.", type: "gold" }
       ],
       enemyPreview: [],
-      tutorialSeen: false
+      tutorialSeen: false,
+      draftComplete: false,
+      draftPicksRemaining: 3,
+      draftHistory: []
     };
-
-    const cinder = makeUnit("cinderCub");
-    const ripple = makeUnit("ripplefin");
-    fresh.units[cinder.id] = cinder;
-    fresh.units[ripple.id] = ripple;
-    fresh.board[(4 * BOARD_COLS) + 2] = cinder.id;
-    fresh.board[(5 * BOARD_COLS) + 3] = ripple.id;
-
-    return fresh;
   }
 
   function normalizeLoadedState(raw) {
-    if (!raw || typeof raw !== "object" || raw.version !== 1) return null;
+    if (!raw || typeof raw !== "object" || raw.version !== 2) return null;
     const clean = { ...raw };
+    clean.mode = clean.mode === "endless" ? "endless" : "expedition";
     clean.phase = "planning";
     clean.board = Array.isArray(clean.board) ? clean.board.slice(0, BOARD_SIZE) : Array(BOARD_SIZE).fill(null);
     clean.bench = Array.isArray(clean.bench) ? clean.bench.slice(0, BENCH_SIZE) : Array(BENCH_SIZE).fill(null);
@@ -1566,8 +1929,11 @@
     clean.inspectedEnemy = null;
     clean.speed = clean.speed === 2 ? 2 : 1;
     clean.sound = clean.sound !== false;
-    clean.battleLog = Array.isArray(clean.battleLog) ? clean.battleLog.slice(-35) : [];
+    clean.battleLog = Array.isArray(clean.battleLog) ? clean.battleLog.slice(-40) : [];
     clean.enemyPreview = [];
+    clean.draftComplete = Boolean(clean.draftComplete);
+    clean.draftPicksRemaining = clamp(Number(clean.draftPicksRemaining) || 0, 0, 3);
+    clean.draftHistory = Array.isArray(clean.draftHistory) ? clean.draftHistory.filter(key => UNIT_DEFS[key]).slice(0, 3) : [];
 
     for (const [id, unit] of Object.entries(clean.units)) {
       if (!unit || !UNIT_DEFS[unit.defKey]) {
@@ -1582,12 +1948,13 @@
       unit.items = Array.isArray(unit.items) ? unit.items.filter(k => ITEM_DEFS[k]).slice(0, 2) : [];
     }
 
-    clean.hp = clamp(Number(clean.hp) || 50, 1, 50);
-    clean.gold = clamp(Number(clean.gold) || 0, 0, 999);
-    clean.level = clamp(Number(clean.level) || 2, 2, MAX_LEVEL);
-    clean.xp = clamp(Number(clean.xp) || 0, 0, 999);
-    clean.round = clamp(Number(clean.round) || 1, 1, FINAL_ROUND);
-    clean.streak = clamp(Number(clean.streak) || 0, -99, 99);
+    clean.hp = clamp(Number(clean.hp) || 60, 1, 60);
+    clean.gold = clamp(Number(clean.gold) || 0, 0, 9999);
+    clean.level = clamp(Number(clean.level) || 3, 3, MAX_LEVEL);
+    clean.xp = clamp(Number(clean.xp) || 0, 0, 9999);
+    const maxRound = clean.mode === "endless" ? 9999 : EXPEDITION_ROUNDS;
+    clean.round = clamp(Number(clean.round) || 1, 1, maxRound);
+    clean.streak = clamp(Number(clean.streak) || 0, -999, 999);
     clean.shopLocked = Boolean(clean.shopLocked);
     clean.tutorialSeen = Boolean(clean.tutorialSeen);
     return clean;
@@ -1901,7 +2268,7 @@
 
     if (source.area === "bench") {
       if (!targetId && deployedCount() >= state.level) {
-        toast(`Your level ${state.level} team is full. Buy XP to deploy more spirits.`, "bad");
+        toast(`Your level ${state.level} team is full. Buy XP to reach the eight-spirit cap.`, "bad");
         playSfx("error");
         return;
       }
@@ -2017,8 +2384,10 @@
 
   function preferredPlayerCells() {
     const order = [];
-    const columns = [2, 3, 1, 4, 0, 5];
-    for (const row of [3, 5, 4]) {
+    const columns = centeredColumns();
+    const rows = [...new Set([PLAYER_START_ROW, BOARD_ROWS - 1, BOARD_ROWS - 2, PLAYER_START_ROW + 1])]
+      .filter(row => row >= PLAYER_START_ROW && row < BOARD_ROWS);
+    for (const row of rows) {
       for (const col of columns) order.push(row * BOARD_COLS + col);
     }
     return order;
@@ -2039,42 +2408,56 @@
   }
 
   function generateEnemy(round) {
-    const rng = mulberry32(9361 + round * 7919);
+    const modeSalt = state?.mode === "endless" ? 173 : 0;
+    const rng = mulberry32(9361 + round * 7919 + modeSalt);
     const bossRound = round % 5 === 0;
-    const cap = Math.min(6, 2 + Math.floor((round - 1) / 2));
-    const maxCost = round <= 2 ? 1 : round <= 5 ? 2 : round <= 9 ? 3 : 4;
-    let budget = 1.8 + round * 1.65 + (bossRound ? 2.3 : 0);
-    const elements = ["Ember", "Grove", "Tide", "Storm", "Frost", "Umbral"];
-    const primary = elements[Math.floor(rng() * elements.length)];
+    const cap = Math.min(8, 2 + Math.floor((round - 1) / 2));
+    const maxCost = round <= 2 ? 1 : round <= 5 ? 2 : round <= 9 ? 3 : round <= 14 ? 4 : 5;
+    let budget = 2.2 + round * 1.85 + (bossRound ? 4.2 : 0);
+    const primary = ELEMENT_TYPES[Math.floor(rng() * ELEMENT_TYPES.length)];
     const entries = [];
 
-    if (round === 5) {
-      entries.push({ defKey: "ironroot", star: 1, boss: true });
-      entries.push({ defKey: "bloombeak", star: 1 });
-      entries.push({ defKey: "thornling", star: 1 });
-    } else if (round === 10) {
-      entries.push({ defKey: "voltDrake", star: 2, boss: true });
-      entries.push({ defKey: "tempestral", star: 1 });
-      entries.push({ defKey: "sparkit", star: 2 });
-      entries.push({ defKey: "frosthorn", star: 1 });
-    } else if (round === 15) {
-      entries.push({ defKey: "emberWyrm", star: 2, boss: true });
-      entries.push({ defKey: "solara", star: 2 });
-      entries.push({ defKey: "ironroot", star: 2 });
-      entries.push({ defKey: "glacielle", star: 2 });
-      entries.push({ defKey: "shadeclaw", star: 2 });
-      entries.push({ defKey: "voltDrake", star: 2 });
+    const bossFormations = {
+      5: [
+        { defKey: "ironroot", star: 1, boss: true }, { defKey: "thornling", star: 2 },
+        { defKey: "pebblit", star: 2 }, { defKey: "rootfox", star: 1 }
+      ],
+      10: [
+        { defKey: "voltDrake", star: 1, boss: true }, { defKey: "arcwhale", star: 2 },
+        { defKey: "sparkit", star: 2 }, { defKey: "zapfin", star: 2 }, { defKey: "cloudram", star: 2 }
+      ],
+      15: [
+        { defKey: "emberWyrm", star: 2, boss: true }, { defKey: "magmole", star: 2 },
+        { defKey: "ashwing", star: 2 }, { defKey: "cinderCub", star: 3 },
+        { defKey: "solara", star: 2 }, { defKey: "sunlion", star: 1 }
+      ],
+      20: [
+        { defKey: "aetherion", star: 2, boss: true }, { defKey: "starmage", star: 2 },
+        { defKey: "runebear", star: 3 }, { defKey: "runelet", star: 3 },
+        { defKey: "voidseer", star: 2 }, { defKey: "blizzardOwl", star: 2 },
+        { defKey: "prismtail", star: 3 }
+      ],
+      25: [
+        { defKey: "terraTitan", star: 3, boss: true }, { defKey: "emberWyrm", star: 2 },
+        { defKey: "coralSage", star: 2 }, { defKey: "voltDrake", star: 2 },
+        { defKey: "blizzardOwl", star: 2 }, { defKey: "skySerpent", star: 2 },
+        { defKey: "sunlion", star: 2 }, { defKey: "aetherion", star: 2 }
+      ]
+    };
+
+    if (bossFormations[round]) {
+      entries.push(...bossFormations[round].map(entry => ({ ...entry })));
     } else {
       while (entries.length < cap && budget >= 0.9) {
         const candidates = Object.entries(UNIT_DEFS)
           .filter(([, def]) => def.cost <= maxCost)
           .map(([key, def]) => ({
             value: key,
-            weight: (def.element === primary ? 3.0 : 1.0) * (def.cost <= budget ? 1 : 0.05)
+            weight: (def.element === primary ? 3.4 : 1.0) * (def.cost <= budget ? 1 : 0.03)
           }));
         let defKey = weightedPick(candidates, rng);
         let def = UNIT_DEFS[defKey];
-        if (def.cost > budget) {
+        if (!def || def.cost > budget) {
           const affordable = candidates.filter(entry => UNIT_DEFS[entry.value].cost <= budget);
           if (!affordable.length) break;
           defKey = weightedPick(affordable, rng);
@@ -2082,17 +2465,28 @@
         }
 
         let star = 1;
-        const twoStarChance = clamp((round - 4) * 0.055, 0, 0.48);
-        if (round >= 5 && rng() < twoStarChance && budget >= def.cost * 2.25) star = 2;
-        entries.push({ defKey, star });
-        budget -= def.cost * (star === 2 ? 2.25 : 1);
+        const twoStarChance = clamp((round - 3) * 0.055, 0, 0.72);
+        const threeStarChance = clamp((round - 17) * 0.028, 0, 0.34);
+        if (round >= 18 && rng() < threeStarChance && budget >= def.cost * 5.8) star = 3;
+        else if (round >= 5 && rng() < twoStarChance && budget >= def.cost * 2.25) star = 2;
+        entries.push({ defKey, star, boss: bossRound && entries.length === 0 });
+        budget -= def.cost * (star === 3 ? 5.8 : star === 2 ? 2.25 : 1);
       }
     }
 
-    const front = [14, 15, 13, 16, 12, 17];
-    const back = [2, 3, 1, 4, 0, 5, 8, 9, 7, 10, 6, 11];
+    const columns = centeredColumns();
+    const front = [];
+    const back = [];
+    for (let row = PLAYER_START_ROW - 1; row >= 0; row--) {
+      for (const col of columns) front.push(row * BOARD_COLS + col);
+    }
+    for (let row = 0; row < PLAYER_START_ROW; row++) {
+      for (const col of columns) back.push(row * BOARD_COLS + col);
+    }
+
     const used = new Set();
-    entries.forEach((entry, idx) => {
+    const endlessScale = state?.mode === "endless" ? 1 + Math.max(0, round - EXPEDITION_ROUNDS) * 0.025 : 1;
+    entries.slice(0, 8).forEach((entry, idx) => {
       const def = UNIT_DEFS[entry.defKey];
       const pool = def.range <= 1 || def.role === "Vanguard" ? front : back;
       let pos = pool.find(p => !used.has(p));
@@ -2101,14 +2495,19 @@
       entry.pos = pos;
       entry.awakening = entry.star >= 2 ? (rng() < 0.5 ? "force" : "guard") : null;
       entry.items = [];
-      if (round >= 8 && rng() < 0.25) {
+      entry.scale = endlessScale * (entry.boss ? 1.08 : 1);
+      if (round >= 8 && rng() < Math.min(0.62, 0.18 + round * 0.012)) {
+        const itemKeys = Object.keys(ITEM_DEFS);
+        entry.items.push(itemKeys[Math.floor(rng() * itemKeys.length)]);
+      }
+      if (round >= 22 && rng() < 0.22 && entry.items.length < 2) {
         const itemKeys = Object.keys(ITEM_DEFS);
         entry.items.push(itemKeys[Math.floor(rng() * itemKeys.length)]);
       }
       used.add(pos);
     });
 
-    return entries;
+    return entries.slice(0, 8);
   }
 
   function prepareEnemy() {
@@ -2149,16 +2548,17 @@
   }
 
   function getTraitCountsFromUnitData(units) {
-    const uniqueDefs = new Set();
+    const uniqueRoleDefs = new Set();
     const counts = {};
     for (const unit of units) {
       const defKey = unit.defKey;
-      if (!defKey || uniqueDefs.has(defKey)) continue;
-      uniqueDefs.add(defKey);
       const def = UNIT_DEFS[defKey];
       if (!def) continue;
       counts[def.element] = (counts[def.element] || 0) + 1;
-      counts[def.role] = (counts[def.role] || 0) + 1;
+      if (!uniqueRoleDefs.has(defKey)) {
+        uniqueRoleDefs.add(defKey);
+        counts[def.role] = (counts[def.role] || 0) + 1;
+      }
     }
     return counts;
   }
@@ -2210,6 +2610,8 @@
     els.levelValue.textContent = state.level;
     els.levelCap.textContent = `/ ${MAX_LEVEL}`;
     els.roundValue.textContent = state.round;
+    els.roundCap.textContent = state.mode === "endless" ? "/ ∞" : `/ ${EXPEDITION_ROUNDS}`;
+    els.modeValue.textContent = modeName();
     const need = currentXpNeed();
     els.xpBar.style.width = state.level >= MAX_LEVEL ? "100%" : `${clamp((state.xp / need) * 100, 0, 100)}%`;
     els.soundButton.textContent = state.sound ? "🔊" : "🔇";
@@ -2217,7 +2619,7 @@
   }
 
   function renderHeader() {
-    const roundName = ROUND_NAMES[state.round - 1] || "Aetherboard";
+    const roundName = getRoundName(state.round);
     els.roundTitle.textContent = `Round ${state.round} · ${roundName}`;
 
     const phaseTextMap = {
@@ -2230,14 +2632,20 @@
     els.phasePill.className = `phase-pill ${state.phase}`;
 
     if (state.phase === "battle") {
-      els.roundSubtitle.textContent = "Your spirits are fighting automatically. Positioning and synergies decide the outcome.";
+      els.roundSubtitle.textContent = "Your eight-space formation fights automatically. Positioning and type bonds decide the outcome.";
     } else if (state.phase === "planning") {
       const boss = state.round % 5 === 0;
-      els.roundSubtitle.textContent = boss
-        ? "Boss round: strengthen your formation before entering the arena."
-        : "Arrange your spirits, improve the shop, then begin the battle.";
+      if (!state.draftComplete) {
+        els.roundSubtitle.textContent = "Draft three free spirits before entering the arena.";
+      } else if (boss) {
+        els.roundSubtitle.textContent = "Boss round: strengthen your formation before entering the arena.";
+      } else if (state.mode === "endless") {
+        els.roundSubtitle.textContent = "Endless mode grows stronger forever. Build toward a full eight-spirit type core.";
+      } else {
+        els.roundSubtitle.textContent = "Arrange your spirits, improve the shop, then begin the battle.";
+      }
     } else if (state.phase === "victory") {
-      els.roundSubtitle.textContent = "The Aetherboard recognizes its new champion.";
+      els.roundSubtitle.textContent = "You survived all 25 rounds and conquered the Aetherboard.";
     } else {
       els.roundSubtitle.textContent = "Your run has ended, but every formation teaches a new strategy.";
     }
@@ -2250,7 +2658,7 @@
       const row = Math.floor(index / BOARD_COLS);
       const cell = document.createElement("button");
       cell.type = "button";
-      cell.className = `board-cell ${row < PLAYER_START_ROW ? "enemy-zone" : "player-zone"}${row === 2 ? " center-line" : ""}`;
+      cell.className = `board-cell ${row < PLAYER_START_ROW ? "enemy-zone" : "player-zone"}${row === PLAYER_START_ROW - 1 ? " center-line" : ""}`;
       cell.dataset.index = String(index);
       cell.setAttribute("role", "gridcell");
       cell.setAttribute("aria-label", `Board row ${row + 1}, column ${(index % BOARD_COLS) + 1}`);
@@ -2441,7 +2849,7 @@
       });
 
     if (!present.length) {
-      els.traitList.innerHTML = `<div class="selected-empty">Deploy spirits to activate elemental and role synergies.</div>`;
+      els.traitList.innerHTML = `<div class="selected-empty">Deploy spirits to activate Type Bonds and role synergies.</div>`;
       return;
     }
 
@@ -2500,6 +2908,20 @@
     }
   }
 
+  function typeBondDetailHtml(def, enemy = false) {
+    const formation = enemy && state.inspectedEnemy
+      ? (state.enemyPreview || [])
+      : getPlayerFormationUnits();
+    const counts = getTraitCountsFromUnitData(formation);
+    const count = counts[def.element] || 0;
+    const bonus = typeDamageBonus(count);
+    const info = TRAIT_INFO[def.element];
+    const message = bonus > 0
+      ? `${count} deployed ${def.element} spirits → +${Math.round(bonus * 100)}% damage for every ${def.element} spirit.`
+      : `${count} deployed ${def.element} spirit${count === 1 ? "" : "s"} · deploy 2 for +8% type damage.`;
+    return `<div class="type-bond-note">${info.icon} <strong>${def.element} Type Bond:</strong> ${message}</div>`;
+  }
+
   function unitDetailHtml(unit, enemy = false) {
     const def = UNIT_DEFS[unit.defKey];
     const stats = getUnitPreviewStats({ ...unit, items: unit.items || [] });
@@ -2542,6 +2964,7 @@
         <div class="stat-box"><span>Mana</span><strong>${def.manaMax}</strong></div>
       </div>
       <div class="ability-box"><strong>${def.ability}</strong><p>${def.abilityText}</p></div>
+      ${typeBondDetailHtml(def, enemy)}
       <div class="awakening-note">${awakeningText}</div>
       ${itemsHtml}
     `;
@@ -2563,7 +2986,7 @@
   function renderInventory() {
     els.inventoryList.innerHTML = "";
     if (!state.inventory.length) {
-      els.inventoryList.innerHTML = `<div style="grid-column:1/-1;color:var(--muted);font-size:9px;line-height:1.45">Win rounds 3, 6, 9, and 12 to choose items.</div>`;
+      els.inventoryList.innerHTML = `<div style="grid-column:1/-1;color:var(--muted);font-size:9px;line-height:1.45">Win every third round to choose an item.</div>`;
       return;
     }
     state.inventory.forEach((itemKey, index) => {
@@ -2648,11 +3071,11 @@
   function addLog(text, type = "") {
     state.battleLog = Array.isArray(state.battleLog) ? state.battleLog : [];
     state.battleLog.push({ text, type });
-    if (state.battleLog.length > 35) state.battleLog.shift();
+    if (state.battleLog.length > 40) state.battleLog.shift();
   }
 
   function renderControls() {
-    const planning = state.phase === "planning";
+    const planning = state.phase === "planning" && state.draftComplete;
     const battling = state.phase === "battle";
     const deployed = deployedCount();
     els.formationInfo.innerHTML = `<strong>${deployed} / ${state.level}</strong> spirits deployed · ${planning ? "Click a unit, then a space." : "Formation is locked during battle."}`;
@@ -2712,13 +3135,15 @@
   function showHelp() {
     openModal({
       title: "How to play",
-      subtitle: "Aetherboard is a single-player auto-battler. Your decisions happen before the fight; your spirits act on their own once battle begins.",
+      subtitle: "Aetherboard is a single-player auto-battler. Draft and position your team; the spirits act on their own after battle begins.",
       body: `
         <div class="tutorial-grid">
-          <div class="tutorial-step"><div class="big">🛒</div><strong>1. Build your squad</strong><p>Buy spirits from the shop. Reroll for new choices or lock a shop to keep it for the next round.</p></div>
-          <div class="tutorial-step"><div class="big">♟️</div><strong>2. Choose positions</strong><p>Click a spirit, then click a board or bench space. Put tough Vanguards in front and ranged units behind them.</p></div>
-          <div class="tutorial-step"><div class="big">★★</div><strong>3. Combine copies</strong><p>Three identical one-star spirits become a two-star spirit. At two stars, choose a powerful Awakening.</p></div>
-          <div class="tutorial-step"><div class="big">⚔️</div><strong>4. Battle automatically</strong><p>Abilities charge with mana. Active elements and roles give your entire formation useful bonuses.</p></div>
+          <div class="tutorial-step"><div class="big">🎴</div><strong>1. Draft from nothing</strong><p>Every new run begins with an empty board. Choose three free starter spirits, then buy more from the rotating shop.</p></div>
+          <div class="tutorial-step"><div class="big">♟️</div><strong>2. Field up to eight</strong><p>Click a spirit, then a board or bench space. Put tough Vanguards in front and ranged units behind them.</p></div>
+          <div class="tutorial-step"><div class="big">🔥</div><strong>3. Build Type Bonds</strong><p>All deployed copies count. At 2/3/4/5/6/7/8 of one type, those units gain +8/+15/+25/+40/+55/+72/+90% damage.</p></div>
+          <div class="tutorial-step"><div class="big">★★</div><strong>4. Combine and awaken</strong><p>Three identical one-star spirits become a two-star spirit. At two stars, choose a permanent Awakening.</p></div>
+          <div class="tutorial-step"><div class="big">🏁</div><strong>25-Round mode</strong><p>Survive 25 escalating rounds and defeat the Tenfold Convergence.</p></div>
+          <div class="tutorial-step"><div class="big">∞</div><strong>Endless mode</strong><p>There is no final round. Enemy stars, items, and scaling keep increasing until your heart reaches zero.</p></div>
         </div>
         <div class="awakening-note" style="margin-top:10px">Keyboard: <span class="kbd">R</span> rerolls, <span class="kbd">E</span> buys XP, <span class="kbd">Space</span> begins battle, and <span class="kbd">Esc</span> clears your selection.</div>
       `,
@@ -2727,30 +3152,134 @@
   }
 
   function confirmNewGame() {
+    showModeSelect(false);
+  }
+
+  function showModeSelect(locked = false) {
+    const body = document.createElement("div");
+    body.className = "choice-grid mode-grid";
+    body.innerHTML = `
+      <button class="choice-card" data-mode="expedition">
+        <span class="choice-icon">🏆</span>
+        <span class="choice-name">25-Round Expedition</span>
+        <span class="choice-desc">A complete run with five boss fights and a final victory at round 25.</span>
+        <span class="mode-badge">Finite · Victory possible</span>
+      </button>
+      <button class="choice-card" data-mode="endless">
+        <span class="choice-icon">∞</span>
+        <span class="choice-name">Endless Ascension</span>
+        <span class="choice-desc">No final round. Enemies continue scaling after round 25 until your team falls.</span>
+        <span class="mode-badge">Infinite · High-score survival</span>
+      </button>
+    `;
     openModal({
-      title: "Start a new run?",
-      subtitle: "This will replace your current saved formation and return you to round 1.",
-      body: `<div class="result-banner"><div class="result-icon">↻</div><h3>Fresh Aetherboard</h3><p>Your current run cannot be restored after starting over.</p></div>`,
-      actions: [
-        { label: "Keep playing", className: "small-button", onClick: () => closeModal(true) },
-        { label: "Start new run", className: "danger-button", onClick: resetGame }
-      ]
+      title: "Choose your game mode",
+      subtitle: locked
+        ? "Every run starts with an empty board and a three-pick starter draft."
+        : "Choosing a mode starts a fresh run and replaces the current saved run.",
+      body,
+      actions: locked ? [] : [{ label: "Keep current run", className: "small-button", onClick: () => closeModal(true) }],
+      locked
+    });
+    body.querySelectorAll("[data-mode]").forEach(button => {
+      button.addEventListener("click", () => startNewRun(button.dataset.mode));
     });
   }
 
-  function resetGame() {
+  function startNewRun(mode = "expedition") {
     if (combat?.raf) cancelAnimationFrame(combat.raf);
     combat = null;
     awakeningQueue = [];
     closeModal(true);
-    state = createFreshState();
+    state = createFreshState(mode);
+    state.shop = Array.from({ length: 5 }, () => rollShopUnit(state.level));
     prepareEnemy();
-    refreshShop({ free: true, force: true });
-    state.tutorialSeen = true;
-    saveGame();
     render();
-    toast("New run started.", "good");
+    saveGame();
     playSfx("start");
+    showStarterDraft();
+  }
+
+  function resetGame(mode = state?.mode || "expedition") {
+    startNewRun(mode);
+  }
+
+  function draftCandidates() {
+    const eligible = Object.keys(UNIT_DEFS).filter(key => UNIT_DEFS[key].cost <= 2);
+    const alreadyDrafted = new Set(state.draftHistory || []);
+    const freshEligible = eligible.filter(key => !alreadyDrafted.has(key));
+    const sourcePool = freshEligible.length >= 4 ? freshEligible : eligible;
+    const picked = [];
+    const historyTypes = (state.draftHistory || []).map(key => UNIT_DEFS[key]?.element).filter(Boolean);
+    if (historyTypes.length) {
+      const focusType = historyTypes.at(-1);
+      const matching = sourcePool.filter(key => UNIT_DEFS[key].element === focusType);
+      if (matching.length) picked.push(matching[Math.floor(Math.random() * matching.length)]);
+    }
+    const shuffled = [...sourcePool].sort(() => Math.random() - 0.5);
+    for (const key of shuffled) {
+      if (!picked.includes(key)) picked.push(key);
+      if (picked.length >= 4) break;
+    }
+    return picked.slice(0, 4);
+  }
+
+  function showStarterDraft() {
+    if (!state || state.draftComplete) return;
+    const candidates = draftCandidates();
+    const pickedCount = 3 - state.draftPicksRemaining;
+    const body = document.createElement("div");
+    body.innerHTML = `
+      <div class="draft-progress">
+        ${Array.from({ length: 3 }, (_, index) => `<span class="draft-dot ${index < pickedCount ? "filled" : ""}"></span>`).join("")}
+      </div>
+      <div class="choice-grid">
+        ${candidates.map(key => {
+          const def = UNIT_DEFS[key];
+          return `
+            <button class="choice-card" data-draft-key="${key}">
+              <span class="choice-icon">${def.icon}</span>
+              <span class="choice-name">${def.name}</span>
+              <span class="choice-desc">${TRAIT_INFO[def.element].icon} ${def.element} · ${TRAIT_INFO[def.role].icon} ${def.role}<br>${def.abilityText}</span>
+              <span class="draft-card-meta">FREE STARTER · normally ${def.cost} gold</span>
+            </button>
+          `;
+        }).join("")}
+      </div>
+    `;
+    openModal({
+      title: `Starter Draft · Pick ${pickedCount + 1} of 3`,
+      subtitle: "Your board begins empty. Choose one spirit; later picks may offer another spirit of the same type so you can begin a Type Bond.",
+      body,
+      locked: true
+    });
+    body.querySelectorAll("[data-draft-key]").forEach(button => {
+      button.addEventListener("click", () => chooseDraftSpirit(button.dataset.draftKey));
+    });
+  }
+
+  function chooseDraftSpirit(defKey) {
+    if (!state || state.draftComplete || !UNIT_DEFS[defKey]) return;
+    const benchIndex = state.bench.indexOf(null);
+    if (benchIndex < 0) return;
+    const unit = makeUnit(defKey);
+    state.units[unit.id] = unit;
+    state.bench[benchIndex] = unit.id;
+    state.draftHistory.push(defKey);
+    state.draftPicksRemaining = Math.max(0, state.draftPicksRemaining - 1);
+    addLog(`${UNIT_DEFS[defKey].name} was selected in the starter draft.`, "gold");
+    playSfx("buy");
+    if (state.draftPicksRemaining > 0) {
+      showStarterDraft();
+      return;
+    }
+    state.draftComplete = true;
+    closeModal(true);
+    render();
+    autoPlace();
+    saveGame();
+    toast("Opening team drafted. Rearrange your formation, then begin round 1.", "good");
+    if (!state.tutorialSeen) setTimeout(showHelp, 450);
   }
 
   function processAwakeningQueue() {
@@ -2805,82 +3334,53 @@
 
   function calculateTeamBonuses(unitData) {
     const counts = getTraitCountsFromUnitData(unitData);
+    const elementDamage = {};
+    ELEMENT_TYPES.forEach(type => {
+      elementDamage[type] = 1 + typeDamageBonus(counts[type] || 0);
+    });
+
     const bonuses = {
       counts,
-      attackAll: 1,
-      hpAll: 1,
-      speedAll: 1,
-      startMana: 0,
+      elementDamage,
       abilityAll: 1,
-      critAll: 0,
-      regenAll: 0,
-      radiantShield: 0,
       vanguardArmor: 0,
       rangerSpeed: 1,
       strikerAttack: 1,
       assassinCritMult: 1.5,
       assassinSpeed: 1,
-      assassinBlink: false,
-      frostSlow: false,
-      frostFreezeChance: 0,
-      emberBurn: false
+      assassinBlink: false
     };
 
-    const ember = traitTier("Ember", counts.Ember || 0);
-    if (ember === 1) bonuses.attackAll *= 1.12;
-    if (ember >= 2) {
-      bonuses.attackAll *= 1.28;
-      bonuses.emberBurn = true;
-    }
-
-    const grove = traitTier("Grove", counts.Grove || 0);
-    if (grove === 1) bonuses.hpAll *= 1.12;
-    if (grove >= 2) {
-      bonuses.hpAll *= 1.28;
-      bonuses.regenAll += 7;
-    }
-
-    const tide = traitTier("Tide", counts.Tide || 0);
-    if (tide === 1) bonuses.startMana += 18;
-    if (tide >= 2) bonuses.startMana += 40;
-
-    const storm = traitTier("Storm", counts.Storm || 0);
-    if (storm === 1) bonuses.speedAll *= 1.16;
-    if (storm >= 2) bonuses.speedAll *= 1.36;
-
-    const frost = traitTier("Frost", counts.Frost || 0);
-    if (frost >= 1) bonuses.frostSlow = true;
-    if (frost >= 2) bonuses.frostFreezeChance = 0.18;
-
-    const umbral = traitTier("Umbral", counts.Umbral || 0);
-    if (umbral === 1) bonuses.critAll += 0.16;
-    if (umbral >= 2) bonuses.critAll += 0.30;
-
-    const radiant = traitTier("Radiant", counts.Radiant || 0);
-    if (radiant === 1) bonuses.radiantShield = 70;
-    if (radiant >= 2) bonuses.radiantShield = 145;
-
     const vanguard = traitTier("Vanguard", counts.Vanguard || 0);
-    if (vanguard === 1) bonuses.vanguardArmor = 24;
-    if (vanguard >= 2) bonuses.vanguardArmor = 52;
+    if (vanguard === 1) bonuses.vanguardArmor = 20;
+    if (vanguard === 2) bonuses.vanguardArmor = 42;
+    if (vanguard >= 3) bonuses.vanguardArmor = 70;
 
     const ranger = traitTier("Ranger", counts.Ranger || 0);
-    if (ranger === 1) bonuses.rangerSpeed = 1.18;
-    if (ranger >= 2) bonuses.rangerSpeed = 1.40;
+    if (ranger === 1) bonuses.rangerSpeed = 1.15;
+    if (ranger === 2) bonuses.rangerSpeed = 1.32;
+    if (ranger >= 3) bonuses.rangerSpeed = 1.55;
 
     const mystic = traitTier("Mystic", counts.Mystic || 0);
-    if (mystic === 1) bonuses.abilityAll = 1.18;
-    if (mystic >= 2) bonuses.abilityAll = 1.40;
+    if (mystic === 1) bonuses.abilityAll = 1.15;
+    if (mystic === 2) bonuses.abilityAll = 1.32;
+    if (mystic >= 3) bonuses.abilityAll = 1.55;
 
     const striker = traitTier("Striker", counts.Striker || 0);
-    if (striker === 1) bonuses.strikerAttack = 1.18;
-    if (striker >= 2) bonuses.strikerAttack = 1.38;
+    if (striker === 1) bonuses.strikerAttack = 1.15;
+    if (striker === 2) bonuses.strikerAttack = 1.32;
+    if (striker >= 3) bonuses.strikerAttack = 1.55;
 
     const assassin = traitTier("Assassin", counts.Assassin || 0);
-    if (assassin === 1) bonuses.assassinCritMult = 1.9;
-    if (assassin >= 2) {
+    if (assassin === 1) bonuses.assassinCritMult = 1.85;
+    if (assassin === 2) {
       bonuses.assassinCritMult = 2.15;
       bonuses.assassinSpeed = 1.25;
+      bonuses.assassinBlink = true;
+    }
+    if (assassin >= 3) {
+      bonuses.assassinCritMult = 2.45;
+      bonuses.assassinSpeed = 1.42;
       bonuses.assassinBlink = true;
     }
 
@@ -2895,9 +3395,9 @@
     let armor = def.armor;
     let attackSpeed = def.attackSpeed;
     let abilityPower = (1 + (star - 1) * 0.22) * bonuses.abilityAll;
-    let startMana = bonuses.startMana;
-    let regenPerSecond = bonuses.regenAll;
-    let critChance = 0.05 + bonuses.critAll;
+    let startMana = 0;
+    let regenPerSecond = 0;
+    let critChance = 0.05;
     let critMult = 1.5;
     let manaMax = def.manaMax;
     let echoAvailable = false;
@@ -2925,10 +3425,6 @@
       startMana += 10;
     }
 
-    maxHp *= bonuses.hpAll;
-    attack *= bonuses.attackAll;
-    attackSpeed *= bonuses.speedAll;
-
     if (def.role === "Vanguard") armor += bonuses.vanguardArmor;
     if (def.role === "Ranger") attackSpeed *= bonuses.rangerSpeed;
     if (def.role === "Striker") attack *= bonuses.strikerAttack;
@@ -2941,6 +3437,11 @@
       maxHp *= 1.24;
       attack *= 1.12;
       armor += 8;
+    }
+    if (source.scale && source.scale > 1) {
+      maxHp *= source.scale;
+      attack *= 1 + (source.scale - 1) * 0.82;
+      armor += Math.round((source.scale - 1) * 10);
     }
 
     const x = position % BOARD_COLS;
@@ -2970,6 +3471,7 @@
       regenPerSecond,
       critChance: clamp(critChance, 0, 0.78),
       critMult,
+      damageMultiplier: bonuses.elementDamage[def.element] || 1,
       bonuses,
       alive: true,
       targetId: null,
@@ -3019,7 +3521,7 @@
       raf: null,
       floating: [],
       ended: false,
-      maxTime: 35000,
+      maxTime: 45000,
       lastSoundAt: -999,
       resultTimeout: null
     };
@@ -3033,16 +3535,6 @@
   }
 
   function applyBattleStartEffects() {
-    const teams = ["player", "enemy"];
-    for (const team of teams) {
-      const teamUnits = livingUnits(team);
-      const bonuses = teamUnits[0]?.bonuses;
-      if (!bonuses) continue;
-      if (bonuses.radiantShield > 0) {
-        teamUnits.forEach(unit => addShield(unit, bonuses.radiantShield * unit.abilityPower, false));
-      }
-    }
-
     const blinkers = combat.units.filter(unit => unit.alive && unit.bonuses.assassinBlink && UNIT_DEFS[unit.defKey].role === "Assassin");
     for (const unit of blinkers) {
       const enemies = livingUnits(unit.team === "player" ? "enemy" : "player");
@@ -3208,12 +3700,6 @@
     attacker.actionClass = "attack";
     attacker.actionUntil = combat.elapsed + 260;
 
-    if (attacker.bonuses.emberBurn) applyBurn(target, attacker.attack * 0.12, 2600);
-    if (attacker.bonuses.frostSlow) target.slowUntil = Math.max(target.slowUntil, combat.elapsed + 1300);
-    if (attacker.bonuses.frostFreezeChance > 0 && Math.random() < attacker.bonuses.frostFreezeChance) {
-      target.stunnedUntil = Math.max(target.stunnedUntil, combat.elapsed + 650);
-      addFloating(target, "❄ Freeze", "shield");
-    }
 
     const slowMultiplier = attacker.slowUntil > combat.elapsed ? 1.35 : 1;
     attacker.attackCooldown = attacker.attackInterval * slowMultiplier;
@@ -3226,13 +3712,15 @@
 
   function dealDamage(attacker, target, rawDamage, kind = "damage", show = true) {
     if (!target?.alive) return 0;
-    const damage = Math.max(1, rawDamage * armorMultiplier(target.armor));
+    const outgoing = attacker?.damageMultiplier || 1;
+    const damage = Math.max(1, rawDamage * outgoing * armorMultiplier(target.armor));
     return applyDamageAmount(attacker, target, damage, kind, show);
   }
 
   function dealPureDamage(attacker, target, damage, kind = "damage", show = true) {
     if (!target?.alive) return 0;
-    return applyDamageAmount(attacker, target, Math.max(1, damage), kind, show);
+    const outgoing = attacker?.damageMultiplier || 1;
+    return applyDamageAmount(attacker, target, Math.max(1, damage * outgoing), kind, show);
   }
 
   function applyDamageAmount(attacker, target, damage, kind, show) {
@@ -3332,13 +3820,211 @@
     let castSucceeded = true;
 
     switch (def.abilityKey) {
+      case "snowBlessing": {
+        const hurt = [...allies].sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp)).slice(0, 2);
+        hurt.forEach(ally => healUnit(ally, 92 * caster.abilityPower + ally.maxHp * 0.035));
+        const target = [...enemies].sort((a, b) => gridDistance(caster, a) - gridDistance(caster, b))[0];
+        if (target) {
+          target.stunnedUntil = Math.max(target.stunnedUntil, combat.elapsed + 850);
+          target.slowUntil = Math.max(target.slowUntil, combat.elapsed + 2200);
+          addFloating(target, "Frozen", "shield");
+        }
+        break;
+      }
+      case "gloomBolt": {
+        const target = [...enemies].sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp))[0];
+        if (!target) { castSucceeded = false; break; }
+        const execute = target.hp / target.maxHp < 0.5 ? 1.45 : 1;
+        dealDamage(caster, target, (118 * caster.abilityPower + caster.attack * 0.55) * execute, execute > 1 ? "crit" : "damage");
+        break;
+      }
+      case "sparkleWard": {
+        const ally = [...allies].sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp))[0];
+        addShield(ally, 155 * caster.abilityPower + ally.maxHp * 0.06);
+        ally.mana = clamp(ally.mana + 22, 0, ally.manaMax);
+        break;
+      }
+      case "stoneGuard": {
+        addShield(caster, 190 * caster.abilityPower + caster.maxHp * 0.18);
+        healUnit(caster, caster.maxHp * 0.07 * caster.abilityPower);
+        break;
+      }
+      case "gustShot": {
+        [...enemies].sort((a, b) => gridDistance(caster, a) - gridDistance(caster, b)).slice(0, 2).forEach((victim, index) => {
+          dealDamage(caster, victim, (128 * caster.abilityPower + caster.attack * 0.42) * (1 - index * 0.12));
+          victim.slowUntil = Math.max(victim.slowUntil, combat.elapsed + 1200);
+        });
+        break;
+      }
+      case "runeNova": {
+        const target = currentTarget?.alive ? currentTarget : findBestTarget(caster);
+        if (!target) { castSucceeded = false; break; }
+        unitsNearPosition(target.x, target.y, enemyTeam, 1).forEach(victim => {
+          dealDamage(caster, victim, 128 * caster.abilityPower + caster.attack * 0.34);
+        });
+        break;
+      }
+      case "shellWard": {
+        [...allies].sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp)).slice(0, 2).forEach(ally => {
+          addShield(ally, 150 * caster.abilityPower + ally.maxHp * 0.07);
+          healUnit(ally, 55 * caster.abilityPower);
+        });
+        break;
+      }
+      case "vineAmbush": {
+        const target = [...enemies].sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp))[0];
+        if (!target) { castSucceeded = false; break; }
+        teleportAdjacent(caster, target);
+        const dealt = dealDamage(caster, target, caster.attack * 1.1 + 105 * caster.abilityPower, "crit");
+        healUnit(caster, dealt * 0.34);
+        break;
+      }
+      case "staticDash": {
+        const target = [...enemies].sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp))[0];
+        if (!target) { castSucceeded = false; break; }
+        teleportAdjacent(caster, target);
+        dealDamage(caster, target, caster.attack * 0.95 + 112 * caster.abilityPower, "crit");
+        const second = enemies.filter(enemy => enemy.alive && enemy.combatId !== target.combatId)
+          .sort((a, b) => gridDistance(target, a) - gridDistance(target, b))[0];
+        if (second) dealDamage(caster, second, 92 * caster.abilityPower + caster.attack * 0.30);
+        break;
+      }
+      case "prismVolley": {
+        [...enemies].sort((a, b) => gridDistance(caster, a) - gridDistance(caster, b)).slice(0, 3).forEach((victim, index) => {
+          dealDamage(caster, victim, (105 * caster.abilityPower + caster.attack * 0.33) * (1 - index * 0.10));
+        });
+        addShield(caster, 120 * caster.abilityPower);
+        break;
+      }
+      case "cloudCrash": {
+        const target = currentTarget?.alive ? currentTarget : findBestTarget(caster);
+        if (!target) { castSucceeded = false; break; }
+        teleportAdjacent(caster, target);
+        unitsNearPosition(caster.x, caster.y, enemyTeam, 1).forEach(victim => {
+          dealDamage(caster, victim, 115 * caster.abilityPower + caster.attack * 0.48);
+          victim.stunnedUntil = Math.max(victim.stunnedUntil, combat.elapsed + 700);
+        });
+        break;
+      }
+      case "arcaneBulwark": {
+        allies.forEach(ally => {
+          addShield(ally, 82 * caster.abilityPower + ally.maxHp * 0.025);
+          if (gridDistance(caster, ally) <= 2) ally.mana = clamp(ally.mana + 12, 0, ally.manaMax);
+        });
+        break;
+      }
+      case "fireVolley": {
+        [...enemies].sort((a, b) => gridDistance(caster, a) - gridDistance(caster, b)).slice(0, 3).forEach((victim, index) => {
+          dealDamage(caster, victim, (112 * caster.abilityPower + caster.attack * 0.36) * (1 - index * 0.10));
+          applyBurn(victim, 20 * caster.abilityPower * caster.damageMultiplier, 3000);
+        });
+        break;
+      }
+      case "tidalCrash": {
+        const target = currentTarget?.alive ? currentTarget : findBestTarget(caster);
+        if (!target) { castSucceeded = false; break; }
+        let total = 0;
+        unitsNearPosition(target.x, target.y, enemyTeam, 1).forEach(victim => {
+          total += dealDamage(caster, victim, 132 * caster.abilityPower + caster.attack * 0.48);
+        });
+        healUnit(caster, total * 0.22);
+        break;
+      }
+      case "thornVolley": {
+        [...enemies].sort((a, b) => gridDistance(caster, a) - gridDistance(caster, b)).slice(0, 3).forEach(victim => {
+          dealDamage(caster, victim, 118 * caster.abilityPower + caster.attack * 0.38);
+          victim.slowUntil = Math.max(victim.slowUntil, combat.elapsed + 1800);
+        });
+        break;
+      }
+      case "obsidianSmash": {
+        const target = currentTarget?.alive ? currentTarget : findBestTarget(caster);
+        if (!target) { castSucceeded = false; break; }
+        unitsNearPosition(target.x, target.y, enemyTeam, 1).forEach((victim, index) => {
+          dealDamage(caster, victim, (145 * caster.abilityPower + caster.attack * 0.60) * (index === 0 ? 1 : 0.72));
+        });
+        target.stunnedUntil = Math.max(target.stunnedUntil, combat.elapsed + 1150);
+        break;
+      }
+      case "arcSurge": {
+        let target = currentTarget?.alive ? currentTarget : findBestTarget(caster);
+        const hit = new Set();
+        for (let jump = 0; jump < 4 && target; jump++) {
+          hit.add(target.combatId);
+          dealDamage(caster, target, (138 * caster.abilityPower + caster.attack * 0.30) * (1 - jump * 0.12));
+          target = enemies.filter(enemy => enemy.alive && !hit.has(enemy.combatId))
+            .sort((a, b) => gridDistance(target, a) - gridDistance(target, b))[0] || null;
+        }
+        break;
+      }
+      case "voidPulse": {
+        const target = currentTarget?.alive ? currentTarget : findBestTarget(caster);
+        if (!target) { castSucceeded = false; break; }
+        let drained = 0;
+        unitsNearPosition(target.x, target.y, enemyTeam, 2).forEach(victim => {
+          drained += dealDamage(caster, victim, 130 * caster.abilityPower + caster.attack * 0.30);
+        });
+        healUnit(caster, drained * 0.30);
+        break;
+      }
+      case "starfall": {
+        const targets = [...enemies].sort((a, b) => (b.attack + b.abilityPower * 40) - (a.attack + a.abilityPower * 40));
+        for (let hit = 0; hit < 4 && targets.length; hit++) {
+          const victim = targets[hit % targets.length];
+          if (victim.alive) dealDamage(caster, victim, 122 * caster.abilityPower + caster.attack * 0.31);
+        }
+        break;
+      }
+      case "blizzard": {
+        enemies.forEach(victim => {
+          dealDamage(caster, victim, 118 * caster.abilityPower + caster.attack * 0.25);
+          victim.slowUntil = Math.max(victim.slowUntil, combat.elapsed + 3600);
+        });
+        break;
+      }
+      case "solarRoar": {
+        enemies.forEach(victim => dealDamage(caster, victim, 125 * caster.abilityPower + caster.attack * 0.26));
+        allies.forEach(ally => addShield(ally, 95 * caster.abilityPower + ally.maxHp * 0.025));
+        break;
+      }
+      case "earthshatter": {
+        const victims = unitsNearPosition(caster.x, caster.y, enemyTeam, 2);
+        victims.forEach(victim => {
+          dealDamage(caster, victim, 155 * caster.abilityPower + caster.attack * 0.42);
+          victim.stunnedUntil = Math.max(victim.stunnedUntil, combat.elapsed + 1050);
+        });
+        addShield(caster, 210 * caster.abilityPower + caster.maxHp * 0.12);
+        break;
+      }
+      case "skyDive": {
+        const target = [...enemies].sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp))[0];
+        if (!target) { castSucceeded = false; break; }
+        teleportAdjacent(caster, target);
+        dealDamage(caster, target, caster.attack * 1.28 + 145 * caster.abilityPower, "crit");
+        unitsNearPosition(target.x, target.y, enemyTeam, 1)
+          .filter(victim => victim.combatId !== target.combatId)
+          .forEach(victim => dealDamage(caster, victim, 82 * caster.abilityPower + caster.attack * 0.25));
+        break;
+      }
+      case "aetherBeam": {
+        const clusterTarget = [...enemies].sort((a, b) => {
+          const aCount = unitsNearPosition(a.x, a.y, enemyTeam, 2).length;
+          const bCount = unitsNearPosition(b.x, b.y, enemyTeam, 2).length;
+          return bCount - aCount;
+        })[0];
+        if (!clusterTarget) { castSucceeded = false; break; }
+        unitsNearPosition(clusterTarget.x, clusterTarget.y, enemyTeam, 2).forEach((victim, index) => {
+          dealDamage(caster, victim, (190 * caster.abilityPower + caster.attack * 0.52) * (index === 0 ? 1 : 0.78));
+        });
+        break;
+      }
       case "flareBurst": {
         const target = currentTarget?.alive ? currentTarget : findBestTarget(caster);
         if (!target) { castSucceeded = false; break; }
         const victims = unitsNearPosition(target.x, target.y, enemyTeam, 1);
         victims.forEach((victim, index) => {
           dealDamage(caster, victim, (caster.attack * 0.72 + 105 * caster.abilityPower) * (index === 0 ? 1 : 0.68));
-          applyBurn(victim, 23 * caster.abilityPower, 3200);
+          applyBurn(victim, 23 * caster.abilityPower * caster.damageMultiplier, 3200);
         });
         break;
       }
@@ -3388,7 +4074,7 @@
         } else {
           victims.forEach(victim => {
             dealDamage(caster, victim, 138 * caster.abilityPower + caster.attack * 0.42);
-            applyBurn(victim, 20 * caster.abilityPower, 2600);
+            applyBurn(victim, 20 * caster.abilityPower * caster.damageMultiplier, 2600);
           });
         }
         break;
@@ -3464,7 +4150,7 @@
         const victims = unitsNearPosition(target.x, target.y, enemyTeam, 2);
         victims.forEach(victim => {
           dealDamage(caster, victim, 175 * caster.abilityPower + caster.attack * 0.52);
-          applyBurn(victim, 31 * caster.abilityPower, 4200);
+          applyBurn(victim, 31 * caster.abilityPower * caster.damageMultiplier, 4200);
         });
         break;
       }
@@ -3517,7 +4203,7 @@
       addLog(`Round ${completedRound} won${timedOut ? " on remaining health" : ""}: +${reward} gold (${interest} interest${streakBonus ? `, ${streakBonus} streak` : ""}).`, "good");
     } else {
       const survivorPower = enemySurvivors.reduce((sum, unit) => sum + unit.star + (unit.boss ? 1 : 0), 0);
-      const damage = clamp(2 + survivorPower, 2, 14);
+      const damage = clamp(2 + survivorPower, 2, 18);
       state.hp -= damage;
       addLog(`Round ${completedRound} lost: -${damage} heart, +${reward} gold (${interest} interest).`, "bad");
     }
@@ -3536,7 +4222,7 @@
       return;
     }
 
-    if (playerWon && completedRound >= FINAL_ROUND) {
+    if (state.mode === "expedition" && playerWon && completedRound >= EXPEDITION_ROUNDS) {
       state.phase = "victory";
       try { localStorage.removeItem(SAVE_KEY); } catch (_) {}
       render();
@@ -3544,7 +4230,7 @@
       return;
     }
 
-    state.round = Math.min(FINAL_ROUND, completedRound + 1);
+    state.round = completedRound + 1;
     state.phase = "planning";
     prepareEnemy();
     if (state.shopLocked) {
@@ -3600,19 +4286,23 @@
   }
 
   function showEndModal(victory, completedRound) {
+    const endless = state.mode === "endless";
     openModal({
-      title: victory ? "Aetherboard Champion!" : "Run complete",
+      title: victory ? "Aetherboard Champion!" : endless ? "Endless run complete" : "Run complete",
       subtitle: victory
-        ? "Your formation defeated every challenger and claimed the arena crown."
-        : `Your squad reached round ${completedRound}. Try a different economy, formation, or synergy on the next run.`,
+        ? "Your formation survived all 25 rounds and defeated the Tenfold Convergence."
+        : `Your squad reached round ${completedRound}. Try a different draft, economy, formation, or type core on the next run.`,
       body: `
         <div class="result-banner">
-          <div class="result-icon">${victory ? "🏆" : "🌌"}</div>
-          <h3>${victory ? "Victory" : `Round ${completedRound}`}</h3>
-          <p>${victory ? "You survived all 15 rounds." : "Three matching copies create stars, active synergies reward focused teams, and positioning can protect fragile damage dealers."}</p>
+          <div class="result-icon">${victory ? "🏆" : endless ? "∞" : "🌌"}</div>
+          <h3>${victory ? "25-Round Victory" : `Round ${completedRound}`}</h3>
+          <p>${victory ? "You conquered the full expedition." : endless ? `Endless score: round ${completedRound}. Enemy scaling had no maximum.` : "Type Bonds reward focused teams, while flexible roles and positioning keep them alive."}</p>
         </div>
       `,
-      actions: [{ label: "Start a new run", className: "primary-button", onClick: resetGame }],
+      actions: [
+        { label: `Restart ${modeName(state.mode)}`, className: "primary-button", onClick: () => startNewRun(state.mode) },
+        { label: "Choose other mode", className: "small-button", onClick: () => showModeSelect(true) }
+      ],
       locked: true
     });
   }
@@ -3739,7 +4429,7 @@
     cacheElements();
     bindEvents();
     const loaded = loadGame();
-    state = loaded || createFreshState();
+    state = loaded || createFreshState("expedition");
     prepareEnemy();
     if (!state.shop.some(Boolean)) {
       state.shop = Array.from({ length: 5 }, () => rollShopUnit(state.level));
@@ -3748,21 +4438,69 @@
       .filter(loc => loc.unit.star >= 2 && !loc.unit.awakening)
       .map(loc => loc.id);
     render();
-    saveGame();
+
     if (loaded) {
-      toast("Saved run restored.", "good");
-      setTimeout(processAwakeningQueue, 0);
-    } else if (!state.tutorialSeen) {
-      showHelp();
+      saveGame();
+      if (!state.draftComplete) {
+        showStarterDraft();
+      } else {
+        toast("Saved run restored.", "good");
+        setTimeout(processAwakeningQueue, 0);
+      }
+    } else {
+      showModeSelect(true);
     }
+  }
+
+  function debugSeedTeam(defKeys = []) {
+    const validKeys = Array.isArray(defKeys)
+      ? defKeys.filter(key => UNIT_DEFS[key]).slice(0, MAX_LEVEL)
+      : [];
+    state.phase = "planning";
+    state.level = Math.max(3, validKeys.length);
+    state.xp = 0;
+    state.board = Array(BOARD_SIZE).fill(null);
+    state.bench = Array(BENCH_SIZE).fill(null);
+    state.units = {};
+    state.selected = null;
+    state.inspectedEnemy = null;
+    state.draftComplete = true;
+    state.draftPicksRemaining = 0;
+    const cells = preferredPlayerCells();
+    validKeys.forEach((defKey, index) => {
+      const unit = makeUnit(defKey);
+      state.units[unit.id] = unit;
+      state.board[cells[index]] = unit.id;
+    });
+    prepareEnemy();
+    render();
+    return JSON.parse(JSON.stringify(state));
+  }
+
+  function debugSetRound(round) {
+    const parsed = Number.parseInt(round, 10);
+    state.round = clamp(Number.isFinite(parsed) ? parsed : 1, 1, 9999);
+    state.phase = "planning";
+    state.selected = null;
+    state.inspectedEnemy = null;
+    combat = null;
+    prepareEnemy();
+    render();
+    return state.round;
   }
 
   window.AetherboardDebug = {
     getState: () => JSON.parse(JSON.stringify(state)),
     getCombat: () => combat ? JSON.parse(JSON.stringify({ elapsed: combat.elapsed, units: combat.units })) : null,
+    getCatalog: () => Object.entries(UNIT_DEFS).map(([key, def]) => ({ key, ...def })),
+    getTypeDamageBonus: count => typeDamageBonus(Number(count) || 0),
     startBattle,
     resetGame,
-    resolveRound: (won = true) => resolveRound(Boolean(won), won ? [] : [{ star: 1, boss: false }], won ? 1 : 0, false)
+    resolveRound: (won = true) => resolveRound(Boolean(won), won ? [] : [{ star: 1, boss: false }], won ? 1 : 0, false),
+    startNewRun,
+    showStarterDraft,
+    seedTeam: debugSeedTeam,
+    setRound: debugSetRound
   };
 
   init();
