@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#10162b" />
-  <title>Aetherboard Arena: Auto Chess</title>
+  <title>Aetherboard Arena: Auto Chess — Team Clarity Update</title>
   <style>
     :root {
       --bg-0: #080b18;
@@ -1972,6 +1972,362 @@
       .title-play-button { animation: none !important; }
     }
 
+
+
+    /* ─────────────────────────────────────────────────────────────
+       VERSION 4 — TEAM CLARITY + NON-STACKING, CLEANER BOOSTS
+       ───────────────────────────────────────────────────────────── */
+    :root {
+      --ally: #62c9ff;
+      --ally-deep: #2167ca;
+      --enemy: #ff6079;
+      --enemy-deep: #a71f3c;
+      --shield: #6ed9ff;
+    }
+
+    .arena-header-tools {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .team-legend {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 999px;
+      background: rgba(4,7,20,.5);
+    }
+
+    .team-legend-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 7px;
+      border-radius: 999px;
+      font-size: 8px;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .team-legend-chip::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      box-shadow: 0 0 10px currentColor;
+    }
+
+    .team-legend-chip.player {
+      color: #cdecff;
+      background: rgba(66, 156, 255, .16);
+      border: 1px solid rgba(98,201,255,.28);
+    }
+
+    .team-legend-chip.player::before { background: var(--ally); }
+
+    .team-legend-chip.enemy {
+      color: #ffd5dc;
+      background: rgba(255, 76, 106, .16);
+      border: 1px solid rgba(255,96,121,.3);
+    }
+
+    .team-legend-chip.enemy::before { background: var(--enemy); }
+
+    .board-wrap {
+      background:
+        linear-gradient(180deg, rgba(164, 31, 61, .20) 0 49.4%, rgba(30, 94, 185, .20) 50.6% 100%),
+        rgba(4, 7, 20, .74);
+      border-color: rgba(218,228,255,.22);
+      box-shadow: inset 0 0 48px rgba(0,0,0,.37), 0 16px 45px rgba(0,0,0,.3);
+    }
+
+    .board-cell.enemy-zone {
+      background: rgba(255, 70, 103, .085);
+      border-color: rgba(255, 102, 128, .11);
+    }
+
+    .board-cell.player-zone {
+      background: rgba(75, 145, 255, .09);
+      border-color: rgba(98, 175, 255, .12);
+    }
+
+    .board-cell.center-line::after {
+      left: 3%;
+      right: 3%;
+      bottom: -4px;
+      height: 3px;
+      background: linear-gradient(90deg, rgba(255,96,121,.12), rgba(255,255,255,.68), rgba(98,201,255,.12));
+      box-shadow: 0 0 8px rgba(255,255,255,.16);
+    }
+
+    .board-zone-label {
+      position: absolute;
+      z-index: 2;
+      left: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 6px;
+      border-radius: 999px;
+      font-size: 7px;
+      font-weight: 950;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+      pointer-events: none;
+      opacity: .82;
+      backdrop-filter: blur(4px);
+    }
+
+    .board-zone-label.enemy {
+      top: 9px;
+      color: #ffd9df;
+      border: 1px solid rgba(255,96,121,.32);
+      background: rgba(105, 18, 40, .67);
+    }
+
+    .board-zone-label.player {
+      bottom: 9px;
+      color: #d7efff;
+      border: 1px solid rgba(98,201,255,.31);
+      background: rgba(19, 55, 116, .68);
+    }
+
+    .board-unit.player,
+    .board-unit.enemy {
+      border-width: 3px;
+      isolation: isolate;
+    }
+
+    .board-unit.player {
+      border-color: var(--ally);
+      box-shadow:
+        inset 0 -8px 14px rgba(0,0,0,.22),
+        inset 0 0 0 2px rgba(226,246,255,.14),
+        0 0 0 2px rgba(68,150,255,.17),
+        0 6px 16px rgba(22,83,181,.38),
+        0 0 18px rgba(98,201,255,.22);
+    }
+
+    .board-unit.enemy {
+      border-color: var(--enemy);
+      box-shadow:
+        inset 0 -8px 14px rgba(0,0,0,.24),
+        inset 0 0 0 2px rgba(255,232,236,.12),
+        0 0 0 2px rgba(255,68,101,.19),
+        0 6px 16px rgba(144,21,50,.42),
+        0 0 18px rgba(255,96,121,.24);
+    }
+
+    .board-unit.enemy-preview {
+      opacity: 1;
+      filter: saturate(.92) brightness(.94);
+      cursor: help;
+    }
+
+    .board-unit.player:hover,
+    .board-unit.enemy:hover { filter: brightness(1.12); }
+
+    .board-unit.player.selected {
+      border-color: #fff3a8;
+      box-shadow:
+        inset 0 -8px 14px rgba(0,0,0,.22),
+        0 0 0 3px rgba(255,214,107,.28),
+        0 0 24px rgba(255,214,107,.5);
+    }
+
+    .team-marker {
+      position: absolute;
+      left: -5px;
+      top: 6px;
+      z-index: 9;
+      min-width: 22px;
+      padding: 2px 4px;
+      border: 2px solid rgba(4,7,19,.86);
+      border-radius: 6px;
+      font-size: clamp(5px, .55vw, 7px);
+      font-weight: 1000;
+      line-height: 1;
+      letter-spacing: .045em;
+      text-transform: uppercase;
+      text-shadow: 0 1px 2px rgba(0,0,0,.75);
+      pointer-events: none;
+    }
+
+    .board-unit.player .team-marker {
+      color: #f0fbff;
+      background: linear-gradient(135deg, #3c9bea, #2259b9);
+    }
+
+    .board-unit.enemy .team-marker {
+      color: #fff5f7;
+      background: linear-gradient(135deg, #f4516b, #a81f3c);
+    }
+
+    .board-unit.player .unit-name-tiny {
+      background: rgba(19, 66, 132, .83);
+      box-shadow: inset 0 0 0 1px rgba(98,201,255,.2);
+    }
+
+    .board-unit.enemy .unit-name-tiny {
+      background: rgba(116, 18, 41, .84);
+      box-shadow: inset 0 0 0 1px rgba(255,96,121,.21);
+    }
+
+    .status-icons {
+      left: auto;
+      right: -4px;
+      top: 7px;
+      max-width: 42px;
+      min-height: 14px;
+      padding: 2px 3px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 1px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(2,5,15,.76);
+      box-shadow: 0 2px 8px rgba(0,0,0,.35);
+      font-size: 8px;
+      line-height: 1;
+    }
+
+    .status-icons:empty { display: none; }
+
+    .health-stack {
+      left: 6%;
+      right: 6%;
+      bottom: -7px;
+      gap: 1px;
+    }
+
+    .health-bar.player-health > span {
+      background: linear-gradient(90deg, #38d8a0, #7ceeff);
+    }
+
+    .health-bar.enemy-health > span {
+      background: linear-gradient(90deg, #ff4e6a, #ff9a72);
+    }
+
+    .health-bar.low.player-health > span,
+    .health-bar.low.enemy-health > span {
+      background: linear-gradient(90deg, #ff3e59, #ff8a68);
+    }
+
+    .shield-bar {
+      height: 3px;
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,.62);
+      border-radius: 99px;
+      background: rgba(0,0,0,.68);
+    }
+
+    .shield-bar > span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #55bfff, #a5efff);
+      box-shadow: 0 0 6px rgba(110,217,255,.42);
+      transition: width .12s linear;
+    }
+
+    .float-text {
+      --lane-offset: 0px;
+      --side-offset: 0px;
+      transform: translate(calc(-50% + var(--side-offset)), calc(-50% - var(--lane-offset)));
+      padding: 2px 5px;
+      border-radius: 6px;
+      background: rgba(2,5,14,.72);
+      font-size: clamp(8px, .95vw, 13px);
+      text-shadow: 0 2px 4px #000;
+      box-shadow: 0 3px 9px rgba(0,0,0,.2);
+      animation: floatUpClean .66s ease-out forwards;
+    }
+
+    .float-text.status { color: #d8e8ff; }
+    .float-text.mana { color: #bda7ff; }
+    .float-text.shield { color: var(--shield); }
+    .float-text.player { border-left: 2px solid var(--ally); }
+    .float-text.enemy { border-left: 2px solid var(--enemy); }
+
+    @keyframes floatUpClean {
+      to {
+        transform: translate(calc(-50% + var(--side-offset)), calc(-138% - var(--lane-offset)));
+        opacity: 0;
+      }
+    }
+
+    .bonus-rule-banner {
+      margin-bottom: 6px;
+      padding: 6px 7px;
+      border: 1px solid rgba(121,185,255,.14);
+      border-radius: 9px;
+      background: rgba(75,118,212,.08);
+      color: #ccdcff;
+      font-size: 8px;
+      line-height: 1.35;
+    }
+
+    .trait-group-label {
+      margin: 7px 1px 4px;
+      color: var(--muted);
+      font-size: 7px;
+      font-weight: 950;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .building-bonuses {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .building-bonus {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 3px 5px;
+      border: 1px solid rgba(255,255,255,.075);
+      border-radius: 999px;
+      background: rgba(255,255,255,.03);
+      color: #c2cae2;
+      font-size: 7px;
+      white-space: nowrap;
+    }
+
+    .stack-rule-note {
+      padding: 6px 8px;
+      border-left: 3px solid #79b9ff;
+      border-radius: 6px;
+      background: rgba(121,185,255,.07);
+      color: #cfe5ff;
+      font-size: 8px;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 720px) {
+      .arena-header-tools { align-items: flex-end; flex-direction: column-reverse; gap: 4px; }
+      .team-legend-chip { font-size: 7px; padding: 3px 6px; }
+      .board-zone-label { font-size: 6px; }
+      .team-marker { min-width: 18px; padding: 2px 3px; }
+    }
+
+    @media (min-width: 981px) and (max-height: 790px) {
+      .team-legend-chip { padding: 3px 6px; font-size: 7px; }
+      .bonus-rule-banner { padding: 4px 5px; margin-bottom: 4px; font-size: 7px; }
+      .trait-group-label { margin-top: 4px; }
+      .board-zone-label { padding: 2px 5px; }
+    }
+
   </style>
 </head>
 <body class="title-open">
@@ -2117,7 +2473,7 @@
         <section class="panel-section">
           <div class="section-heading">
             <h2>Types &amp; roles</h2>
-            <span>Type copies count</span>
+            <span>Highest tier only</span>
           </div>
           <div class="trait-list" id="traitList"></div>
         </section>
@@ -2137,11 +2493,19 @@
             <div class="round-title" id="roundTitle">Round 1 · Whispering Grove</div>
             <div class="round-subtitle" id="roundSubtitle">Arrange your spirits, then begin the battle.</div>
           </div>
-          <div class="phase-pill" id="phasePill"><span class="phase-dot"></span><span id="phaseText">Planning</span></div>
+          <div class="arena-header-tools">
+            <div class="team-legend" aria-label="Team colour legend">
+              <span class="team-legend-chip player">Your team</span>
+              <span class="team-legend-chip enemy">Enemy</span>
+            </div>
+            <div class="phase-pill" id="phasePill"><span class="phase-dot"></span><span id="phaseText">Planning</span></div>
+          </div>
         </header>
 
         <div class="board-area">
           <div class="board-wrap" id="boardWrap">
+            <div class="board-zone-label enemy">● Enemy start</div>
+            <div class="board-zone-label player">● Your start</div>
             <div class="battle-timer" id="battleTimer" hidden>35.0s</div>
             <div class="board-grid" id="boardGrid" role="grid" aria-label="Battle board"></div>
             <div class="floating-layer" id="floatingLayer"></div>
@@ -2170,7 +2534,7 @@
         <section class="panel-section">
           <div class="section-heading">
             <h2>Items</h2>
-            <span>Equip up to 2</span>
+            <span>Strongest stat applies</span>
           </div>
           <div class="inventory-list" id="inventoryList"></div>
         </section>
@@ -3459,31 +3823,56 @@
   const STAR_HP_MULT = { 1: 1, 2: 1.78, 3: 3.15 };
   const STAR_ATTACK_MULT = { 1: 1, 2: 1.68, 3: 2.9 };
 
-  function getUnitPreviewStats(unit) {
-    const def = UNIT_DEFS[unit.defKey];
-    let hp = def.hp * STAR_HP_MULT[unit.star];
-    let attack = def.attack * STAR_ATTACK_MULT[unit.star];
-    let armor = def.armor;
-    let attackSpeed = def.attackSpeed;
-    let abilityPower = 1 + (unit.star - 1) * 0.22;
+  const NON_STACKING_ITEM_STATS = ["hp", "attack", "armor", "attackSpeed", "abilityPower", "startMana", "regen", "crit"];
 
-    for (const itemKey of unit.items || []) {
+  function strongestItemBonuses(itemKeys = []) {
+    const result = {
+      hp: 0,
+      attack: 0,
+      armor: 0,
+      attackSpeed: 0,
+      abilityPower: 0,
+      startMana: 0,
+      regen: 0,
+      crit: 0,
+      echo: false
+    };
+    for (const itemKey of itemKeys) {
       const item = ITEM_DEFS[itemKey];
       if (!item) continue;
-      hp += item.hp || 0;
-      attack += item.attack || 0;
-      armor += item.armor || 0;
-      attackSpeed *= 1 + (item.attackSpeed || 0);
-      abilityPower += item.abilityPower || 0;
+      NON_STACKING_ITEM_STATS.forEach(stat => {
+        result[stat] = Math.max(result[stat], Number(item[stat]) || 0);
+      });
+      result.echo = result.echo || Boolean(item.echo);
     }
+    return result;
+  }
 
-    if (unit.awakening === "force") {
-      attack *= 1.2;
-      abilityPower += 0.22;
-    } else if (unit.awakening === "guard") {
-      hp *= 1.25;
-      armor += 12;
-    }
+  function getUnitPreviewStats(unit, teamBonuses = null) {
+    const def = UNIT_DEFS[unit.defKey];
+    const star = unit.star || 1;
+    const baseHp = def.hp * STAR_HP_MULT[star];
+    const baseAttack = def.attack * STAR_ATTACK_MULT[star];
+    const baseAbilityPower = 1 + (star - 1) * 0.22;
+    const item = strongestItemBonuses(unit.items || []);
+
+    const guardHpGain = unit.awakening === "guard" ? baseHp * 0.25 : 0;
+    const guardArmor = unit.awakening === "guard" ? 12 : 0;
+    const forceAttackPct = unit.awakening === "force" ? 0.20 : 0;
+    const forceAbilityPct = unit.awakening === "force" ? 0.22 : 0;
+
+    const vanguardArmor = teamBonuses && def.role === "Vanguard" ? teamBonuses.vanguardArmor : 0;
+    const strikerAttackPct = teamBonuses && def.role === "Striker" ? Math.max(0, teamBonuses.strikerAttack - 1) : 0;
+    const rangerSpeedPct = teamBonuses && def.role === "Ranger" ? Math.max(0, teamBonuses.rangerSpeed - 1) : 0;
+    const assassinSpeedPct = teamBonuses && def.role === "Assassin" ? Math.max(0, teamBonuses.assassinSpeed - 1) : 0;
+    const mysticAbilityPct = teamBonuses ? Math.max(0, teamBonuses.abilityAll - 1) : 0;
+
+    // Same-stat boosts do not add together. The strongest source wins.
+    const hp = baseHp + Math.max(item.hp, guardHpGain);
+    const attack = baseAttack + Math.max(item.attack, baseAttack * Math.max(forceAttackPct, strikerAttackPct));
+    const armor = def.armor + Math.max(item.armor, guardArmor, vanguardArmor);
+    const attackSpeed = def.attackSpeed * (1 + Math.max(item.attackSpeed, rangerSpeedPct, assassinSpeedPct));
+    const abilityPower = baseAbilityPower * (1 + Math.max(item.abilityPower, forceAbilityPct, mysticAbilityPct));
 
     return { hp, attack, armor, attackSpeed, abilityPower };
   }
@@ -3526,9 +3915,10 @@
   function traitNextText(name, count) {
     const info = TRAIT_INFO[name];
     const tier = traitTier(name, count);
-    if (tier === 0) return `${count}/${info.thresholds[0]} · ${info.effects[0]}`;
-    if (tier < info.thresholds.length) return `${count}/${info.thresholds[tier]} · ${info.effects[tier - 1]}`;
-    return `${count} · ${info.effects.at(-1)}`;
+    if (tier === 0) return `${count}/${info.thresholds[0]} toward ${info.effects[0]}`;
+    const current = info.effects[tier - 1];
+    const next = info.thresholds[tier];
+    return next ? `${current} · next at ${next}` : `${current} · maximum tier`;
   }
 
   function render() {
@@ -3675,10 +4065,12 @@
     const def = UNIT_DEFS[unit.defKey];
     const button = document.createElement("button");
     button.type = "button";
-    button.className = `board-unit${enemy ? " enemy-preview" : ""}${selected ? " selected" : ""}`;
+    const teamClass = enemy ? "enemy enemy-preview" : "player";
+    button.className = `board-unit ${teamClass}${selected ? " selected" : ""}`;
     button.style.setProperty("--unit-a", def.colors[0]);
     button.style.setProperty("--unit-b", def.colors[1]);
     button.innerHTML = `
+      <span class="team-marker">${enemy ? "ENEMY" : "YOU"}</span>
       <span class="unit-stars">${starString(unit.star)}</span>
       <span class="unit-icon">${def.icon}</span>
       <span class="unit-name-tiny">${def.name}</span>
@@ -3697,7 +4089,7 @@
     button.className = `board-unit ${unit.team}${actionClass ? ` ${actionClass}` : ""}${stunned ? " stunned" : ""}`;
     button.style.setProperty("--unit-a", def.colors[0]);
     button.style.setProperty("--unit-b", def.colors[1]);
-    button.title = `${def.name} · ${Math.ceil(unit.hp)}/${Math.ceil(unit.maxHp)} HP`;
+    button.title = `${unit.team === "enemy" ? "ENEMY" : "YOUR TEAM"} · ${def.name} · ${Math.ceil(unit.hp)}/${Math.ceil(unit.maxHp)} HP`;
     button.addEventListener("click", event => {
       event.stopPropagation();
       inspectCombatUnit(unit);
@@ -3705,19 +4097,21 @@
 
     const hpPercent = clamp((unit.hp / unit.maxHp) * 100, 0, 100);
     const manaPercent = clamp((unit.mana / unit.manaMax) * 100, 0, 100);
+    const shieldPercent = clamp((unit.shield / unit.maxHp) * 100, 0, 100);
     const status = [];
-    if (unit.shield > 1) status.push("🔷");
     if (unit.burnUntil > now) status.push("🔥");
     if (stunned) status.push("💫");
     if (unit.slowUntil > now) status.push("❄️");
 
     button.innerHTML = `
+      <span class="team-marker">${unit.team === "enemy" ? "ENEMY" : "YOU"}</span>
       <span class="unit-stars">${starString(unit.star)}</span>
       <span class="unit-icon">${def.icon}</span>
       <span class="unit-name-tiny">${def.name}</span>
-      <span class="status-icons">${status.map(icon => `<span>${icon}</span>`).join("")}</span>
+      <span class="status-icons">${status.slice(0, 3).map(icon => `<span>${icon}</span>`).join("")}</span>
       <span class="health-stack">
-        <span class="health-bar ${hpPercent < 32 ? "low" : ""}"><span style="width:${hpPercent}%"></span></span>
+        ${shieldPercent > 0.5 ? `<span class="shield-bar" title="${Math.round(unit.shield)} shield"><span style="width:${shieldPercent}%"></span></span>` : ""}
+        <span class="health-bar ${unit.team}-health ${hpPercent < 32 ? "low" : ""}"><span style="width:${hpPercent}%"></span></span>
         <span class="mana-bar"><span style="width:${manaPercent}%"></span></span>
       </span>
     `;
@@ -3729,7 +4123,7 @@
     const now = combat.elapsed;
     combat.floating = combat.floating.filter(entry => entry.expires > now);
     els.floatingLayer.innerHTML = combat.floating.map(entry => `
-      <span class="float-text ${entry.kind}" style="left:${((entry.x + 0.5) / BOARD_COLS) * 100}%;top:${((entry.y + 0.5) / BOARD_ROWS) * 100}%">${entry.text}</span>
+      <span class="float-text ${entry.kind} ${entry.team || ""}" style="left:${((entry.x + 0.5) / BOARD_COLS) * 100}%;top:${((entry.y + 0.5) / BOARD_ROWS) * 100}%;--lane-offset:${(entry.lane || 0) * 11}px;--side-offset:${entry.sideOffset || 0}px">${entry.text}</span>
     `).join("");
   }
 
@@ -3798,16 +4192,20 @@
       });
 
     if (!present.length) {
-      els.traitList.innerHTML = `<div class="selected-empty">Deploy spirits to activate Type Bonds and role synergies.</div>`;
+      els.traitList.innerHTML = `
+        <div class="bonus-rule-banner"><strong>Clean boost rule:</strong> only the strongest bonus for a stat applies. Shield amounts refresh instead of stacking.</div>
+        <div class="selected-empty">Deploy spirits to activate Type Bonds and role synergies.</div>
+      `;
       return;
     }
 
-    els.traitList.innerHTML = present.map(name => {
+    const active = present.filter(name => traitTier(name, counts[name] || 0) > 0);
+    const building = present.filter(name => traitTier(name, counts[name] || 0) === 0);
+    const activeHtml = active.map(name => {
       const info = TRAIT_INFO[name];
       const count = counts[name] || 0;
-      const tier = traitTier(name, count);
       return `
-        <div class="trait-chip ${tier ? "active" : ""}">
+        <div class="trait-chip active">
           <div class="trait-icon">${info.icon}</div>
           <div>
             <div class="trait-name">${name}</div>
@@ -3817,14 +4215,29 @@
         </div>
       `;
     }).join("");
+    const buildingHtml = building.length
+      ? `<div class="trait-group-label">Building toward</div><div class="building-bonuses">${building.map(name => {
+          const info = TRAIT_INFO[name];
+          const count = counts[name] || 0;
+          return `<span class="building-bonus" title="${name}: ${traitNextText(name, count)}">${info.icon} ${name} ${count}/${info.thresholds[0]}</span>`;
+        }).join("")}</div>`
+      : "";
+
+    els.traitList.innerHTML = `
+      <div class="bonus-rule-banner"><strong>No stat stacking:</strong> the highest same-stat bonus applies; Type Bonds use only their highest unlocked tier.</div>
+      ${active.length ? `<div class="trait-group-label">Active bonuses</div>${activeHtml}` : `<div class="trait-group-label">No active bonus yet</div>`}
+      ${buildingHtml}
+    `;
   }
 
   function renderSelected() {
     if (state.inspectedEnemy) {
-      const enemy = state.inspectedEnemy;
-      const def = UNIT_DEFS[enemy.defKey];
-      els.selectedLocation.textContent = "Enemy scout";
-      els.selectedCard.innerHTML = unitDetailHtml(enemy, true);
+      const inspected = state.inspectedEnemy;
+      const isEnemy = inspected.team ? inspected.team === "enemy" : true;
+      els.selectedLocation.textContent = inspected.team
+        ? (isEnemy ? "Enemy combat spirit" : "Your combat spirit")
+        : "Enemy scout";
+      els.selectedCard.innerHTML = unitDetailHtml(inspected, isEnemy);
       return;
     }
 
@@ -3873,7 +4286,10 @@
 
   function unitDetailHtml(unit, enemy = false) {
     const def = UNIT_DEFS[unit.defKey];
-    const stats = getUnitPreviewStats({ ...unit, items: unit.items || [] });
+    const formation = enemy ? (state.enemyPreview || []) : getPlayerFormationUnits();
+    const isDeployed = enemy || Boolean(unit.id && state.board.includes(unit.id));
+    const teamBonuses = isDeployed ? calculateTeamBonuses(formation) : null;
+    const stats = getUnitPreviewStats({ ...unit, items: unit.items || [] }, teamBonuses);
     const awakeningText = unit.awakening === "force"
       ? "Primal Force: +20% attack and +22% ability power."
       : unit.awakening === "guard"
@@ -3915,6 +4331,7 @@
       <div class="ability-box"><strong>${def.ability}</strong><p>${def.abilityText}</p></div>
       ${typeBondDetailHtml(def, enemy)}
       <div class="awakening-note">${awakeningText}</div>
+      <div class="stack-rule-note"><strong>Boost rule:</strong> bonuses to the same stat do not add together. The strongest source is used. Elemental Type Bond damage remains its own separate bonus.</div>
       ${itemsHtml}
     `;
   }
@@ -3925,7 +4342,8 @@
       defKey: unit.defKey,
       star: unit.star,
       awakening: unit.awakening,
-      items: unit.items
+      items: unit.items,
+      team: unit.team
     };
     state.selected = null;
     state.inspectedEnemy = source;
@@ -3967,6 +4385,11 @@
     }
     const itemKey = state.inventory[inventoryIndex];
     if (!ITEM_DEFS[itemKey]) return;
+    if (unit.items.includes(itemKey)) {
+      toast(`${ITEM_DEFS[itemKey].name} is already equipped. Duplicate effects do not stack.`, "bad");
+      playSfx("error");
+      return;
+    }
     unit.items.push(itemKey);
     state.inventory.splice(inventoryIndex, 1);
     toast(`${ITEM_DEFS[itemKey].name} equipped to ${UNIT_DEFS[unit.defKey].name}.`, "good");
@@ -4090,7 +4513,9 @@
           <div class="tutorial-step"><div class="big">🎴</div><strong>1. Draft from nothing</strong><p>Every new run begins with an empty board. Choose three free starter spirits, then buy more from the rotating shop.</p></div>
           <div class="tutorial-step"><div class="big">♟️</div><strong>2. Field up to eight</strong><p>Click a spirit, then a board or bench space. Put tough Vanguards in front and ranged units behind them.</p></div>
           <div class="tutorial-step"><div class="big">🔥</div><strong>3. Build Type Bonds</strong><p>All deployed copies count. At 2/3/4/5/6/7/8 of one type, those units gain +8/+15/+25/+40/+55/+72/+90% damage.</p></div>
-          <div class="tutorial-step"><div class="big">★★</div><strong>4. Combine and awaken</strong><p>Three identical one-star spirits become a two-star spirit. At two stars, choose a permanent Awakening.</p></div>
+          <div class="tutorial-step"><div class="big">🔵🔴</div><strong>4. Know the teams</strong><p>Your spirits have blue rings, blue-green health bars, and a YOU badge. Enemies always have red rings, red health bars, and an ENEMY badge—even after units cross the board.</p></div>
+          <div class="tutorial-step"><div class="big">🛡️</div><strong>5. Boosts do not stack</strong><p>For each stat, only the strongest same-stat source applies. Type Bonds use the highest unlocked tier, and new shields refresh the stronger shield instead of adding together.</p></div>
+          <div class="tutorial-step"><div class="big">★★</div><strong>6. Combine and awaken</strong><p>Three identical one-star spirits become a two-star spirit. At two stars, choose a permanent Awakening.</p></div>
           <div class="tutorial-step"><div class="big">🏁</div><strong>25-Round mode</strong><p>Survive 25 escalating rounds and defeat the Tenfold Convergence.</p></div>
           <div class="tutorial-step"><div class="big">∞</div><strong>Endless mode</strong><p>There is no final round. Enemy stars, items, and scaling keep increasing until your heart reaches zero.</p></div>
         </div>
@@ -4348,49 +4773,37 @@
   function buildCombatUnit(source, team, position, bonuses) {
     const def = UNIT_DEFS[source.defKey];
     const star = source.star || 1;
-    let maxHp = def.hp * STAR_HP_MULT[star];
-    let attack = def.attack * STAR_ATTACK_MULT[star];
-    let armor = def.armor;
-    let attackSpeed = def.attackSpeed;
-    let abilityPower = (1 + (star - 1) * 0.22) * bonuses.abilityAll;
-    let startMana = 0;
-    let regenPerSecond = 0;
-    let critChance = 0.05;
-    let critMult = 1.5;
+    const baseHp = def.hp * STAR_HP_MULT[star];
+    const baseAttack = def.attack * STAR_ATTACK_MULT[star];
+    const baseAbilityPower = 1 + (star - 1) * 0.22;
+    const item = strongestItemBonuses(source.items || []);
+
+    const guardHpGain = source.awakening === "guard" ? baseHp * 0.25 : 0;
+    const guardArmor = source.awakening === "guard" ? 12 : 0;
+    const forceAttackPct = source.awakening === "force" ? 0.20 : 0;
+    const forceAbilityPct = source.awakening === "force" ? 0.22 : 0;
+
+    const vanguardArmor = def.role === "Vanguard" ? bonuses.vanguardArmor : 0;
+    const strikerAttackPct = def.role === "Striker" ? Math.max(0, bonuses.strikerAttack - 1) : 0;
+    const rangerSpeedPct = def.role === "Ranger" ? Math.max(0, bonuses.rangerSpeed - 1) : 0;
+    const assassinSpeedPct = def.role === "Assassin" ? Math.max(0, bonuses.assassinSpeed - 1) : 0;
+    const mysticAbilityPct = Math.max(0, bonuses.abilityAll - 1);
+
+    // The strongest source wins for each stat. This prevents stacked armour,
+    // attack, speed, health, mana, regeneration and ability-power boosts.
+    let maxHp = baseHp + Math.max(item.hp, guardHpGain);
+    let attack = baseAttack + Math.max(item.attack, baseAttack * Math.max(forceAttackPct, strikerAttackPct));
+    let armor = def.armor + Math.max(item.armor, guardArmor, vanguardArmor);
+    let attackSpeed = def.attackSpeed * (1 + Math.max(item.attackSpeed, rangerSpeedPct, assassinSpeedPct));
+    let abilityPower = baseAbilityPower * (1 + Math.max(item.abilityPower, forceAbilityPct, mysticAbilityPct));
+    let startMana = Math.max(item.startMana, source.awakening === "guard" ? 10 : 0);
+    let regenPerSecond = item.regen;
+    let critChance = 0.05 + item.crit;
+    let critMult = def.role === "Assassin" ? bonuses.assassinCritMult : 1.5;
     let manaMax = def.manaMax;
-    let echoAvailable = false;
+    let echoAvailable = item.echo;
 
-    for (const itemKey of source.items || []) {
-      const item = ITEM_DEFS[itemKey];
-      if (!item) continue;
-      maxHp += item.hp || 0;
-      attack += item.attack || 0;
-      armor += item.armor || 0;
-      attackSpeed *= 1 + (item.attackSpeed || 0);
-      abilityPower += item.abilityPower || 0;
-      startMana += item.startMana || 0;
-      regenPerSecond += item.regen || 0;
-      critChance += item.crit || 0;
-      if (item.echo) echoAvailable = true;
-    }
-
-    if (source.awakening === "force") {
-      attack *= 1.20;
-      abilityPower += 0.22;
-    } else if (source.awakening === "guard") {
-      maxHp *= 1.25;
-      armor += 12;
-      startMana += 10;
-    }
-
-    if (def.role === "Vanguard") armor += bonuses.vanguardArmor;
-    if (def.role === "Ranger") attackSpeed *= bonuses.rangerSpeed;
-    if (def.role === "Striker") attack *= bonuses.strikerAttack;
-    if (def.role === "Assassin") {
-      critMult = bonuses.assassinCritMult;
-      attackSpeed *= bonuses.assassinSpeed;
-    }
-
+    // Boss and endless-round scaling are enemy difficulty modifiers, not stackable buffs.
     if (source.boss) {
       maxHp *= 1.24;
       attack *= 1.12;
@@ -4713,14 +5126,67 @@
     playSfx("ko");
   }
 
+  function formatFloatingAmount(kind, value) {
+    const rounded = Math.max(0, Math.round(value));
+    if (kind === "damage" || kind === "crit") return `-${rounded}`;
+    if (kind === "heal") return `+${rounded}`;
+    if (kind === "shield") return `🛡 ${rounded}`;
+    if (kind === "mana") return `+${rounded} mana`;
+    return String(rounded);
+  }
+
   function addFloating(unit, text, kind = "damage") {
-    if (!combat) return;
+    if (!combat || !unit) return;
+    const now = combat.elapsed;
+    const numericMatch = String(text).match(/([+-]?)(\d+(?:\.\d+)?)/);
+    const numericKinds = new Set(["damage", "crit", "heal", "shield", "mana"]);
+    const numericValue = numericMatch && numericKinds.has(kind) ? Number(numericMatch[2]) : null;
+
+    const mergeKey = kind === "crit" ? "damage" : kind;
+    if (numericValue !== null) {
+      const mergeTarget = [...combat.floating].reverse().find(entry =>
+        entry.unitId === unit.combatId &&
+        entry.mergeKey === mergeKey &&
+        now - (entry.lastAt || entry.createdAt || 0) <= 170
+      );
+      if (mergeTarget) {
+        mergeTarget.value = (mergeTarget.value || 0) + numericValue;
+        if (kind === "crit") mergeTarget.kind = "crit";
+        mergeTarget.text = formatFloatingAmount(mergeTarget.kind, mergeTarget.value);
+        mergeTarget.lastAt = now;
+        mergeTarget.expires = now + 660;
+        mergeTarget.x = unit.x;
+        mergeTarget.y = unit.y;
+        return;
+      }
+    }
+
+    const activeForUnit = combat.floating
+      .filter(entry => entry.unitId === unit.combatId && entry.expires > now)
+      .sort((a, b) => a.createdAt - b.createdAt);
+    // One popup per spirit at a time: new information replaces older clutter.
+    while (activeForUnit.length >= 1) {
+      const oldest = activeForUnit.shift();
+      const index = combat.floating.indexOf(oldest);
+      if (index >= 0) combat.floating.splice(index, 1);
+    }
+    const lane = 0;
+    const teamOffset = unit.team === "enemy" ? -7 : 7;
+
     combat.floating.push({
+      unitId: unit.combatId,
+      team: unit.team,
       x: unit.x,
       y: unit.y,
-      text,
+      text: numericValue !== null ? formatFloatingAmount(kind, numericValue) : text,
+      value: numericValue,
       kind,
-      expires: combat.elapsed + 760
+      mergeKey,
+      lane,
+      sideOffset: teamOffset,
+      createdAt: now,
+      lastAt: now,
+      expires: now + 660
     });
   }
 
@@ -4733,9 +5199,13 @@
   }
 
   function addShield(unit, amount, show = true) {
-    if (!unit?.alive || amount <= 0) return;
-    unit.shield += amount;
-    if (show) addFloating(unit, `+${Math.round(amount)} shield`, "shield");
+    if (!unit?.alive || amount <= 0) return 0;
+    const previous = unit.shield;
+    // Shields refresh to the stronger remaining value instead of adding together.
+    unit.shield = Math.max(unit.shield, amount);
+    const gained = Math.max(0, unit.shield - previous);
+    if (show && gained > 1) addFloating(unit, `🛡 ${Math.round(gained)}`, "shield");
+    return gained;
   }
 
   function applyBurn(unit, dps, duration) {
@@ -4785,7 +5255,7 @@
         if (target) {
           target.stunnedUntil = Math.max(target.stunnedUntil, combat.elapsed + 850);
           target.slowUntil = Math.max(target.slowUntil, combat.elapsed + 2200);
-          addFloating(target, "Frozen", "shield");
+          addFloating(target, "Frozen", "status");
         }
         break;
       }
@@ -5014,7 +5484,7 @@
         dealDamage(caster, target, 130 * caster.abilityPower + caster.attack * 0.82);
         target.stunnedUntil = Math.max(target.stunnedUntil, combat.elapsed + 1400);
         target.slowUntil = Math.max(target.slowUntil, combat.elapsed + 2600);
-        addFloating(target, "Stunned", "shield");
+        addFloating(target, "Stunned", "status");
         break;
       }
       case "shadowDive": {
@@ -5121,7 +5591,7 @@
     if (caster.echoAvailable) {
       caster.mana = clamp(caster.mana + 30, 0, caster.manaMax);
       caster.echoAvailable = false;
-      addFloating(caster, "+30 mana", "shield");
+      addFloating(caster, "+30 mana", "mana");
     }
     caster.castLock = 360;
     caster.attackCooldown = Math.max(caster.attackCooldown, 500);
