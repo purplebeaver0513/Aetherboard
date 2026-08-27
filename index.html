@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#10162b" />
-  <title>Aetherboard: Auto Chess</title>
+  <title>Aetherboard Arena: Auto Chess</title>
   <style>
     :root {
       --bg-0: #080b18;
@@ -1287,18 +1287,797 @@
       .bench-list { grid-template-columns: repeat(12, 58px); }
     }
 
+
+    /* ─────────────────────────────────────────────────────────────
+       IO-STYLE MAIN TITLE SCREEN
+       ───────────────────────────────────────────────────────────── */
+    body.title-open { overflow: hidden; }
+
+    .title-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 1500;
+      min-height: 100dvh;
+      overflow: auto;
+      color: #f8fbff;
+      background:
+        radial-gradient(circle at 16% 14%, rgba(83, 116, 255, .32), transparent 30rem),
+        radial-gradient(circle at 85% 18%, rgba(194, 93, 255, .25), transparent 28rem),
+        radial-gradient(circle at 50% 110%, rgba(53, 228, 205, .18), transparent 36rem),
+        linear-gradient(150deg, #070918 0%, #101632 46%, #0b1027 100%);
+      isolation: isolate;
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1);
+      transition: opacity .28s ease, visibility .28s ease, transform .35s ease;
+    }
+
+    .title-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: scale(1.015);
+    }
+
+    .title-screen::before {
+      content: "";
+      position: fixed;
+      inset: -20%;
+      z-index: -3;
+      background-image:
+        linear-gradient(rgba(153, 177, 255, .055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(153, 177, 255, .055) 1px, transparent 1px);
+      background-size: 46px 46px;
+      transform: perspective(700px) rotateX(58deg) translateY(29%);
+      transform-origin: center bottom;
+      mask-image: linear-gradient(to bottom, transparent 7%, rgba(0,0,0,.95) 46%, transparent 96%);
+      animation: titleGridDrift 20s linear infinite;
+    }
+
+    .title-screen::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      background:
+        linear-gradient(to bottom, rgba(2, 4, 15, .08), rgba(2, 4, 15, .28)),
+        radial-gradient(ellipse at center, transparent 34%, rgba(2, 4, 15, .42) 100%);
+    }
+
+    @keyframes titleGridDrift {
+      from { background-position: 0 0, 0 0; }
+      to { background-position: 46px 46px, 46px 46px; }
+    }
+
+    .title-orb {
+      position: fixed;
+      z-index: -1;
+      display: grid;
+      place-items: center;
+      width: var(--size, 76px);
+      aspect-ratio: 1;
+      left: var(--x, 10%);
+      top: var(--y, 20%);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 34% 27%, rgba(255,255,255,.54), transparent 16%),
+        radial-gradient(circle at 52% 58%, var(--orb-a, rgba(111, 139, 255, .72)), var(--orb-b, rgba(27, 34, 80, .48)) 66%, rgba(8, 12, 34, .65) 100%);
+      box-shadow: inset 0 0 23px rgba(255,255,255,.10), 0 14px 50px var(--glow, rgba(99, 123, 255, .21));
+      color: white;
+      font-size: calc(var(--size, 76px) * .39);
+      filter: saturate(1.1);
+      opacity: var(--opacity, .72);
+      animation: titleFloat var(--speed, 8s) ease-in-out infinite alternate;
+      animation-delay: var(--delay, 0s);
+    }
+
+    @keyframes titleFloat {
+      from { transform: translate3d(-8px, -8px, 0) rotate(-5deg); }
+      to { transform: translate3d(12px, 15px, 0) rotate(8deg); }
+    }
+
+    .title-inner {
+      position: relative;
+      z-index: 2;
+      width: min(1180px, 100%);
+      min-height: 100dvh;
+      margin: 0 auto;
+      padding: 20px 28px 14px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 13px;
+    }
+
+    .title-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .title-nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #dbe4ff;
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .title-nav-mark {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 11px;
+      background: conic-gradient(from 210deg, #5de5d1, #6c82ff, #c177ff, #ff8ca7, #ffd66b, #5de5d1);
+      color: #0b1027;
+      font-size: 18px;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.25), 0 8px 22px rgba(88, 111, 255, .28);
+      transform: rotate(-5deg);
+    }
+
+    .title-nav-brand small {
+      margin-left: -4px;
+      padding: 3px 6px;
+      border: 1px solid rgba(114, 238, 212, .32);
+      border-radius: 99px;
+      color: #83efd8;
+      background: rgba(45, 199, 173, .08);
+      font-size: 7px;
+      letter-spacing: .11em;
+    }
+
+    .title-nav-actions { display: flex; gap: 8px; }
+
+    .title-circle-button {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 50%;
+      background: rgba(13, 19, 45, .58);
+      box-shadow: 0 8px 24px rgba(0,0,0,.20);
+      color: #f3f7ff;
+      font-size: 16px;
+      backdrop-filter: blur(10px);
+      transition: transform .15s ease, background .15s ease, border-color .15s ease;
+    }
+
+    .title-circle-button:hover {
+      transform: translateY(-2px) scale(1.03);
+      border-color: rgba(157, 176, 255, .42);
+      background: rgba(28, 38, 78, .78);
+    }
+
+    .title-main {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(360px, .72fr);
+      align-items: center;
+      gap: clamp(26px, 5vw, 72px);
+      padding: 4px 0;
+    }
+
+    .title-hero { min-width: 0; }
+
+    .title-kicker {
+      width: fit-content;
+      margin-bottom: 12px;
+      padding: 6px 10px;
+      border: 1px solid rgba(126, 240, 170, .28);
+      border-radius: 99px;
+      background: rgba(126, 240, 170, .07);
+      color: #91f2b5;
+      font-size: 9px;
+      font-weight: 950;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      box-shadow: 0 10px 32px rgba(0,0,0,.13);
+    }
+
+    .title-logo {
+      margin: 0;
+      font-size: clamp(54px, 7.2vw, 92px);
+      line-height: .82;
+      letter-spacing: -.075em;
+      text-transform: uppercase;
+      text-shadow: 0 18px 55px rgba(0,0,0,.38);
+    }
+
+    .title-logo span {
+      display: block;
+      color: #f5f8ff;
+    }
+
+    .title-logo strong {
+      display: block;
+      margin-left: .42em;
+      color: transparent;
+      background: linear-gradient(100deg, #5de5d1 0%, #72a0ff 35%, #c37aff 68%, #ff95bb 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      filter: drop-shadow(0 8px 25px rgba(101, 126, 255, .22));
+    }
+
+    .title-tagline {
+      max-width: 610px;
+      margin: 18px 0 0;
+      color: #b9c4e3;
+      font-size: clamp(13px, 1.5vw, 17px);
+      line-height: 1.58;
+    }
+
+    .title-tagline strong { color: #f4f7ff; }
+
+    .title-arena-preview {
+      position: relative;
+      width: min(610px, 100%);
+      height: 186px;
+      margin-top: 22px;
+      overflow: hidden;
+      border: 1px solid rgba(172, 194, 255, .20);
+      border-radius: 22px;
+      background:
+        linear-gradient(rgba(168, 188, 255, .08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(168, 188, 255, .08) 1px, transparent 1px),
+        radial-gradient(circle at 35% 100%, rgba(72, 126, 255, .17), transparent 44%),
+        linear-gradient(145deg, rgba(24, 33, 71, .72), rgba(9, 13, 34, .86));
+      background-size: 12.5% 25%, 12.5% 25%, auto, auto;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 20px 55px rgba(0,0,0,.25);
+      transform: perspective(900px) rotateX(4deg) rotateY(-2deg);
+      transform-origin: center;
+    }
+
+    .title-arena-preview::before {
+      content: "YOUR FORMATION";
+      position: absolute;
+      left: 14px;
+      top: 12px;
+      color: rgba(210, 222, 255, .55);
+      font-size: 7px;
+      font-weight: 950;
+      letter-spacing: .18em;
+    }
+
+    .preview-spirit {
+      position: absolute;
+      left: var(--px);
+      top: var(--py);
+      width: 49px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255,255,255,.28);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 34% 25%, rgba(255,255,255,.48), transparent 18%),
+        linear-gradient(145deg, var(--pa), var(--pb));
+      box-shadow: 0 10px 23px rgba(0,0,0,.30), 0 0 24px var(--pg);
+      font-size: 24px;
+      animation: previewBounce 2.8s ease-in-out infinite alternate;
+      animation-delay: var(--pd, 0s);
+    }
+
+    .preview-spirit::after {
+      content: "";
+      position: absolute;
+      inset: auto 9px -8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(0,0,0,.26);
+      filter: blur(4px);
+      z-index: -1;
+    }
+
+    @keyframes previewBounce {
+      from { transform: translateY(0) scale(1); }
+      to { transform: translateY(-5px) scale(1.035); }
+    }
+
+    .title-bond-badge {
+      position: absolute;
+      right: 14px;
+      bottom: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border: 1px solid rgba(255, 166, 108, .34);
+      border-radius: 13px;
+      background: rgba(46, 21, 30, .80);
+      box-shadow: 0 12px 30px rgba(0,0,0,.30);
+      color: #ffbc91;
+      font-size: 10px;
+      font-weight: 850;
+      backdrop-filter: blur(8px);
+    }
+
+    .title-bond-badge b {
+      color: #fff1e8;
+      font-size: 15px;
+    }
+
+    .title-feature-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .title-feature {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 99px;
+      background: rgba(255,255,255,.045);
+      color: #c6d0ec;
+      font-size: 9px;
+      font-weight: 800;
+      backdrop-filter: blur(8px);
+    }
+
+    .title-feature b { color: white; }
+
+    .title-menu-card {
+      position: relative;
+      overflow: hidden;
+      padding: 22px;
+      border: 1px solid rgba(176, 193, 255, .22);
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 100% 0, rgba(169, 96, 255, .18), transparent 38%),
+        linear-gradient(155deg, rgba(31, 42, 82, .91), rgba(10, 15, 37, .94));
+      box-shadow: 0 30px 90px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.08);
+      backdrop-filter: blur(18px);
+    }
+
+    .title-menu-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #6e8dff, #cb7cff, transparent);
+      opacity: .78;
+    }
+
+    .title-ready {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: #83eeb4;
+      font-size: 8px;
+      font-weight: 950;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .title-ready-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #6de9a1;
+      box-shadow: 0 0 0 5px rgba(109, 233, 161, .09), 0 0 15px rgba(109, 233, 161, .55);
+      animation: readyPulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes readyPulse { 50% { transform: scale(.76); opacity: .72; } }
+
+    .title-menu-card h2 {
+      margin: 9px 0 0;
+      font-size: clamp(25px, 3vw, 35px);
+      line-height: 1;
+      letter-spacing: -.045em;
+    }
+
+    .title-menu-copy {
+      margin: 7px 0 0;
+      color: #aeb9d9;
+      font-size: 10px;
+      line-height: 1.48;
+    }
+
+    .title-name-label {
+      display: block;
+      margin-top: 17px;
+      color: #cdd6ef;
+      font-size: 8px;
+      font-weight: 950;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .title-name-wrap {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 6px;
+      height: 48px;
+      padding: 0 13px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 13px;
+      background: rgba(4, 8, 24, .55);
+      box-shadow: inset 0 2px 8px rgba(0,0,0,.22);
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+
+    .title-name-wrap:focus-within {
+      border-color: rgba(114, 151, 255, .72);
+      box-shadow: 0 0 0 4px rgba(102, 137, 255, .10), inset 0 2px 8px rgba(0,0,0,.18);
+    }
+
+    .title-name-wrap span { font-size: 16px; opacity: .74; }
+
+    .title-name-input {
+      min-width: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: white;
+      font-size: 15px;
+      font-weight: 850;
+    }
+
+    .title-name-input::placeholder { color: #67728f; }
+
+    .title-mode-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 15px;
+      color: #cdd6ef;
+      font-size: 8px;
+      font-weight: 950;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .title-mode-heading span {
+      color: #7f8aa7;
+      font-size: 7px;
+      letter-spacing: .02em;
+      text-transform: none;
+      font-weight: 750;
+    }
+
+    .title-mode-picker {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 7px;
+    }
+
+    .title-mode-card {
+      position: relative;
+      min-height: 105px;
+      padding: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.11);
+      border-radius: 14px;
+      background: rgba(255,255,255,.035);
+      text-align: left;
+      transition: transform .15s ease, border-color .15s ease, background .15s ease, box-shadow .15s ease;
+    }
+
+    .title-mode-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(133, 160, 255, .36);
+      background: rgba(105, 126, 220, .08);
+    }
+
+    .title-mode-card.selected {
+      border-color: rgba(112, 145, 255, .72);
+      background: linear-gradient(145deg, rgba(91, 122, 255, .19), rgba(134, 91, 225, .12));
+      box-shadow: 0 0 0 3px rgba(99, 132, 255, .09), inset 0 1px 0 rgba(255,255,255,.08);
+    }
+
+    .title-mode-card.selected::after {
+      content: "✓";
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      width: 19px;
+      height: 19px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #7796ff;
+      color: #09102a;
+      font-size: 10px;
+      font-weight: 1000;
+    }
+
+    .title-mode-icon { display: block; font-size: 23px; }
+    .title-mode-card strong { display: block; margin-top: 6px; font-size: 11px; }
+    .title-mode-card small { display: block; margin-top: 4px; color: #8f9ab7; font-size: 8px; line-height: 1.35; }
+
+    .title-play-button {
+      width: 100%;
+      min-height: 62px;
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 16px;
+      background: linear-gradient(105deg, #5c78ff 0%, #8069f8 52%, #bd68ed 100%);
+      box-shadow: 0 15px 36px rgba(84, 92, 231, .38), inset 0 1px 0 rgba(255,255,255,.26);
+      color: white;
+      text-align: left;
+      text-shadow: 0 1px 8px rgba(31, 24, 87, .35);
+      transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
+      animation: playGlow 2.8s ease-in-out infinite;
+    }
+
+    @keyframes playGlow {
+      50% { box-shadow: 0 18px 44px rgba(112, 88, 246, .51), 0 0 0 5px rgba(132, 104, 255, .055), inset 0 1px 0 rgba(255,255,255,.28); }
+    }
+
+    .title-play-button:hover { transform: translateY(-2px) scale(1.008); filter: brightness(1.07); }
+    .title-play-button:active { transform: translateY(1px) scale(.996); }
+    .title-play-icon { font-size: 24px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.20)); }
+    .title-play-button strong { display: block; font-size: 17px; letter-spacing: .055em; }
+    .title-play-button small { display: block; margin-top: 2px; color: rgba(255,255,255,.78); font-size: 8px; font-weight: 700; }
+
+    .title-continue-button[hidden] { display: none !important; }
+
+    .title-continue-button {
+      width: 100%;
+      min-height: 47px;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 12px;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 13px;
+      background: rgba(255,255,255,.055);
+      color: #e8edff;
+      text-align: left;
+      transition: background .15s ease, transform .15s ease, border-color .15s ease;
+    }
+
+    .title-continue-button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(124, 237, 198, .32);
+      background: rgba(106, 211, 175, .08);
+    }
+
+    .title-continue-main strong { display: block; font-size: 10px; }
+    .title-continue-main small { display: block; margin-top: 2px; color: #8f9ab8; font-size: 7px; }
+    .title-continue-arrow { color: #83eeb4; font-size: 16px; }
+
+    .title-record-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      margin-top: 10px;
+      color: #76829f;
+      font-size: 7px;
+      font-weight: 750;
+    }
+
+    .title-record-strip span:first-child {
+      color: #9da9c9;
+      font-weight: 950;
+      letter-spacing: .10em;
+    }
+
+    .title-record-strip strong { color: #ffd879; font-size: 8px; }
+    .title-record-separator { opacity: .5; }
+
+    .title-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      color: #6f7a99;
+      font-size: 8px;
+    }
+
+    .title-footer strong { color: #aeb8d4; }
+    .title-footer-right { display: flex; align-items: center; gap: 12px; }
+
+    .title-key {
+      display: inline-grid;
+      min-width: 20px;
+      height: 20px;
+      place-items: center;
+      padding: 0 5px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-bottom-width: 2px;
+      border-radius: 6px;
+      background: rgba(255,255,255,.045);
+      color: #aab5d0;
+      font-size: 7px;
+      font-weight: 900;
+    }
+
+    @media (max-width: 900px) {
+      body.title-open { overflow: auto; }
+      .title-inner { min-height: 100dvh; padding: 16px; }
+      .title-main { grid-template-columns: 1fr; gap: 24px; padding: 28px 0; }
+      .title-hero { text-align: center; }
+      .title-kicker { margin-inline: auto; }
+      .title-logo strong { margin-left: 0; }
+      .title-tagline { margin-inline: auto; }
+      .title-arena-preview { margin-inline: auto; transform: none; }
+      .title-feature-row { justify-content: center; }
+      .title-menu-card { width: min(520px, 100%); margin: 0 auto; }
+      .title-orb { opacity: calc(var(--opacity, .72) * .55); }
+    }
+
+    @media (max-width: 560px) {
+      .title-nav-brand { font-size: 10px; }
+      .title-nav-brand small { display: none; }
+      .title-main { padding-top: 16px; }
+      .title-logo { font-size: clamp(47px, 18vw, 72px); }
+      .title-tagline { font-size: 12px; }
+      .title-arena-preview { height: 150px; }
+      .preview-spirit { width: 41px; font-size: 20px; }
+      .title-bond-badge { right: 9px; bottom: 9px; padding: 7px 9px; font-size: 8px; }
+      .title-bond-badge b { font-size: 12px; }
+      .title-menu-card { padding: 16px; border-radius: 19px; }
+      .title-mode-card { min-height: 98px; padding: 10px; }
+      .title-mode-card small { font-size: 7px; }
+      .title-footer { justify-content: center; text-align: center; }
+      .title-footer-right { display: none; }
+    }
+
+    @media (min-width: 901px) and (max-height: 760px) {
+      .title-inner { padding-top: 12px; padding-bottom: 8px; gap: 7px; }
+      .title-nav-mark { width: 31px; height: 31px; }
+      .title-circle-button { width: 33px; height: 33px; }
+      .title-main { gap: 34px; }
+      .title-kicker { margin-bottom: 8px; padding: 5px 9px; }
+      .title-logo { font-size: clamp(49px, 6.3vw, 76px); }
+      .title-tagline { margin-top: 11px; font-size: 12px; line-height: 1.45; }
+      .title-arena-preview { height: 145px; margin-top: 13px; }
+      .preview-spirit { width: 42px; font-size: 20px; }
+      .title-feature-row { margin-top: 8px; }
+      .title-feature { padding: 5px 8px; }
+      .title-menu-card { padding: 16px; }
+      .title-menu-card h2 { margin-top: 6px; font-size: 27px; }
+      .title-menu-copy { margin-top: 4px; }
+      .title-name-label { margin-top: 11px; }
+      .title-name-wrap { height: 42px; }
+      .title-mode-heading { margin-top: 10px; }
+      .title-mode-card { min-height: 87px; padding: 9px; }
+      .title-mode-icon { font-size: 19px; }
+      .title-mode-card strong { margin-top: 3px; font-size: 10px; }
+      .title-play-button { min-height: 52px; margin-top: 9px; }
+      .title-play-button strong { font-size: 14px; }
+      .title-continue-button { min-height: 41px; }
+      .title-record-strip { margin-top: 6px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .title-screen::before,
+      .title-orb,
+      .preview-spirit,
+      .title-ready-dot,
+      .title-play-button { animation: none !important; }
+    }
+
   </style>
 </head>
-<body>
+<body class="title-open">
   <noscript><div class="noscript">This game needs JavaScript enabled to run.</div></noscript>
 
-  <main class="app-shell" id="app">
+  <section class="title-screen" id="titleScreen" aria-labelledby="titleLogo">
+    <span class="title-orb" aria-hidden="true" style="--x:4%;--y:18%;--size:68px;--speed:7.4s;--delay:-1s;--orb-a:#ff8a58;--orb-b:#512334;--glow:rgba(255,112,82,.22);--opacity:.62">🔥</span>
+    <span class="title-orb" aria-hidden="true" style="--x:89%;--y:13%;--size:84px;--speed:8.7s;--delay:-3s;--orb-a:#68b8ff;--orb-b:#243c76;--glow:rgba(76,156,255,.22);--opacity:.65">💧</span>
+    <span class="title-orb" aria-hidden="true" style="--x:1%;--y:74%;--size:96px;--speed:10s;--delay:-5s;--orb-a:#6dcf8d;--orb-b:#234c43;--glow:rgba(87,220,142,.20);--opacity:.38">🌿</span>
+    <span class="title-orb" aria-hidden="true" style="--x:93%;--y:68%;--size:62px;--speed:6.8s;--delay:-2s;--orb-a:#c181ff;--orb-b:#3b265d;--glow:rgba(183,103,255,.25);--opacity:.55">🔮</span>
+    <span class="title-orb" aria-hidden="true" style="--x:72%;--y:87%;--size:44px;--speed:7.7s;--delay:-4s;--orb-a:#f6d45e;--orb-b:#61511d;--glow:rgba(255,218,89,.22);--opacity:.40">⚡</span>
+    <span class="title-orb" aria-hidden="true" style="--x:23%;--y:91%;--size:48px;--speed:9.2s;--delay:-6s;--orb-a:#9fe7ff;--orb-b:#31516a;--glow:rgba(121,216,255,.20);--opacity:.34">❄️</span>
+
+    <div class="title-inner">
+      <header class="title-nav">
+        <div class="title-nav-brand">
+          <span class="title-nav-mark" aria-hidden="true">✦</span>
+          <span>Aetherboard</span>
+          <small>Browser Arena</small>
+        </div>
+        <div class="title-nav-actions">
+          <button class="title-circle-button" id="titleSoundButton" type="button" title="Toggle sound" aria-label="Toggle sound">🔊</button>
+          <button class="title-circle-button" id="titleHelpButton" type="button" title="How to play" aria-label="How to play">?</button>
+        </div>
+      </header>
+
+      <div class="title-main">
+        <section class="title-hero">
+          <div class="title-kicker">● Solo auto-battler · Instant browser play</div>
+          <h1 class="title-logo" id="titleLogo"><span>Aether</span><strong>Board</strong></h1>
+          <p class="title-tagline">Draft from nothing, discover <strong>40 original spirits</strong>, and build an eight-unit formation whose type bonds can completely change the battle.</p>
+
+          <div class="title-arena-preview" aria-hidden="true">
+            <span class="preview-spirit" style="--px:9%;--py:49%;--pa:#ff895a;--pb:#7c2830;--pg:rgba(255,112,75,.25);--pd:-.2s">🔥</span>
+            <span class="preview-spirit" style="--px:23%;--py:23%;--pa:#ff9d64;--pb:#703248;--pg:rgba(255,112,75,.23);--pd:-1.1s">🦊</span>
+            <span class="preview-spirit" style="--px:35%;--py:55%;--pa:#ef765e;--pb:#6a2534;--pg:rgba(255,112,75,.24);--pd:-1.8s">🌋</span>
+            <span class="preview-spirit" style="--px:48%;--py:25%;--pa:#ffb15c;--pb:#7b3b2d;--pg:rgba(255,112,75,.21);--pd:-.7s">☀️</span>
+            <span class="preview-spirit" style="--px:60%;--py:54%;--pa:#ff8057;--pb:#6b2732;--pg:rgba(255,112,75,.23);--pd:-1.4s">🐲</span>
+            <span class="preview-spirit" style="--px:76%;--py:24%;--pa:#5ab6ff;--pb:#274575;--pg:rgba(71,158,255,.22);--pd:-2.1s">💧</span>
+            <div class="title-bond-badge"><span>🔥 Fire Bond ×5</span><b>+40%</b> damage</div>
+          </div>
+
+          <div class="title-feature-row" aria-label="Game features">
+            <span class="title-feature">👾 <b>40</b> spirits</span>
+            <span class="title-feature">✨ <b>10</b> elemental types</span>
+            <span class="title-feature">♟️ <b>8</b>-unit teams</span>
+            <span class="title-feature">🏆 25 rounds or ∞ endless</span>
+          </div>
+        </section>
+
+        <aside class="title-menu-card" aria-label="Start menu">
+          <div class="title-ready"><span class="title-ready-dot"></span> Arena ready</div>
+          <h2>Enter the arena</h2>
+          <p class="title-menu-copy">Choose a name and mode. Every new run starts with an empty roster and a three-pick starter draft.</p>
+
+          <label class="title-name-label" for="titleNameInput">Commander name</label>
+          <div class="title-name-wrap">
+            <span aria-hidden="true">⌨</span>
+            <input class="title-name-input" id="titleNameInput" type="text" maxlength="16" autocomplete="nickname" spellcheck="false" placeholder="Enter a name" />
+          </div>
+
+          <div class="title-mode-heading">Game mode <span id="titleModeHint">Defeat the final boss</span></div>
+          <div class="title-mode-picker" role="group" aria-label="Choose game mode">
+            <button class="title-mode-card selected" type="button" data-title-mode="expedition" aria-pressed="true">
+              <span class="title-mode-icon">🏆</span>
+              <strong>25-Round</strong>
+              <small>Five boss rounds and a final victory.</small>
+            </button>
+            <button class="title-mode-card" type="button" data-title-mode="endless" aria-pressed="false">
+              <span class="title-mode-icon">∞</span>
+              <strong>Endless</strong>
+              <small>Scale forever and chase a local record.</small>
+            </button>
+          </div>
+
+          <button class="title-play-button" id="titlePlayButton" type="button">
+            <span class="title-play-icon" aria-hidden="true">▶</span>
+            <span><strong>PLAY NOW</strong><small id="titlePlaySub">Start a 25-round expedition</small></span>
+          </button>
+
+          <button class="title-continue-button" id="titleContinueButton" type="button" hidden>
+            <span class="title-continue-main"><strong id="titleContinueLabel">Continue saved run</strong><small id="titleContinueMeta">Round 1 · 25-Round</small></span>
+            <span class="title-continue-arrow" aria-hidden="true">→</span>
+          </button>
+
+          <div class="title-record-strip">
+            <span>LOCAL RECORD</span><strong id="titleBestValue">—</strong><i class="title-record-separator">•</i><span>Auto-saves in this browser</span>
+          </div>
+        </aside>
+      </div>
+
+      <footer class="title-footer">
+        <span><strong>Aetherboard Arena</strong> · Original single-player auto chess prototype</span>
+        <span class="title-footer-right"><span><span class="title-key">Enter</span> play</span><span>No account required</span></span>
+      </footer>
+    </div>
+  </section>
+
+
+  <main class="app-shell" id="app" aria-hidden="true">
     <header class="topbar">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true">✦</div>
         <div class="brand-copy">
           <h1>Aetherboard: Auto Chess</h1>
-          <p>Draft from 40 spirits, build an eight-spirit squad, and master powerful type bonds.</p>
+          <p id="brandSubtitle">Draft from 40 spirits, build an eight-spirit squad, and master powerful type bonds.</p>
         </div>
       </div>
 
@@ -1451,6 +2230,7 @@
   const MAX_LEVEL = 8;
   const EXPEDITION_ROUNDS = 25;
   const SAVE_KEY = "aetherboard-auto-chess-v2";
+  const PROFILE_KEY = "aetherboard-arena-profile-v1";
   const ELEMENT_TYPES = ["Fire", "Water", "Nature", "Electric", "Ice", "Shadow", "Light", "Earth", "Wind", "Arcane"];
   const TYPE_DAMAGE_TIERS = [
     { count: 2, bonus: 0.08 },
@@ -1802,18 +2582,177 @@
   let awakeningQueue = [];
   let modalLocked = false;
   let audioContext = null;
+  let titleSelectedMode = "expedition";
+  let titleHasSavedRun = false;
+  let titleContinueAllowed = true;
 
 
   function cacheElements() {
     [
-      "hpValue", "goldValue", "levelValue", "levelCap", "xpBar", "roundValue", "roundCap", "modeValue",
+      "app", "brandSubtitle", "hpValue", "goldValue", "levelValue", "levelCap", "xpBar", "roundValue", "roundCap", "modeValue",
       "soundButton", "helpButton", "newGameButton", "traitList", "battleLog", "streakLabel",
       "roundTitle", "roundSubtitle", "phasePill", "phaseText", "boardWrap", "boardGrid",
       "floatingLayer", "battleTimer", "formationInfo", "autoPlaceButton", "speedButton",
       "battleButton", "selectedLocation", "selectedCard", "inventoryList", "enemyPowerLabel",
       "enemyList", "lockButton", "xpButton", "rerollButton", "shopList", "benchList",
-      "toastLayer", "modalBackdrop", "modalTitle", "modalSubtitle", "modalBody", "modalActions"
+      "toastLayer", "modalBackdrop", "modalTitle", "modalSubtitle", "modalBody", "modalActions",
+      "titleScreen", "titleSoundButton", "titleHelpButton", "titleNameInput", "titleModeHint",
+      "titlePlayButton", "titlePlaySub", "titleContinueButton", "titleContinueLabel",
+      "titleContinueMeta", "titleBestValue"
     ].forEach(id => { els[id] = document.getElementById(id); });
+  }
+
+
+  function sanitizeCommanderName(value) {
+    return String(value || "")
+      .replace(/[<>]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 16) || "Commander";
+  }
+
+  function loadProfile() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
+      return {
+        name: sanitizeCommanderName(raw.name || "Commander"),
+        bestExpedition: clamp(Number(raw.bestExpedition) || 0, 0, EXPEDITION_ROUNDS),
+        bestEndless: clamp(Number(raw.bestEndless) || 0, 0, 9999)
+      };
+    } catch (error) {
+      return { name: "Commander", bestExpedition: 0, bestEndless: 0 };
+    }
+  }
+
+  function saveProfile(patch = {}) {
+    const current = loadProfile();
+    const next = {
+      ...current,
+      ...patch,
+      name: sanitizeCommanderName(patch.name ?? current.name),
+      bestExpedition: clamp(Number(patch.bestExpedition ?? current.bestExpedition) || 0, 0, EXPEDITION_ROUNDS),
+      bestEndless: clamp(Number(patch.bestEndless ?? current.bestEndless) || 0, 0, 9999)
+    };
+    try {
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(next));
+    } catch (error) {
+      console.warn("Could not save profile", error);
+    }
+    return next;
+  }
+
+  function titleScreenOpen() {
+    return Boolean(els.titleScreen && !els.titleScreen.classList.contains("hidden"));
+  }
+
+  function getTitleCommanderName() {
+    return sanitizeCommanderName(els.titleNameInput?.value || state?.commanderName || loadProfile().name);
+  }
+
+  function setTitleMode(mode, silent = false) {
+    titleSelectedMode = mode === "endless" ? "endless" : "expedition";
+    document.querySelectorAll("[data-title-mode]").forEach(button => {
+      const selected = button.dataset.titleMode === titleSelectedMode;
+      button.classList.toggle("selected", selected);
+      button.setAttribute("aria-pressed", String(selected));
+    });
+    if (els.titleModeHint) {
+      els.titleModeHint.textContent = titleSelectedMode === "endless"
+        ? "Survive as long as possible"
+        : "Defeat the final boss";
+    }
+    if (els.titlePlaySub) {
+      els.titlePlaySub.textContent = titleSelectedMode === "endless"
+        ? "Start an infinite ascension"
+        : "Start a 25-round expedition";
+    }
+    updateTitleRecord();
+    if (!silent && state?.sound) playSfx("select");
+  }
+
+  function updateTitleRecord() {
+    if (!els.titleBestValue) return;
+    const profile = loadProfile();
+    if (titleSelectedMode === "endless") {
+      els.titleBestValue.textContent = profile.bestEndless ? `Round ${profile.bestEndless}` : "No run yet";
+    } else {
+      els.titleBestValue.textContent = profile.bestExpedition ? `${profile.bestExpedition} / ${EXPEDITION_ROUNDS}` : "No run yet";
+    }
+  }
+
+  function updateTitleContinue() {
+    if (!els.titleContinueButton) return;
+    const canContinue = Boolean(titleContinueAllowed && titleHasSavedRun && state && state.phase === "planning");
+    els.titleContinueButton.hidden = !canContinue;
+    if (!canContinue) return;
+    const totalOwned = Object.keys(state.units || {}).length;
+    const name = sanitizeCommanderName(state.commanderName || loadProfile().name);
+    els.titleContinueLabel.textContent = state.draftComplete ? `Continue ${name}'s run` : "Continue starter draft";
+    els.titleContinueMeta.textContent = `Round ${state.round} · ${modeName(state.mode)} · ${totalOwned} spirit${totalOwned === 1 ? "" : "s"}`;
+  }
+
+  function showTitleScreen({ allowContinue = true, preserveMode = true } = {}) {
+    if (!els.titleScreen) return;
+    closeModal(true);
+    titleContinueAllowed = allowContinue;
+    if (preserveMode && state?.mode) setTitleMode(state.mode, true);
+    const profile = loadProfile();
+    els.titleNameInput.value = sanitizeCommanderName(state?.commanderName || profile.name);
+    updateTitleContinue();
+    updateTitleRecord();
+    els.titleScreen.classList.remove("hidden");
+    document.body.classList.add("title-open");
+    els.app?.setAttribute("aria-hidden", "true");
+    requestAnimationFrame(() => els.titleNameInput?.focus({ preventScroll: true }));
+  }
+
+  function hideTitleScreen() {
+    if (!els.titleScreen) return;
+    els.titleScreen.classList.add("hidden");
+    document.body.classList.remove("title-open");
+    els.app?.setAttribute("aria-hidden", "false");
+  }
+
+  function beginFromTitle() {
+    const name = getTitleCommanderName();
+    saveProfile({ name });
+    startNewRun(titleSelectedMode, name);
+  }
+
+  function continueFromTitle() {
+    if (!titleHasSavedRun || !state || state.phase !== "planning") return;
+    const name = getTitleCommanderName();
+    state.commanderName = name;
+    saveProfile({ name });
+    saveGame();
+    hideTitleScreen();
+    render();
+    playSfx("start");
+    if (!state.draftComplete) {
+      showStarterDraft();
+    } else {
+      toast(`Welcome back, ${name}. Round ${state.round} is ready.`, "good");
+      setTimeout(processAwakeningQueue, 0);
+    }
+  }
+
+  function recordCompletedRun(completedRound, victory = false) {
+    const profile = loadProfile();
+    const round = Math.max(0, Number(completedRound) || 0);
+    if (state.mode === "endless") {
+      saveProfile({ name: state.commanderName, bestEndless: Math.max(profile.bestEndless, round) });
+    } else {
+      saveProfile({
+        name: state.commanderName,
+        bestExpedition: Math.max(profile.bestExpedition, victory ? EXPEDITION_ROUNDS : Math.min(round, EXPEDITION_ROUNDS))
+      });
+    }
+    updateTitleRecord();
+  }
+
+  function clearSavedRun() {
+    try { localStorage.removeItem(SAVE_KEY); } catch (error) {}
+    titleHasSavedRun = false;
   }
 
 
@@ -1879,7 +2818,7 @@
     };
   }
 
-  function createFreshState(mode = "expedition") {
+  function createFreshState(mode = "expedition", commanderName = loadProfile().name) {
     return {
       version: 2,
       hp: 60,
@@ -1888,6 +2827,7 @@
       xp: 0,
       round: 1,
       mode: mode === "endless" ? "endless" : "expedition",
+      commanderName: sanitizeCommanderName(commanderName),
       phase: "planning",
       board: Array(BOARD_SIZE).fill(null),
       bench: Array(BENCH_SIZE).fill(null),
@@ -1916,6 +2856,7 @@
     if (!raw || typeof raw !== "object" || raw.version !== 2) return null;
     const clean = { ...raw };
     clean.mode = clean.mode === "endless" ? "endless" : "expedition";
+    clean.commanderName = sanitizeCommanderName(clean.commanderName || loadProfile().name);
     clean.phase = "planning";
     clean.board = Array.isArray(clean.board) ? clean.board.slice(0, BOARD_SIZE) : Array(BOARD_SIZE).fill(null);
     clean.bench = Array.isArray(clean.bench) ? clean.bench.slice(0, BENCH_SIZE) : Array(BENCH_SIZE).fill(null);
@@ -2616,6 +3557,14 @@
     els.xpBar.style.width = state.level >= MAX_LEVEL ? "100%" : `${clamp((state.xp / need) * 100, 0, 100)}%`;
     els.soundButton.textContent = state.sound ? "🔊" : "🔇";
     els.soundButton.title = state.sound ? "Mute sound" : "Turn on sound";
+    if (els.titleSoundButton) {
+      els.titleSoundButton.textContent = state.sound ? "🔊" : "🔇";
+      els.titleSoundButton.title = state.sound ? "Mute sound" : "Turn on sound";
+    }
+    if (els.brandSubtitle) {
+      const commander = sanitizeCommanderName(state.commanderName);
+      els.brandSubtitle.textContent = `${commander} · 40 spirits · eight-unit squads · powerful type bonds`;
+    }
   }
 
   function renderHeader() {
@@ -3147,12 +4096,17 @@
         </div>
         <div class="awakening-note" style="margin-top:10px">Keyboard: <span class="kbd">R</span> rerolls, <span class="kbd">E</span> buys XP, <span class="kbd">Space</span> begins battle, and <span class="kbd">Esc</span> clears your selection.</div>
       `,
-      actions: [{ label: "Got it", className: "primary-button", onClick: () => { closeModal(true); state.tutorialSeen = true; saveGame(); } }]
+      actions: [{ label: "Got it", className: "primary-button", onClick: () => {
+        closeModal(true);
+        state.tutorialSeen = true;
+        if (!titleScreenOpen() || titleHasSavedRun) saveGame();
+      } }]
     });
   }
 
   function confirmNewGame() {
-    showModeSelect(false);
+    playSfx("select");
+    showTitleScreen({ allowContinue: true, preserveMode: true });
   }
 
   function showModeSelect(locked = false) {
@@ -3186,16 +4140,20 @@
     });
   }
 
-  function startNewRun(mode = "expedition") {
+  function startNewRun(mode = "expedition", commanderName = getTitleCommanderName()) {
     if (combat?.raf) cancelAnimationFrame(combat.raf);
     combat = null;
     awakeningQueue = [];
     closeModal(true);
-    state = createFreshState(mode);
+    hideTitleScreen();
+    const name = sanitizeCommanderName(commanderName);
+    saveProfile({ name });
+    state = createFreshState(mode, name);
     state.shop = Array.from({ length: 5 }, () => rollShopUnit(state.level));
     prepareEnemy();
     render();
     saveGame();
+    titleHasSavedRun = true;
     playSfx("start");
     showStarterDraft();
   }
@@ -4287,6 +5245,8 @@
 
   function showEndModal(victory, completedRound) {
     const endless = state.mode === "endless";
+    recordCompletedRun(completedRound, victory);
+    clearSavedRun();
     openModal({
       title: victory ? "Aetherboard Champion!" : endless ? "Endless run complete" : "Run complete",
       subtitle: victory
@@ -4300,8 +5260,8 @@
         </div>
       `,
       actions: [
-        { label: `Restart ${modeName(state.mode)}`, className: "primary-button", onClick: () => startNewRun(state.mode) },
-        { label: "Choose other mode", className: "small-button", onClick: () => showModeSelect(true) }
+        { label: `Restart ${modeName(state.mode)}`, className: "primary-button", onClick: () => startNewRun(state.mode, state.commanderName) },
+        { label: "Main menu", className: "small-button", onClick: () => { closeModal(true); showTitleScreen({ allowContinue: false, preserveMode: true }); } }
       ],
       locked: true
     });
@@ -4328,7 +5288,7 @@
     state.sound = !state.sound;
     if (state.sound) playSfx("select");
     renderStats();
-    saveGame();
+    if (!titleScreenOpen() || titleHasSavedRun) saveGame();
   }
 
   function getAudioContext() {
@@ -4387,6 +5347,23 @@
 
   function bindEvents() {
     els.helpButton.addEventListener("click", showHelp);
+    els.titleHelpButton.addEventListener("click", showHelp);
+    els.titleSoundButton.addEventListener("click", toggleSound);
+    els.titlePlayButton.addEventListener("click", beginFromTitle);
+    els.titleContinueButton.addEventListener("click", continueFromTitle);
+    document.querySelectorAll("[data-title-mode]").forEach(button => {
+      button.addEventListener("click", () => setTitleMode(button.dataset.titleMode));
+    });
+    els.titleNameInput.addEventListener("input", () => {
+      const cleaned = els.titleNameInput.value.replace(/[<>]/g, "").slice(0, 16);
+      if (cleaned !== els.titleNameInput.value) els.titleNameInput.value = cleaned;
+    });
+    els.titleNameInput.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        beginFromTitle();
+      }
+    });
     els.newGameButton.addEventListener("click", confirmNewGame);
     els.soundButton.addEventListener("click", toggleSound);
     els.battleButton.addEventListener("click", startBattle);
@@ -4402,8 +5379,12 @@
 
     window.addEventListener("keydown", event => {
       const tag = document.activeElement?.tagName?.toLowerCase();
-      if (tag === "input" || tag === "textarea") return;
       const modalOpen = !els.modalBackdrop.classList.contains("hidden");
+      if (tag === "input" || tag === "textarea") return;
+      if (titleScreenOpen() && !modalOpen) {
+        if (event.key === "Enter") beginFromTitle();
+        return;
+      }
       if (event.key === "Escape") {
         if (modalOpen && !modalLocked) closeModal(true);
         else if (!modalOpen && state.phase === "planning") {
@@ -4429,7 +5410,8 @@
     cacheElements();
     bindEvents();
     const loaded = loadGame();
-    state = loaded || createFreshState("expedition");
+    titleHasSavedRun = Boolean(loaded);
+    state = loaded || createFreshState("expedition", loadProfile().name);
     prepareEnemy();
     if (!state.shop.some(Boolean)) {
       state.shop = Array.from({ length: 5 }, () => rollShopUnit(state.level));
@@ -4438,18 +5420,8 @@
       .filter(loc => loc.unit.star >= 2 && !loc.unit.awakening)
       .map(loc => loc.id);
     render();
-
-    if (loaded) {
-      saveGame();
-      if (!state.draftComplete) {
-        showStarterDraft();
-      } else {
-        toast("Saved run restored.", "good");
-        setTimeout(processAwakeningQueue, 0);
-      }
-    } else {
-      showModeSelect(true);
-    }
+    setTitleMode(state.mode, true);
+    showTitleScreen({ allowContinue: titleHasSavedRun, preserveMode: true });
   }
 
   function debugSeedTeam(defKeys = []) {
@@ -4498,6 +5470,8 @@
     resetGame,
     resolveRound: (won = true) => resolveRound(Boolean(won), won ? [] : [{ star: 1, boss: false }], won ? 1 : 0, false),
     startNewRun,
+    showTitleScreen,
+    hideTitleScreen,
     showStarterDraft,
     seedTeam: debugSeedTeam,
     setRound: debugSetRound
