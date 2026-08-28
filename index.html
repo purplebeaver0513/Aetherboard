@@ -2328,6 +2328,101 @@
       .board-zone-label { padding: 2px 5px; }
     }
 
+
+    /* VERSION 4 MULTIPLAYER UPDATE — local duel, blessings, items and music */
+    .title-mode-card[data-title-mode="duel"] {
+      grid-column: 1 / -1;
+      min-height: 82px;
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      align-items: center;
+      column-gap: 10px;
+    }
+    .title-mode-card[data-title-mode="duel"] .title-mode-icon { grid-row: 1 / 3; font-size: 28px; }
+    .title-mode-card[data-title-mode="duel"] strong { margin-top: 0; }
+    .title-mode-card[data-title-mode="duel"] small { margin-top: 2px; }
+    .title-second-name { display: none; }
+    .title-second-name.visible { display: block; }
+    .buff-button { position: relative; }
+    .buff-count-badge {
+      min-width: 17px;
+      height: 17px;
+      padding: 0 4px;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 999px;
+      background: rgba(255,214,107,.17);
+      color: var(--gold);
+      font-size: 8px;
+      font-weight: 950;
+    }
+    .blessing-list { display: grid; gap: 7px; }
+    .blessing-row {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 9px;
+      align-items: center;
+      padding: 9px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 12px;
+      background: rgba(255,255,255,.035);
+    }
+    .blessing-row .blessing-icon {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: rgba(255,214,107,.09);
+      font-size: 18px;
+    }
+    .blessing-row strong { display:block; font-size: 11px; }
+    .blessing-row span { display:block; margin-top:2px; color:var(--muted); font-size:9px; line-height:1.35; }
+    .app-shell.privacy-blur { filter: blur(18px) saturate(.35); pointer-events: none; user-select: none; }
+    .duel-pass-card {
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 16px;
+      background: linear-gradient(145deg, rgba(92,121,255,.12), rgba(181,102,239,.08));
+      text-align: center;
+    }
+    .duel-pass-icon { font-size: 44px; }
+    .duel-pass-card h3 { margin: 8px 0 0; font-size: 18px; }
+    .duel-pass-card p { margin: 6px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .duel-scoreboard {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 8px;
+      align-items: center;
+      margin-top: 10px;
+      padding: 9px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.035);
+    }
+    .duel-score-player { text-align:center; }
+    .duel-score-player strong { display:block; font-size:12px; }
+    .duel-score-player span { display:block; margin-top:2px; color:var(--muted); font-size:9px; }
+    .duel-score-vs { color:var(--gold); font-size:10px; font-weight:950; }
+    .asset-ready-note {
+      margin-top: 8px;
+      padding: 7px 8px;
+      border-left: 3px solid #b69cff;
+      border-radius: 6px;
+      background: rgba(182,156,255,.07);
+      color: #d9ceff;
+      font-size: 9px;
+      line-height: 1.4;
+    }
+    @media (max-width: 540px) {
+      .title-mode-card[data-title-mode="duel"] { grid-template-columns: 34px 1fr; min-height: 74px; }
+      .title-mode-card[data-title-mode="duel"] .title-mode-icon { font-size: 23px; }
+    }
+
+    .custom-unit-art { width: 72%; height: 72%; object-fit: contain; display: block; margin: auto; pointer-events: none; }
+    .shop-icon .custom-unit-art, .enemy-mini-icon .custom-unit-art { width: 28px; height: 28px; }
+    .profile-icon .custom-unit-art { width: 80%; height: 80%; }
+    .bench-unit .custom-unit-art { width: 74%; height: 74%; }
+
   </style>
 </head>
 <body class="title-open">
@@ -2349,14 +2444,15 @@
           <small>Browser Arena</small>
         </div>
         <div class="title-nav-actions">
-          <button class="title-circle-button" id="titleSoundButton" type="button" title="Toggle sound" aria-label="Toggle sound">🔊</button>
+          <button class="title-circle-button" id="titleMusicButton" type="button" title="Toggle music" aria-label="Toggle music">♫</button>
+          <button class="title-circle-button" id="titleSoundButton" type="button" title="Toggle sound effects" aria-label="Toggle sound effects">🔊</button>
           <button class="title-circle-button" id="titleHelpButton" type="button" title="How to play" aria-label="How to play">?</button>
         </div>
       </header>
 
       <div class="title-main">
         <section class="title-hero">
-          <div class="title-kicker">● Solo auto-battler · Instant browser play</div>
+          <div class="title-kicker">● Solo + local multiplayer · Instant browser play</div>
           <h1 class="title-logo" id="titleLogo"><span>Aether</span><strong>Board</strong></h1>
           <p class="title-tagline">Draft from nothing, discover <strong>40 original spirits</strong>, and build an eight-unit formation whose type bonds can completely change the battle.</p>
 
@@ -2375,18 +2471,27 @@
             <span class="title-feature">✨ <b>10</b> elemental types</span>
             <span class="title-feature">♟️ <b>8</b>-unit teams</span>
             <span class="title-feature">🏆 25 rounds or ∞ endless</span>
+            <span class="title-feature">⚔️ local 2-player duel</span>
           </div>
         </section>
 
         <aside class="title-menu-card" aria-label="Start menu">
           <div class="title-ready"><span class="title-ready-dot"></span> Arena ready</div>
           <h2>Enter the arena</h2>
-          <p class="title-menu-copy">Choose a name and mode. Every new run starts with an empty roster and a three-pick starter draft.</p>
+          <p class="title-menu-copy">Choose names and a mode. Solo runs start with an empty roster; Local Duel lets two people build teams on one device.</p>
 
           <label class="title-name-label" for="titleNameInput">Commander name</label>
           <div class="title-name-wrap">
             <span aria-hidden="true">⌨</span>
-            <input class="title-name-input" id="titleNameInput" type="text" maxlength="16" autocomplete="nickname" spellcheck="false" placeholder="Enter a name" />
+            <input class="title-name-input" id="titleNameInput" type="text" maxlength="16" autocomplete="nickname" spellcheck="false" placeholder="Player 1 name" />
+          </div>
+
+          <div class="title-second-name" id="titleName2Group">
+            <label class="title-name-label" for="titleName2Input">Player 2 name</label>
+            <div class="title-name-wrap">
+              <span aria-hidden="true">⌨</span>
+              <input class="title-name-input" id="titleName2Input" type="text" maxlength="16" autocomplete="off" spellcheck="false" placeholder="Player 2 name" />
+            </div>
           </div>
 
           <div class="title-mode-heading">Game mode <span id="titleModeHint">Defeat the final boss</span></div>
@@ -2400,6 +2505,11 @@
               <span class="title-mode-icon">∞</span>
               <strong>Endless</strong>
               <small>Scale forever and chase a local record.</small>
+            </button>
+            <button class="title-mode-card" type="button" data-title-mode="duel" aria-pressed="false">
+              <span class="title-mode-icon">⚔️</span>
+              <strong>Local Duel · 2 Players</strong>
+              <small>Pass-and-play on one device. Build separately, then watch both teams fight.</small>
             </button>
           </div>
 
@@ -2420,7 +2530,7 @@
       </div>
 
       <footer class="title-footer">
-        <span><strong>Aetherboard Arena</strong> · Original single-player auto chess prototype</span>
+        <span><strong>Aetherboard Arena</strong> · Original auto chess prototype · solo and same-device multiplayer</span>
         <span class="title-footer-right"><span><span class="title-key">Enter</span> play</span><span>No account required</span></span>
       </footer>
     </div>
@@ -2462,7 +2572,9 @@
       </div>
 
       <div class="top-actions">
-        <button class="icon-button" id="soundButton" title="Toggle sound" aria-label="Toggle sound">🔊</button>
+        <button class="icon-button" id="musicButton" title="Toggle music" aria-label="Toggle music">♫</button>
+        <button class="icon-button" id="soundButton" title="Toggle sound effects" aria-label="Toggle sound effects">🔊</button>
+        <button class="small-button buff-button" id="teamBuffButton" title="View permanent team blessings">✦ Buffs <span class="buff-count-badge" id="teamBuffCount">0</span></button>
         <button class="icon-button" id="helpButton" title="How to play" aria-label="How to play">?</button>
         <button class="small-button" id="newGameButton" title="Start a new run">↻ <span class="new-label">New run</span></button>
       </div>
@@ -2593,7 +2705,7 @@
   const BENCH_SIZE = 12;
   const MAX_LEVEL = 8;
   const EXPEDITION_ROUNDS = 25;
-  const SAVE_KEY = "aetherboard-auto-chess-v2";
+  const SAVE_KEY = "aetherboard-auto-chess-v4-multiplayer";
   const PROFILE_KEY = "aetherboard-arena-profile-v1";
   const ELEMENT_TYPES = ["Fire", "Water", "Nature", "Electric", "Ice", "Shadow", "Light", "Earth", "Wind", "Arcane"];
   const TYPE_DAMAGE_TIERS = [
@@ -2897,9 +3009,39 @@
     swiftFeather: { name: "Swift Feather", icon: "🪶", text: "+22% attack speed.", attackSpeed: 0.22 },
     vitalSeed: { name: "Vital Seed", icon: "🌱", text: "+180 health and steady regeneration.", hp: 180, regen: 7 },
     arcCrystal: { name: "Arc Crystal", icon: "🔮", text: "+25% ability power and +20 starting mana.", abilityPower: 0.25, startMana: 20 },
-    ironPlate: { name: "Iron Plate", icon: "🛡️", text: "+28 armour.", armor: 28 },
+    ironPlate: { name: "Iron Plate", icon: "🛡️", text: "+24 armour.", armor: 24 },
     razorFang: { name: "Razor Fang", icon: "🦷", text: "+22 attack and +12% critical chance.", attack: 22, crit: 0.12 },
-    echoShell: { name: "Echo Shell", icon: "🐚", text: "After casting, regain 30 mana once per battle.", echo: true }
+    echoShell: { name: "Echo Shell", icon: "🐚", text: "After casting, regain 30 mana once per battle.", echo: true },
+    titanHeart: { name: "Titan Heart", icon: "❤️", text: "+260 maximum health.", hp: 260 },
+    scholarScroll: { name: "Scholar Scroll", icon: "📜", text: "+32% ability power.", abilityPower: 0.32 },
+    manaBattery: { name: "Mana Battery", icon: "🔋", text: "+35 starting mana.", startMana: 35 },
+    guardianBell: { name: "Guardian Bell", icon: "🔔", text: "+150 health or +18 armour, whichever stat is not already surpassed.", hp: 150, armor: 18 },
+    hunterScope: { name: "Hunter Scope", icon: "🎯", text: "+26 attack and +1 attack range.", attack: 26, range: 1 },
+    drainRune: { name: "Drain Rune", icon: "🩸", text: "Basic attacks heal for 10% of damage dealt.", lifesteal: 0.10 },
+    nullPrism: { name: "Null Prism", icon: "🔷", text: "Reduce incoming damage by 12%.", damageReduction: 0.12 },
+    stormCoil: { name: "Storm Coil", icon: "🌀", text: "+5 mana whenever a basic attack lands.", manaOnHit: 5 },
+    frostSigil: { name: "Frost Sigil", icon: "❄️", text: "Basic attacks have a 24% chance to slow the target.", slowOnHit: 0.24 },
+    emberCharm: { name: "Ember Charm", icon: "🔥", text: "Basic attacks inflict a small burn.", burnOnHit: 12 },
+    phoenixAsh: { name: "Phoenix Ash", icon: "🪶", text: "Revive once per battle at 30% health.", revive: true }
+  };
+
+  const BLESSING_DEFS = {
+    battleTraining: { name: "Battle Training", icon: "⚔️", text: "All spirits gain up to +12% attack as their strongest attack boost.", attackPct: 0.12 },
+    arcaneTutelage: { name: "Arcane Tutelage", icon: "🔮", text: "All spirits gain up to +16% ability power.", abilityPower: 0.16 },
+    swiftFormation: { name: "Swift Formation", icon: "💨", text: "All spirits gain up to +14% attack speed.", attackSpeed: 0.14 },
+    fortifiedLines: { name: "Fortified Lines", icon: "🏰", text: "All spirits gain up to +14 armour. This does not stack with stronger armour sources.", armor: 14 },
+    vitalityRite: { name: "Vitality Rite", icon: "💚", text: "All spirits gain up to +14% maximum health.", hpPct: 0.14 },
+    startingSpark: { name: "Starting Spark", icon: "⚡", text: "All spirits begin battle with up to +25 mana.", startMana: 25 },
+    healingWinds: { name: "Healing Winds", icon: "🌬️", text: "All spirits gain up to 5 health regeneration per second.", regen: 5 },
+    sharpInstinct: { name: "Sharp Instinct", icon: "🎯", text: "All spirits gain up to +8% critical chance.", crit: 0.08 },
+    elementalMastery: { name: "Elemental Mastery", icon: "🌈", text: "Active Type Bonds gain an additional +8 percentage points of damage.", typeBondBonus: 0.08 },
+    warChest: { name: "War Chest", icon: "💰", text: "Gain +2 gold after every completed round.", roundGold: 2 }
+  };
+
+  // Replace these empty URLs later with the user's custom art and soundtrack.
+  const CUSTOM_ASSETS = {
+    unitImages: {},
+    musicUrl: ""
   };
 
   const TRAIT_INFO = {
@@ -2913,7 +3055,7 @@
     Earth: { icon: "🪨", thresholds: [2, 3, 4, 5, 6, 7, 8], effects: ["+8% Earth damage", "+15% Earth damage", "+25% Earth damage", "+40% Earth damage", "+55% Earth damage", "+72% Earth damage", "+90% Earth damage"] },
     Wind: { icon: "🌪️", thresholds: [2, 3, 4, 5, 6, 7, 8], effects: ["+8% Wind damage", "+15% Wind damage", "+25% Wind damage", "+40% Wind damage", "+55% Wind damage", "+72% Wind damage", "+90% Wind damage"] },
     Arcane: { icon: "✨", thresholds: [2, 3, 4, 5, 6, 7, 8], effects: ["+8% Arcane damage", "+15% Arcane damage", "+25% Arcane damage", "+40% Arcane damage", "+55% Arcane damage", "+72% Arcane damage", "+90% Arcane damage"] },
-    Vanguard: { icon: "🛡️", thresholds: [2, 4, 6], effects: ["Vanguards gain +20 armour", "Vanguards gain +42 armour", "Vanguards gain +70 armour"] },
+    Vanguard: { icon: "🛡️", thresholds: [2, 4, 6], effects: ["Vanguards gain +8 armour", "Vanguards gain +18 armour", "Vanguards gain +30 armour"] },
     Ranger: { icon: "🏹", thresholds: [2, 4, 6], effects: ["Rangers gain +15% speed", "Rangers gain +32% speed", "Rangers gain +55% speed"] },
     Mystic: { icon: "🔮", thresholds: [2, 4, 6], effects: ["Team gains +15% ability power", "Team gains +32% ability power", "Team gains +55% ability power"] },
     Striker: { icon: "⚔️", thresholds: [2, 4, 6], effects: ["Strikers gain +15% attack", "Strikers gain +32% attack", "Strikers gain +55% attack"] },
@@ -2946,6 +3088,9 @@
   let awakeningQueue = [];
   let modalLocked = false;
   let audioContext = null;
+  let musicTimer = null;
+  let musicStep = 0;
+  let customMusicAudio = null;
   let titleSelectedMode = "expedition";
   let titleHasSavedRun = false;
   let titleContinueAllowed = true;
@@ -2960,9 +3105,9 @@
       "battleButton", "selectedLocation", "selectedCard", "inventoryList", "enemyPowerLabel",
       "enemyList", "lockButton", "xpButton", "rerollButton", "shopList", "benchList",
       "toastLayer", "modalBackdrop", "modalTitle", "modalSubtitle", "modalBody", "modalActions",
-      "titleScreen", "titleSoundButton", "titleHelpButton", "titleNameInput", "titleModeHint",
+      "titleScreen", "titleMusicButton", "titleSoundButton", "titleHelpButton", "titleNameInput", "titleName2Group", "titleName2Input", "titleModeHint",
       "titlePlayButton", "titlePlaySub", "titleContinueButton", "titleContinueLabel",
-      "titleContinueMeta", "titleBestValue"
+      "titleContinueMeta", "titleBestValue", "musicButton", "teamBuffButton", "teamBuffCount"
     ].forEach(id => { els[id] = document.getElementById(id); });
   }
 
@@ -2980,11 +3125,12 @@
       const raw = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
       return {
         name: sanitizeCommanderName(raw.name || "Commander"),
+        name2: sanitizeCommanderName(raw.name2 || "Rival"),
         bestExpedition: clamp(Number(raw.bestExpedition) || 0, 0, EXPEDITION_ROUNDS),
         bestEndless: clamp(Number(raw.bestEndless) || 0, 0, 9999)
       };
     } catch (error) {
-      return { name: "Commander", bestExpedition: 0, bestEndless: 0 };
+      return { name: "Commander", name2: "Rival", bestExpedition: 0, bestEndless: 0 };
     }
   }
 
@@ -2994,6 +3140,7 @@
       ...current,
       ...patch,
       name: sanitizeCommanderName(patch.name ?? current.name),
+      name2: sanitizeCommanderName(patch.name2 ?? current.name2),
       bestExpedition: clamp(Number(patch.bestExpedition ?? current.bestExpedition) || 0, 0, EXPEDITION_ROUNDS),
       bestEndless: clamp(Number(patch.bestEndless ?? current.bestEndless) || 0, 0, 9999)
     };
@@ -3013,22 +3160,31 @@
     return sanitizeCommanderName(els.titleNameInput?.value || state?.commanderName || loadProfile().name);
   }
 
+  function getTitleCommanderName2() {
+    return sanitizeCommanderName(els.titleName2Input?.value || loadProfile().name2 || "Rival");
+  }
+
   function setTitleMode(mode, silent = false) {
-    titleSelectedMode = mode === "endless" ? "endless" : "expedition";
+    titleSelectedMode = ["endless", "duel"].includes(mode) ? mode : "expedition";
     document.querySelectorAll("[data-title-mode]").forEach(button => {
       const selected = button.dataset.titleMode === titleSelectedMode;
       button.classList.toggle("selected", selected);
       button.setAttribute("aria-pressed", String(selected));
     });
+    els.titleName2Group?.classList.toggle("visible", titleSelectedMode === "duel");
     if (els.titleModeHint) {
       els.titleModeHint.textContent = titleSelectedMode === "endless"
         ? "Survive as long as possible"
-        : "Defeat the final boss";
+        : titleSelectedMode === "duel"
+          ? "Two players · one device"
+          : "Defeat the final boss";
     }
     if (els.titlePlaySub) {
       els.titlePlaySub.textContent = titleSelectedMode === "endless"
         ? "Start an infinite ascension"
-        : "Start a 25-round expedition";
+        : titleSelectedMode === "duel"
+          ? "Start a same-device two-player duel"
+          : "Start a 25-round expedition";
     }
     updateTitleRecord();
     if (!silent && state?.sound) playSfx("select");
@@ -3039,6 +3195,8 @@
     const profile = loadProfile();
     if (titleSelectedMode === "endless") {
       els.titleBestValue.textContent = profile.bestEndless ? `Round ${profile.bestEndless}` : "No run yet";
+    } else if (titleSelectedMode === "duel") {
+      els.titleBestValue.textContent = "Local match";
     } else {
       els.titleBestValue.textContent = profile.bestExpedition ? `${profile.bestExpedition} / ${EXPEDITION_ROUNDS}` : "No run yet";
     }
@@ -3049,10 +3207,14 @@
     const canContinue = Boolean(titleContinueAllowed && titleHasSavedRun && state && state.phase === "planning");
     els.titleContinueButton.hidden = !canContinue;
     if (!canContinue) return;
-    const totalOwned = Object.keys(state.units || {}).length;
+    const totalOwned = state.mode === "duel"
+      ? (state.duel?.players || []).reduce((sum, player) => sum + Object.keys(player.units || {}).length, 0)
+      : Object.keys(state.units || {}).length;
     const name = sanitizeCommanderName(state.commanderName || loadProfile().name);
-    els.titleContinueLabel.textContent = state.draftComplete ? `Continue ${name}'s run` : "Continue starter draft";
-    els.titleContinueMeta.textContent = `Round ${state.round} · ${modeName(state.mode)} · ${totalOwned} spirit${totalOwned === 1 ? "" : "s"}`;
+    els.titleContinueLabel.textContent = state.mode === "duel"
+      ? "Continue local duel"
+      : state.draftComplete ? `Continue ${name}'s run` : "Continue starter draft";
+    els.titleContinueMeta.textContent = `Round ${state.round} · ${modeName(state.mode)} · ${totalOwned} total spirit${totalOwned === 1 ? "" : "s"}`;
   }
 
   function showTitleScreen({ allowContinue = true, preserveMode = true } = {}) {
@@ -3062,6 +3224,10 @@
     if (preserveMode && state?.mode) setTitleMode(state.mode, true);
     const profile = loadProfile();
     els.titleNameInput.value = sanitizeCommanderName(state?.commanderName || profile.name);
+    if (els.titleName2Input) {
+      const savedRival = state?.mode === "duel" && state?.duel?.players?.[1]?.commanderName;
+      els.titleName2Input.value = sanitizeCommanderName(savedRival || profile.name2 || "Rival");
+    }
     updateTitleContinue();
     updateTitleRecord();
     els.titleScreen.classList.remove("hidden");
@@ -3079,24 +3245,37 @@
 
   function beginFromTitle() {
     const name = getTitleCommanderName();
-    saveProfile({ name });
-    startNewRun(titleSelectedMode, name);
+    const name2 = getTitleCommanderName2();
+    saveProfile({ name, name2 });
+    if (titleSelectedMode === "duel") startLocalDuel(name, name2);
+    else startNewRun(titleSelectedMode, name);
   }
 
   function continueFromTitle() {
     if (!titleHasSavedRun || !state || state.phase !== "planning") return;
     const name = getTitleCommanderName();
-    state.commanderName = name;
-    saveProfile({ name });
+    const name2 = getTitleCommanderName2();
+    if (state.mode === "duel" && state.duel?.players) {
+      state.duel.players[0].commanderName = name;
+      state.duel.players[1].commanderName = name2;
+      applyDuelPlayer(state.duel.active, false);
+      saveProfile({ name, name2 });
+    } else {
+      state.commanderName = name;
+      saveProfile({ name });
+    }
     saveGame();
     hideTitleScreen();
     render();
+    startMusicLoop();
     playSfx("start");
     if (!state.draftComplete) {
       showStarterDraft();
     } else {
-      toast(`Welcome back, ${name}. Round ${state.round} is ready.`, "good");
-      setTimeout(processAwakeningQueue, 0);
+      processPendingRewards(() => {
+        toast(`Welcome back, ${sanitizeCommanderName(state.commanderName)}. Round ${state.round} is ready.`, "good");
+        setTimeout(processAwakeningQueue, 0);
+      });
     }
   }
 
@@ -3115,17 +3294,20 @@
   }
 
   function clearSavedRun() {
-    try { localStorage.removeItem(SAVE_KEY); } catch (error) {}
+    try {
+      localStorage.removeItem(SAVE_KEY);
+      localStorage.removeItem("aetherboard-auto-chess-v2");
+    } catch (error) {}
     titleHasSavedRun = false;
   }
 
 
   function modeName(mode = state?.mode) {
-    return mode === "endless" ? "Endless" : "25 Round";
+    return mode === "endless" ? "Endless" : mode === "duel" ? "Local Duel" : "25 Round";
   }
 
   function getRoundLimit() {
-    return state?.mode === "endless" ? Infinity : EXPEDITION_ROUNDS;
+    return ["endless", "duel"].includes(state?.mode) ? Infinity : EXPEDITION_ROUNDS;
   }
 
   function getRoundName(round) {
@@ -3164,6 +3346,13 @@
     return Math.max(min, Math.min(max, value));
   }
 
+  function unitVisualHtml(defKey, fallbackIcon) {
+    const url = CUSTOM_ASSETS.unitImages?.[defKey];
+    if (!url) return fallbackIcon;
+    const safeUrl = String(url).replace(/"/g, "&quot;");
+    return `<img class="custom-unit-art" src="${safeUrl}" alt="" />`;
+  }
+
   function formatNumber(value) {
     return Math.round(value).toLocaleString();
   }
@@ -3182,15 +3371,20 @@
     };
   }
 
+  function normalizeMode(mode) {
+    return ["endless", "duel"].includes(mode) ? mode : "expedition";
+  }
+
   function createFreshState(mode = "expedition", commanderName = loadProfile().name) {
+    const normalizedMode = normalizeMode(mode);
     return {
-      version: 2,
-      hp: 60,
-      gold: 10,
+      version: 4,
+      hp: normalizedMode === "duel" ? 30 : 60,
+      gold: normalizedMode === "duel" ? 12 : 10,
       level: 3,
       xp: 0,
       round: 1,
-      mode: mode === "endless" ? "endless" : "expedition",
+      mode: normalizedMode,
       commanderName: sanitizeCommanderName(commanderName),
       phase: "planning",
       board: Array(BOARD_SIZE).fill(null),
@@ -3199,75 +3393,192 @@
       shop: Array(5).fill(null),
       shopLocked: false,
       inventory: [],
+      blessings: [],
+      pendingItemRewards: 0,
+      pendingBlessingRewards: 0,
       selected: null,
       inspectedEnemy: null,
       streak: 0,
       speed: 1,
       sound: true,
+      music: true,
       battleLog: [
         { text: "Your board is empty. Draft three free spirits to build your opening team.", type: "good" },
-        { text: "Type Bond: 5 spirits of one type give those five spirits +40% damage.", type: "gold" }
+        { text: "Every fifth completed round grants a permanent team Blessing.", type: "gold" }
       ],
       enemyPreview: [],
       tutorialSeen: false,
       draftComplete: false,
       draftPicksRemaining: 3,
-      draftHistory: []
+      draftHistory: [],
+      duel: null
     };
   }
 
-  function normalizeLoadedState(raw) {
-    if (!raw || typeof raw !== "object" || raw.version !== 2) return null;
-    const clean = { ...raw };
-    clean.mode = clean.mode === "endless" ? "endless" : "expedition";
-    clean.commanderName = sanitizeCommanderName(clean.commanderName || loadProfile().name);
-    clean.phase = "planning";
+  function normalizeUnitCollection(clean) {
     clean.board = Array.isArray(clean.board) ? clean.board.slice(0, BOARD_SIZE) : Array(BOARD_SIZE).fill(null);
     clean.bench = Array.isArray(clean.bench) ? clean.bench.slice(0, BENCH_SIZE) : Array(BENCH_SIZE).fill(null);
     while (clean.board.length < BOARD_SIZE) clean.board.push(null);
     while (clean.bench.length < BENCH_SIZE) clean.bench.push(null);
     clean.units = clean.units && typeof clean.units === "object" ? clean.units : {};
-    clean.shop = Array.isArray(clean.shop) ? clean.shop.slice(0, 5) : Array(5).fill(null);
-    while (clean.shop.length < 5) clean.shop.push(null);
-    clean.inventory = Array.isArray(clean.inventory) ? clean.inventory.filter(k => ITEM_DEFS[k]) : [];
-    clean.selected = null;
-    clean.inspectedEnemy = null;
-    clean.speed = clean.speed === 2 ? 2 : 1;
-    clean.sound = clean.sound !== false;
-    clean.battleLog = Array.isArray(clean.battleLog) ? clean.battleLog.slice(-40) : [];
-    clean.enemyPreview = [];
-    clean.draftComplete = Boolean(clean.draftComplete);
-    clean.draftPicksRemaining = clamp(Number(clean.draftPicksRemaining) || 0, 0, 3);
-    clean.draftHistory = Array.isArray(clean.draftHistory) ? clean.draftHistory.filter(key => UNIT_DEFS[key]).slice(0, 3) : [];
-
     for (const [id, unit] of Object.entries(clean.units)) {
       if (!unit || !UNIT_DEFS[unit.defKey]) {
         delete clean.units[id];
-        clean.board = clean.board.map(v => v === id ? null : v);
-        clean.bench = clean.bench.map(v => v === id ? null : v);
+        clean.board = clean.board.map(value => value === id ? null : value);
+        clean.bench = clean.bench.map(value => value === id ? null : value);
         continue;
       }
       unit.id = id;
       unit.star = clamp(Number(unit.star) || 1, 1, 3);
       unit.awakening = ["force", "guard"].includes(unit.awakening) ? unit.awakening : null;
-      unit.items = Array.isArray(unit.items) ? unit.items.filter(k => ITEM_DEFS[k]).slice(0, 2) : [];
+      unit.items = Array.isArray(unit.items) ? unit.items.filter(key => ITEM_DEFS[key]).slice(0, 2) : [];
     }
+    return clean;
+  }
 
-    clean.hp = clamp(Number(clean.hp) || 60, 1, 60);
+  function normalizePlayerSnapshot(raw, fallbackName = "Commander") {
+    const base = createFreshState("duel", fallbackName);
+    const clean = normalizeUnitCollection({ ...base, ...(raw && typeof raw === "object" ? raw : {}) });
+    clean.commanderName = sanitizeCommanderName(clean.commanderName || fallbackName);
+    clean.hp = clamp(Number(clean.hp) || 30, 0, 30);
     clean.gold = clamp(Number(clean.gold) || 0, 0, 9999);
     clean.level = clamp(Number(clean.level) || 3, 3, MAX_LEVEL);
     clean.xp = clamp(Number(clean.xp) || 0, 0, 9999);
-    const maxRound = clean.mode === "endless" ? 9999 : EXPEDITION_ROUNDS;
+    clean.shop = Array.isArray(clean.shop) ? clean.shop.slice(0, 5) : Array(5).fill(null);
+    while (clean.shop.length < 5) clean.shop.push(null);
+    clean.shop = clean.shop.map(key => UNIT_DEFS[key] ? key : null);
+    clean.inventory = Array.isArray(clean.inventory) ? clean.inventory.filter(key => ITEM_DEFS[key]) : [];
+    clean.blessings = Array.isArray(clean.blessings) ? [...new Set(clean.blessings.filter(key => BLESSING_DEFS[key]))] : [];
+    clean.pendingItemRewards = clamp(Number(clean.pendingItemRewards) || 0, 0, 20);
+    clean.pendingBlessingRewards = clamp(Number(clean.pendingBlessingRewards) || 0, 0, 20);
+    clean.battleLog = Array.isArray(clean.battleLog) ? clean.battleLog.slice(-40) : [];
+    clean.draftComplete = Boolean(clean.draftComplete);
+    clean.draftPicksRemaining = clamp(Number(clean.draftPicksRemaining) || 0, 0, 3);
+    clean.draftHistory = Array.isArray(clean.draftHistory) ? clean.draftHistory.filter(key => UNIT_DEFS[key]).slice(0, 3) : [];
+    clean.shopLocked = Boolean(clean.shopLocked);
+    clean.streak = clamp(Number(clean.streak) || 0, -999, 999);
+    clean.selected = null;
+    clean.inspectedEnemy = null;
+    clean.enemyPreview = [];
+    return clean;
+  }
+
+  const DUEL_SNAPSHOT_FIELDS = [
+    "commanderName", "hp", "gold", "level", "xp", "board", "bench", "units", "shop", "shopLocked",
+    "inventory", "blessings", "pendingItemRewards", "pendingBlessingRewards", "streak", "battleLog",
+    "tutorialSeen", "draftComplete", "draftPicksRemaining", "draftHistory"
+  ];
+
+  function deepClone(value) {
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function snapshotActiveDuelPlayer() {
+    const snap = {};
+    DUEL_SNAPSHOT_FIELDS.forEach(field => { snap[field] = deepClone(state[field]); });
+    return snap;
+  }
+
+  function syncActiveDuelPlayer() {
+    if (state?.mode !== "duel" || !state.duel?.players) return;
+    state.duel.players[state.duel.active] = snapshotActiveDuelPlayer();
+  }
+
+  function applyDuelPlayer(index, syncCurrent = true) {
+    if (!state?.duel?.players?.[index]) return false;
+    if (syncCurrent) syncActiveDuelPlayer();
+    const duel = state.duel;
+    const globalSound = state.sound !== false;
+    const globalMusic = state.music !== false;
+    const globalSpeed = state.speed === 2 ? 2 : 1;
+    const snapshot = normalizePlayerSnapshot(duel.players[index], index === 0 ? "Player 1" : "Player 2");
+    DUEL_SNAPSHOT_FIELDS.forEach(field => { state[field] = deepClone(snapshot[field]); });
+    state.version = 4;
+    state.mode = "duel";
+    state.duel = duel;
+    state.duel.active = index;
+    state.round = duel.round;
+    state.phase = "planning";
+    state.sound = globalSound;
+    state.music = globalMusic;
+    state.speed = globalSpeed;
+    state.selected = null;
+    state.inspectedEnemy = null;
+    state.enemyPreview = [];
+    awakeningQueue = allUnitLocations()
+      .filter(loc => loc.unit.star >= 2 && !loc.unit.awakening)
+      .map(loc => loc.id);
+    prepareEnemy();
+    return true;
+  }
+
+  function normalizeLoadedState(raw) {
+    if (!raw || typeof raw !== "object" || ![2, 4].includes(raw.version)) return null;
+    const clean = normalizeUnitCollection({ ...createFreshState(raw.mode, raw.commanderName), ...raw });
+    clean.version = 4;
+    clean.mode = normalizeMode(clean.mode);
+    clean.commanderName = sanitizeCommanderName(clean.commanderName || loadProfile().name);
+    clean.phase = "planning";
+    clean.shop = Array.isArray(clean.shop) ? clean.shop.slice(0, 5) : Array(5).fill(null);
+    while (clean.shop.length < 5) clean.shop.push(null);
+    clean.shop = clean.shop.map(key => UNIT_DEFS[key] ? key : null);
+    clean.inventory = Array.isArray(clean.inventory) ? clean.inventory.filter(key => ITEM_DEFS[key]) : [];
+    clean.blessings = Array.isArray(clean.blessings) ? [...new Set(clean.blessings.filter(key => BLESSING_DEFS[key]))] : [];
+    clean.pendingItemRewards = clamp(Number(clean.pendingItemRewards) || 0, 0, 20);
+    clean.pendingBlessingRewards = clamp(Number(clean.pendingBlessingRewards) || 0, 0, 20);
+    clean.selected = null;
+    clean.inspectedEnemy = null;
+    clean.speed = clean.speed === 2 ? 2 : 1;
+    clean.sound = clean.sound !== false;
+    clean.music = clean.music !== false;
+    clean.battleLog = Array.isArray(clean.battleLog) ? clean.battleLog.slice(-40) : [];
+    clean.enemyPreview = [];
+    clean.draftComplete = Boolean(clean.draftComplete);
+    clean.draftPicksRemaining = clamp(Number(clean.draftPicksRemaining) || 0, 0, 3);
+    clean.draftHistory = Array.isArray(clean.draftHistory) ? clean.draftHistory.filter(key => UNIT_DEFS[key]).slice(0, 3) : [];
+    clean.hp = clamp(Number(clean.hp) || (clean.mode === "duel" ? 30 : 60), 0, clean.mode === "duel" ? 30 : 60);
+    clean.gold = clamp(Number(clean.gold) || 0, 0, 9999);
+    clean.level = clamp(Number(clean.level) || 3, 3, MAX_LEVEL);
+    clean.xp = clamp(Number(clean.xp) || 0, 0, 9999);
+    const maxRound = clean.mode === "expedition" ? EXPEDITION_ROUNDS : 9999;
     clean.round = clamp(Number(clean.round) || 1, 1, maxRound);
     clean.streak = clamp(Number(clean.streak) || 0, -999, 999);
     clean.shopLocked = Boolean(clean.shopLocked);
     clean.tutorialSeen = Boolean(clean.tutorialSeen);
+
+    if (clean.mode === "duel") {
+      const rawDuel = raw.duel && typeof raw.duel === "object" ? raw.duel : {};
+      const fallbackPlayers = [snapshotActiveFallback(clean), createFreshState("duel", loadProfile().name2)];
+      const playerRaw = Array.isArray(rawDuel.players) ? rawDuel.players : fallbackPlayers;
+      clean.duel = {
+        players: [
+          normalizePlayerSnapshot(playerRaw[0] || fallbackPlayers[0], clean.commanderName),
+          normalizePlayerSnapshot(playerRaw[1] || fallbackPlayers[1], loadProfile().name2)
+        ],
+        active: clamp(Number(rawDuel.active) || 0, 0, 1),
+        ready: Array.isArray(rawDuel.ready) ? [Boolean(rawDuel.ready[0]), Boolean(rawDuel.ready[1])] : [false, false],
+        round: clamp(Number(rawDuel.round) || clean.round || 1, 1, 9999),
+        startingPlayer: clamp(Number(rawDuel.startingPlayer) || 0, 0, 1)
+      };
+      const activeSnapshot = clean.duel.players[clean.duel.active];
+      DUEL_SNAPSHOT_FIELDS.forEach(field => { clean[field] = deepClone(activeSnapshot[field]); });
+      clean.round = clean.duel.round;
+    } else {
+      clean.duel = null;
+    }
     return clean;
+  }
+
+  function snapshotActiveFallback(clean) {
+    const snap = {};
+    DUEL_SNAPSHOT_FIELDS.forEach(field => { snap[field] = deepClone(clean[field]); });
+    return snap;
   }
 
   function saveGame() {
     if (!state || state.phase !== "planning") return;
     try {
+      syncActiveDuelPlayer();
       localStorage.setItem(SAVE_KEY, JSON.stringify(state));
     } catch (error) {
       console.warn("Could not save game", error);
@@ -3276,7 +3587,7 @@
 
   function loadGame() {
     try {
-      const raw = localStorage.getItem(SAVE_KEY);
+      const raw = localStorage.getItem(SAVE_KEY) || localStorage.getItem("aetherboard-auto-chess-v2");
       if (!raw) return null;
       return normalizeLoadedState(JSON.parse(raw));
     } catch (error) {
@@ -3815,27 +4126,44 @@
     return entries.slice(0, 8);
   }
 
+  function getDuelOpponentSnapshot() {
+    if (state?.mode !== "duel" || !state.duel?.players) return null;
+    syncActiveDuelPlayer();
+    return state.duel.players[state.duel.active === 0 ? 1 : 0] || null;
+  }
+
+  function mirrorDuelPosition(position) {
+    const row = Math.floor(position / BOARD_COLS);
+    const col = position % BOARD_COLS;
+    return (BOARD_ROWS - 1 - row) * BOARD_COLS + col;
+  }
+
+  function duelEnemyFormation(snapshot = getDuelOpponentSnapshot()) {
+    if (!snapshot) return [];
+    return (snapshot.board || []).map((id, position) => {
+      if (!id || Math.floor(position / BOARD_COLS) < PLAYER_START_ROW || !snapshot.units?.[id]) return null;
+      return { ...deepClone(snapshot.units[id]), pos: mirrorDuelPosition(position), ownerName: snapshot.commanderName };
+    }).filter(Boolean);
+  }
+
   function prepareEnemy() {
-    state.enemyPreview = generateEnemy(state.round);
+    state.enemyPreview = state.mode === "duel" ? duelEnemyFormation() : generateEnemy(state.round);
   }
 
 
   const STAR_HP_MULT = { 1: 1, 2: 1.78, 3: 3.15 };
   const STAR_ATTACK_MULT = { 1: 1, 2: 1.68, 3: 2.9 };
 
-  const NON_STACKING_ITEM_STATS = ["hp", "attack", "armor", "attackSpeed", "abilityPower", "startMana", "regen", "crit"];
+  const NON_STACKING_ITEM_STATS = [
+    "hp", "attack", "armor", "attackSpeed", "abilityPower", "startMana", "regen", "crit",
+    "range", "lifesteal", "damageReduction", "manaOnHit", "slowOnHit", "burnOnHit"
+  ];
 
   function strongestItemBonuses(itemKeys = []) {
     const result = {
-      hp: 0,
-      attack: 0,
-      armor: 0,
-      attackSpeed: 0,
-      abilityPower: 0,
-      startMana: 0,
-      regen: 0,
-      crit: 0,
-      echo: false
+      hp: 0, attack: 0, armor: 0, attackSpeed: 0, abilityPower: 0, startMana: 0, regen: 0, crit: 0,
+      range: 0, lifesteal: 0, damageReduction: 0, manaOnHit: 0, slowOnHit: 0, burnOnHit: 0,
+      echo: false, revive: false
     };
     for (const itemKey of itemKeys) {
       const item = ITEM_DEFS[itemKey];
@@ -3844,6 +4172,22 @@
         result[stat] = Math.max(result[stat], Number(item[stat]) || 0);
       });
       result.echo = result.echo || Boolean(item.echo);
+      result.revive = result.revive || Boolean(item.revive);
+    }
+    return result;
+  }
+
+  function strongestBlessingBonuses(blessingKeys = []) {
+    const result = {
+      attackPct: 0, abilityPower: 0, attackSpeed: 0, armor: 0, hpPct: 0, startMana: 0,
+      regen: 0, crit: 0, typeBondBonus: 0, roundGold: 0
+    };
+    for (const key of blessingKeys || []) {
+      const blessing = BLESSING_DEFS[key];
+      if (!blessing) continue;
+      Object.keys(result).forEach(stat => {
+        result[stat] = Math.max(result[stat], Number(blessing[stat]) || 0);
+      });
     }
     return result;
   }
@@ -3855,6 +4199,7 @@
     const baseAttack = def.attack * STAR_ATTACK_MULT[star];
     const baseAbilityPower = 1 + (star - 1) * 0.22;
     const item = strongestItemBonuses(unit.items || []);
+    const blessing = teamBonuses?.blessing || strongestBlessingBonuses([]);
 
     const guardHpGain = unit.awakening === "guard" ? baseHp * 0.25 : 0;
     const guardArmor = unit.awakening === "guard" ? 12 : 0;
@@ -3867,14 +4212,15 @@
     const assassinSpeedPct = teamBonuses && def.role === "Assassin" ? Math.max(0, teamBonuses.assassinSpeed - 1) : 0;
     const mysticAbilityPct = teamBonuses ? Math.max(0, teamBonuses.abilityAll - 1) : 0;
 
-    // Same-stat boosts do not add together. The strongest source wins.
-    const hp = baseHp + Math.max(item.hp, guardHpGain);
-    const attack = baseAttack + Math.max(item.attack, baseAttack * Math.max(forceAttackPct, strikerAttackPct));
-    const armor = def.armor + Math.max(item.armor, guardArmor, vanguardArmor);
-    const attackSpeed = def.attackSpeed * (1 + Math.max(item.attackSpeed, rangerSpeedPct, assassinSpeedPct));
-    const abilityPower = baseAbilityPower * (1 + Math.max(item.abilityPower, forceAbilityPct, mysticAbilityPct));
+    // Every stat uses only its single strongest source, including Blessings.
+    const hp = baseHp + Math.max(item.hp, guardHpGain, baseHp * blessing.hpPct);
+    const attack = baseAttack + Math.max(item.attack, baseAttack * Math.max(forceAttackPct, strikerAttackPct, blessing.attackPct));
+    const armor = def.armor + Math.max(item.armor, guardArmor, vanguardArmor, blessing.armor);
+    const attackSpeed = def.attackSpeed * (1 + Math.max(item.attackSpeed, rangerSpeedPct, assassinSpeedPct, blessing.attackSpeed));
+    const abilityPower = baseAbilityPower * (1 + Math.max(item.abilityPower, forceAbilityPct, mysticAbilityPct, blessing.abilityPower));
+    const range = def.range + item.range;
 
-    return { hp, attack, armor, attackSpeed, abilityPower };
+    return { hp, attack, armor, attackSpeed, abilityPower, range };
   }
 
   function getTraitCountsFromUnitData(units) {
@@ -3941,25 +4287,36 @@
     els.levelValue.textContent = state.level;
     els.levelCap.textContent = `/ ${MAX_LEVEL}`;
     els.roundValue.textContent = state.round;
-    els.roundCap.textContent = state.mode === "endless" ? "/ ∞" : `/ ${EXPEDITION_ROUNDS}`;
-    els.modeValue.textContent = modeName();
+    els.roundCap.textContent = ["endless", "duel"].includes(state.mode) ? "/ ∞" : `/ ${EXPEDITION_ROUNDS}`;
+    els.modeValue.textContent = state.mode === "duel" ? `Duel · P${(state.duel?.active || 0) + 1}` : modeName();
     const need = currentXpNeed();
     els.xpBar.style.width = state.level >= MAX_LEVEL ? "100%" : `${clamp((state.xp / need) * 100, 0, 100)}%`;
     els.soundButton.textContent = state.sound ? "🔊" : "🔇";
-    els.soundButton.title = state.sound ? "Mute sound" : "Turn on sound";
+    els.soundButton.title = state.sound ? "Mute sound effects" : "Turn on sound effects";
+    els.musicButton.textContent = state.music ? "♫" : "♪̸";
+    els.musicButton.title = state.music ? "Mute music" : "Turn on music";
+    if (els.teamBuffCount) els.teamBuffCount.textContent = String((state.blessings || []).length);
     if (els.titleSoundButton) {
       els.titleSoundButton.textContent = state.sound ? "🔊" : "🔇";
-      els.titleSoundButton.title = state.sound ? "Mute sound" : "Turn on sound";
+      els.titleSoundButton.title = state.sound ? "Mute sound effects" : "Turn on sound effects";
+    }
+    if (els.titleMusicButton) {
+      els.titleMusicButton.textContent = state.music ? "♫" : "♪̸";
+      els.titleMusicButton.title = state.music ? "Mute music" : "Turn on music";
     }
     if (els.brandSubtitle) {
       const commander = sanitizeCommanderName(state.commanderName);
-      els.brandSubtitle.textContent = `${commander} · 40 spirits · eight-unit squads · powerful type bonds`;
+      els.brandSubtitle.textContent = state.mode === "duel"
+        ? `${commander} planning · local duel round ${state.round} · ${(state.blessings || []).length} Blessing${(state.blessings || []).length === 1 ? "" : "s"}`
+        : `${commander} · 40 spirits · eight-unit squads · ${(state.blessings || []).length} Blessing${(state.blessings || []).length === 1 ? "" : "s"}`;
     }
   }
 
   function renderHeader() {
     const roundName = getRoundName(state.round);
-    els.roundTitle.textContent = `Round ${state.round} · ${roundName}`;
+    els.roundTitle.textContent = state.mode === "duel"
+      ? `Duel Round ${state.round} · ${sanitizeCommanderName(state.commanderName)} planning`
+      : `Round ${state.round} · ${roundName}`;
 
     const phaseTextMap = {
       planning: "Planning",
@@ -3976,6 +4333,9 @@
       const boss = state.round % 5 === 0;
       if (!state.draftComplete) {
         els.roundSubtitle.textContent = "Draft three free spirits before entering the arena.";
+      } else if (state.mode === "duel") {
+        const opponent = getDuelOpponentSnapshot();
+        els.roundSubtitle.textContent = `Build privately, then lock in and pass the device to ${sanitizeCommanderName(opponent?.commanderName || "the rival")}.`;
       } else if (boss) {
         els.roundSubtitle.textContent = "Boss round: strengthen your formation before entering the arena.";
       } else if (state.mode === "endless") {
@@ -4072,7 +4432,7 @@
     button.innerHTML = `
       <span class="team-marker">${enemy ? "ENEMY" : "YOU"}</span>
       <span class="unit-stars">${starString(unit.star)}</span>
-      <span class="unit-icon">${def.icon}</span>
+      <span class="unit-icon">${unitVisualHtml(unit.defKey, def.icon)}</span>
       <span class="unit-name-tiny">${def.name}</span>
       ${unit.awakening ? `<span class="unit-level-badge" title="Awakened">${unit.awakening === "force" ? "⚔" : "◆"}</span>` : ""}
     `;
@@ -4106,7 +4466,7 @@
     button.innerHTML = `
       <span class="team-marker">${unit.team === "enemy" ? "ENEMY" : "YOU"}</span>
       <span class="unit-stars">${starString(unit.star)}</span>
-      <span class="unit-icon">${def.icon}</span>
+      <span class="unit-icon">${unitVisualHtml(unit.defKey, def.icon)}</span>
       <span class="unit-name-tiny">${def.name}</span>
       <span class="status-icons">${status.slice(0, 3).map(icon => `<span>${icon}</span>`).join("")}</span>
       <span class="health-stack">
@@ -4143,7 +4503,7 @@
         const selected = state.selected?.unitId === id;
         slot.innerHTML = `
           <span class="bench-unit${selected ? " selected" : ""}" style="--unit-a:${def.colors[0]};--unit-b:${def.colors[1]}">
-            <span class="bench-stars">${starString(unit.star)}</span>${def.icon}
+            <span class="bench-stars">${starString(unit.star)}</span>${unitVisualHtml(unit.defKey, def.icon)}
           </span>
         `;
       }
@@ -4169,7 +4529,7 @@
         card.style.setProperty("--rarity-glow", `${rarity}35`);
         card.innerHTML = `
           <span class="shop-cost">${def.cost}●</span>
-          <span class="shop-icon">${def.icon}</span>
+          <span class="shop-icon">${unitVisualHtml(defKey, def.icon)}</span>
           <span class="shop-name">${def.name}</span>
           <span class="shop-tags">${TRAIT_INFO[def.element].icon} ${def.element} · ${TRAIT_INFO[def.role].icon} ${def.role}</span>
           <span class="shop-ability">${def.ability}</span>
@@ -4288,7 +4648,8 @@
     const def = UNIT_DEFS[unit.defKey];
     const formation = enemy ? (state.enemyPreview || []) : getPlayerFormationUnits();
     const isDeployed = enemy || Boolean(unit.id && state.board.includes(unit.id));
-    const teamBonuses = isDeployed ? calculateTeamBonuses(formation) : null;
+    const blessingKeys = enemy && state.mode === "duel" ? (getDuelOpponentSnapshot()?.blessings || []) : (state.blessings || []);
+    const teamBonuses = isDeployed ? calculateTeamBonuses(formation, blessingKeys) : null;
     const stats = getUnitPreviewStats({ ...unit, items: unit.items || [] }, teamBonuses);
     const awakeningText = unit.awakening === "force"
       ? "Primal Force: +20% attack and +22% ability power."
@@ -4310,7 +4671,7 @@
 
     return `
       <div class="unit-profile">
-        <div class="profile-icon" style="--unit-a:${def.colors[0]};--unit-b:${def.colors[1]}">${def.icon}</div>
+        <div class="profile-icon" style="--unit-a:${def.colors[0]};--unit-b:${def.colors[1]}">${unitVisualHtml(unit.defKey, def.icon)}</div>
         <div>
           <div class="profile-name">${def.name}</div>
           <div class="profile-stars">${starString(unit.star)} · Cost ${def.cost}</div>
@@ -4324,7 +4685,7 @@
         <div class="stat-box"><span>Health</span><strong>${formatNumber(stats.hp)}</strong></div>
         <div class="stat-box"><span>Attack</span><strong>${formatNumber(stats.attack)}</strong></div>
         <div class="stat-box"><span>Armour</span><strong>${formatNumber(stats.armor)}</strong></div>
-        <div class="stat-box"><span>Range</span><strong>${def.range}</strong></div>
+        <div class="stat-box"><span>Range</span><strong>${stats.range}</strong></div>
         <div class="stat-box"><span>Speed</span><strong>${stats.attackSpeed.toFixed(2)}</strong></div>
         <div class="stat-box"><span>Mana</span><strong>${def.manaMax}</strong></div>
       </div>
@@ -4416,7 +4777,7 @@
       const def = UNIT_DEFS[enemy.defKey];
       return `
         <button class="enemy-mini" data-enemy-pos="${enemy.pos}" title="Inspect ${def.name}">
-          <div class="enemy-mini-icon">${def.icon}</div>
+          <div class="enemy-mini-icon">${unitVisualHtml(enemy.defKey, def.icon)}</div>
           <div class="enemy-mini-name">${def.name}</div>
           <div class="enemy-mini-stars">${starString(enemy.star)}</div>
         </button>
@@ -4450,13 +4811,16 @@
     const planning = state.phase === "planning" && state.draftComplete;
     const battling = state.phase === "battle";
     const deployed = deployedCount();
-    els.formationInfo.innerHTML = `<strong>${deployed} / ${state.level}</strong> spirits deployed · ${planning ? "Click a unit, then a space." : "Formation is locked during battle."}`;
+    const duel = state.mode === "duel";
+    els.formationInfo.innerHTML = duel
+      ? `<strong>${deployed} / ${state.level}</strong> deployed · ${sanitizeCommanderName(state.commanderName)} · ${(state.blessings || []).length} team buff${(state.blessings || []).length === 1 ? "" : "s"}`
+      : `<strong>${deployed} / ${state.level}</strong> spirits deployed · ${planning ? "Click a unit, then a space." : "Formation is locked during battle."}`;
     els.battleButton.disabled = !planning || deployed === 0;
     els.battleButton.innerHTML = planning
-      ? `⚔ Begin battle <span class="kbd">Space</span>`
+      ? duel ? `🔒 Lock in & pass <span class="kbd">Space</span>` : `⚔ Begin battle <span class="kbd">Space</span>`
       : battling
         ? `⚔ Battle in progress`
-        : `Run complete`;
+        : duel ? `Duel complete` : `Run complete`;
     els.autoPlaceButton.disabled = !planning;
     els.speedButton.disabled = !battling;
     els.speedButton.textContent = `Speed ×${state.speed}`;
@@ -4507,7 +4871,7 @@
   function showHelp() {
     openModal({
       title: "How to play",
-      subtitle: "Aetherboard is a single-player auto-battler. Draft and position your team; the spirits act on their own after battle begins.",
+      subtitle: "Aetherboard supports solo runs and same-device Local Duel. Draft and position your team; the spirits act on their own after battle begins.",
       body: `
         <div class="tutorial-grid">
           <div class="tutorial-step"><div class="big">🎴</div><strong>1. Draft from nothing</strong><p>Every new run begins with an empty board. Choose three free starter spirits, then buy more from the rotating shop.</p></div>
@@ -4516,16 +4880,311 @@
           <div class="tutorial-step"><div class="big">🔵🔴</div><strong>4. Know the teams</strong><p>Your spirits have blue rings, blue-green health bars, and a YOU badge. Enemies always have red rings, red health bars, and an ENEMY badge—even after units cross the board.</p></div>
           <div class="tutorial-step"><div class="big">🛡️</div><strong>5. Boosts do not stack</strong><p>For each stat, only the strongest same-stat source applies. Type Bonds use the highest unlocked tier, and new shields refresh the stronger shield instead of adding together.</p></div>
           <div class="tutorial-step"><div class="big">★★</div><strong>6. Combine and awaken</strong><p>Three identical one-star spirits become a two-star spirit. At two stars, choose a permanent Awakening.</p></div>
+          <div class="tutorial-step"><div class="big">✨</div><strong>7. Items and Blessings</strong><p>Winning every third solo round grants an item. Every fifth completed round grants a permanent team Blessing. Same-stat bonuses still use only the strongest source.</p></div>
+          <div class="tutorial-step"><div class="big">⚔️</div><strong>8. Local Duel</strong><p>Two players draft and plan separately on one device. Lock in, pass the device, and battle until one commander reaches 0 heart.</p></div>
           <div class="tutorial-step"><div class="big">🏁</div><strong>25-Round mode</strong><p>Survive 25 escalating rounds and defeat the Tenfold Convergence.</p></div>
           <div class="tutorial-step"><div class="big">∞</div><strong>Endless mode</strong><p>There is no final round. Enemy stars, items, and scaling keep increasing until your heart reaches zero.</p></div>
         </div>
-        <div class="awakening-note" style="margin-top:10px">Keyboard: <span class="kbd">R</span> rerolls, <span class="kbd">E</span> buys XP, <span class="kbd">Space</span> begins battle, and <span class="kbd">Esc</span> clears your selection.</div>
+        <div class="awakening-note" style="margin-top:10px">Placeholder music is generated with Web Audio and can later be replaced. Keyboard: <span class="kbd">R</span> rerolls, <span class="kbd">E</span> buys XP, <span class="kbd">Space</span> begins battle, and <span class="kbd">Esc</span> clears your selection.</div>
       `,
       actions: [{ label: "Got it", className: "primary-button", onClick: () => {
         closeModal(true);
         state.tutorialSeen = true;
         if (!titleScreenOpen() || titleHasSavedRun) saveGame();
       } }]
+    });
+  }
+
+
+  function showTeamBuffs() {
+    const keys = Array.isArray(state?.blessings) ? state.blessings : [];
+    const body = keys.length
+      ? `<div class="blessing-list">${keys.map(key => {
+          const buff = BLESSING_DEFS[key];
+          return `<div class="blessing-row"><div class="blessing-icon">${buff.icon}</div><div><strong>${buff.name}</strong><span>${buff.text}</span></div></div>`;
+        }).join("")}</div>`
+      : `<div class="selected-empty">No permanent Blessings yet. Complete rounds 5, 10, 15, 20 and every later fifth round to choose one.</div>`;
+    openModal({
+      title: `${sanitizeCommanderName(state.commanderName)}'s Team Blessings`,
+      subtitle: "Blessings are permanent for the current run. Same-stat bonuses still use only the single strongest source.",
+      body: `${body}<div class="asset-ready-note"><strong>Custom assets ready:</strong> unit images and a replacement soundtrack can later be connected through the CUSTOM_ASSETS object near the top of the game script.</div>`,
+      actions: [{ label: "Close", className: "small-button", onClick: () => closeModal(true) }]
+    });
+  }
+
+  function randomChoices(keys, count = 3) {
+    return [...keys].sort(() => Math.random() - 0.5).slice(0, count);
+  }
+
+  function showBlessingChoice(completedRound, onComplete = () => {}) {
+    const owned = new Set(state.blessings || []);
+    const available = Object.keys(BLESSING_DEFS).filter(key => !owned.has(key));
+    const choices = randomChoices(available, 3);
+    const body = document.createElement("div");
+    body.className = "choice-grid loot-grid";
+
+    if (choices.length) {
+      body.innerHTML = choices.map(key => {
+        const buff = BLESSING_DEFS[key];
+        return `<button class="choice-card" data-blessing-key="${key}"><span class="choice-icon">${buff.icon}</span><span class="choice-name">${buff.name}</span><span class="choice-desc">${buff.text}</span></button>`;
+      }).join("");
+    } else {
+      body.innerHTML = `
+        <button class="choice-card" data-fallback-reward="heart"><span class="choice-icon">❤️</span><span class="choice-name">Commander Recovery</span><span class="choice-desc">Restore 8 heart.</span></button>
+        <button class="choice-card" data-fallback-reward="gold"><span class="choice-icon">💰</span><span class="choice-name">Treasury Cache</span><span class="choice-desc">Gain 10 gold.</span></button>
+        <button class="choice-card" data-fallback-reward="item"><span class="choice-icon">🎁</span><span class="choice-name">Armory Cache</span><span class="choice-desc">Receive a random item.</span></button>`;
+    }
+
+    openModal({
+      title: `Round ${completedRound} Team Blessing`,
+      subtitle: "Choose one permanent team-wide benefit. It will not add on top of a stronger bonus to the same stat.",
+      body,
+      locked: true
+    });
+
+    body.querySelectorAll("[data-blessing-key]").forEach(button => {
+      button.addEventListener("click", () => {
+        const key = button.dataset.blessingKey;
+        if (!state.blessings.includes(key)) state.blessings.push(key);
+        addLog(`Team Blessing gained: ${BLESSING_DEFS[key].name}.`, "gold");
+        closeModal(true);
+        render();
+        saveGame();
+        playSfx("awaken");
+        onComplete();
+      });
+    });
+
+    body.querySelectorAll("[data-fallback-reward]").forEach(button => {
+      button.addEventListener("click", () => {
+        const reward = button.dataset.fallbackReward;
+        if (reward === "heart") state.hp = Math.min(state.mode === "duel" ? 30 : 60, state.hp + 8);
+        if (reward === "gold") state.gold += 10;
+        if (reward === "item") state.inventory.push(randomChoices(Object.keys(ITEM_DEFS), 1)[0]);
+        closeModal(true);
+        render();
+        saveGame();
+        playSfx("loot");
+        onComplete();
+      });
+    });
+  }
+
+  function processPendingRewards(onComplete = () => {}) {
+    if (!state || state.phase !== "planning") return;
+    if (state.pendingBlessingRewards > 0) {
+      state.pendingBlessingRewards -= 1;
+      showBlessingChoice(Math.max(5, state.round - 1), () => processPendingRewards(onComplete));
+      return;
+    }
+    if (state.pendingItemRewards > 0) {
+      state.pendingItemRewards -= 1;
+      showLootChoice(Math.max(3, state.round - 1), () => processPendingRewards(onComplete));
+      return;
+    }
+    onComplete();
+  }
+
+  function createDuelSnapshot(name) {
+    const base = createFreshState("duel", name);
+    base.shop = Array.from({ length: 5 }, () => rollShopUnit(base.level));
+    base.battleLog = [
+      { text: "Draft three free spirits, then build a formation for the local duel.", type: "good" },
+      { text: "Both players receive items every third round and Blessings every fifth round.", type: "gold" }
+    ];
+    const snap = {};
+    DUEL_SNAPSHOT_FIELDS.forEach(field => { snap[field] = deepClone(base[field]); });
+    return snap;
+  }
+
+  function startLocalDuel(name1 = "Player 1", name2 = "Player 2") {
+    if (combat?.raf) cancelAnimationFrame(combat.raf);
+    combat = null;
+    awakeningQueue = [];
+    closeModal(true);
+    hideTitleScreen();
+    const firstName = sanitizeCommanderName(name1);
+    const secondName = sanitizeCommanderName(name2);
+    saveProfile({ name: firstName, name2: secondName });
+
+    state = createFreshState("duel", firstName);
+    state.duel = {
+      players: [createDuelSnapshot(firstName), createDuelSnapshot(secondName)],
+      active: 0,
+      ready: [false, false],
+      round: 1,
+      startingPlayer: 0
+    };
+    applyDuelPlayer(0, false);
+    prepareEnemy();
+    render();
+    saveGame();
+    titleHasSavedRun = true;
+    startMusicLoop();
+    playSfx("start");
+    showStarterDraft();
+  }
+
+  function showDuelPassScreen(nextIndex, heading, message, afterContinue = () => {}) {
+    const next = state.duel?.players?.[nextIndex];
+    if (!next) return;
+    els.app?.classList.add("privacy-blur");
+    openModal({
+      title: heading,
+      subtitle: "The previous commander's board is hidden while the device changes hands.",
+      body: `<div class="duel-pass-card"><div class="duel-pass-icon">🤝</div><h3>Pass to ${sanitizeCommanderName(next.commanderName)}</h3><p>${message}</p></div>`,
+      actions: [{
+        label: `Continue as ${sanitizeCommanderName(next.commanderName)}`,
+        className: "primary-button",
+        onClick: () => {
+          closeModal(true);
+          els.app?.classList.remove("privacy-blur");
+          applyDuelPlayer(nextIndex);
+          render();
+          saveGame();
+          processPendingRewards(() => {
+            processAwakeningQueue();
+            afterContinue();
+          });
+        }
+      }],
+      locked: true
+    });
+  }
+
+  function finishDuelStarterDraft() {
+    syncActiveDuelPlayer();
+    const current = state.duel.active;
+    const other = current === 0 ? 1 : 0;
+    if (!state.duel.players[other].draftComplete) {
+      showDuelPassScreen(other, "Starter Draft Complete", "Choose three free starters for the second commander's team.", () => showStarterDraft());
+      return;
+    }
+    showDuelPassScreen(0, "Both Teams Drafted", "Player 1 plans first in round 1. Arrange the formation, shop, and then lock in.", () => {
+      toast("Local Duel round 1 planning has begun.", "good");
+    });
+  }
+
+  function lockInDuelPlayer() {
+    if (state.mode !== "duel" || state.phase !== "planning") return;
+    if (deployedCount() < 1) {
+      toast("Deploy at least one spirit before locking in.", "bad");
+      playSfx("error");
+      return;
+    }
+    syncActiveDuelPlayer();
+    const active = state.duel.active;
+    state.duel.ready[active] = true;
+    const other = active === 0 ? 1 : 0;
+    saveGame();
+
+    if (!state.duel.ready[other]) {
+      showDuelPassScreen(other, `${sanitizeCommanderName(state.duel.players[active].commanderName)} Locked In`, `${sanitizeCommanderName(state.duel.players[other].commanderName)} may now plan without seeing changes to the first board.`, () => {
+        toast("Arrange your formation, then lock in.", "good");
+      });
+      return;
+    }
+    beginDuelBattle();
+  }
+
+  function beginDuelBattle() {
+    syncActiveDuelPlayer();
+    applyDuelPlayer(0, false);
+    prepareEnemy();
+    render();
+    playSfx("start");
+    startBattle();
+  }
+
+  function grantXpToSnapshot(player, amount) {
+    player.xp = Math.max(0, Number(player.xp) || 0) + amount;
+    while (player.level < MAX_LEVEL) {
+      const need = XP_TO_NEXT[player.level] || 0;
+      if (!need || player.xp < need) break;
+      player.xp -= need;
+      player.level += 1;
+    }
+  }
+
+  function refreshDuelSnapshotShop(player) {
+    if (player.shopLocked) {
+      player.shopLocked = false;
+    } else {
+      player.shop = Array.from({ length: 5 }, () => rollShopUnit(player.level));
+    }
+  }
+
+  function resolveDuelRound(playerWon, enemySurvivors, playerSurvivors, timedOut) {
+    const completedRound = state.duel.round;
+    syncActiveDuelPlayer();
+    const players = state.duel.players;
+    const winnerIndex = playerWon ? 0 : 1;
+    const loserIndex = winnerIndex === 0 ? 1 : 0;
+    const winningSurvivors = playerWon ? playerSurvivors : enemySurvivors;
+    const survivorPower = (winningSurvivors || []).reduce((sum, unit) => sum + (unit.star || 1), 0);
+    const damage = clamp(2 + survivorPower, 3, 15);
+
+    players.forEach((player, index) => {
+      const won = index === winnerIndex;
+      player.streak = won ? (player.streak > 0 ? player.streak + 1 : 1) : (player.streak < 0 ? player.streak - 1 : -1);
+      const interest = Math.min(5, Math.floor(player.gold / 10));
+      const blessingGold = strongestBlessingBonuses(player.blessings).roundGold;
+      const reward = (won ? 5 : 4) + interest + blessingGold;
+      player.gold += reward;
+      grantXpToSnapshot(player, 2);
+      player.battleLog = Array.isArray(player.battleLog) ? player.battleLog : [];
+      player.battleLog.push({
+        text: won
+          ? `Duel round ${completedRound} won: +${reward} gold.`
+          : `Duel round ${completedRound} lost: -${damage} heart, +${reward} gold.`,
+        type: won ? "good" : "bad"
+      });
+      if (player.battleLog.length > 40) player.battleLog.shift();
+      refreshDuelSnapshotShop(player);
+      if (completedRound % 3 === 0) player.pendingItemRewards = (player.pendingItemRewards || 0) + 1;
+      if (completedRound % 5 === 0) player.pendingBlessingRewards = (player.pendingBlessingRewards || 0) + 1;
+    });
+    players[loserIndex].hp = Math.max(0, players[loserIndex].hp - damage);
+
+    combat = null;
+    state.duel.ready = [false, false];
+    state.duel.round = completedRound + 1;
+    state.duel.startingPlayer = state.duel.startingPlayer === 0 ? 1 : 0;
+
+    if (players[loserIndex].hp <= 0) {
+      state.phase = "gameover";
+      clearSavedRun();
+      applyDuelPlayer(winnerIndex, false);
+      state.phase = "gameover";
+      render();
+      showDuelEndModal(winnerIndex, completedRound);
+      return;
+    }
+
+    const nextIndex = state.duel.startingPlayer;
+    applyDuelPlayer(nextIndex, false);
+    state.round = state.duel.round;
+    prepareEnemy();
+    render();
+    saveGame();
+    const winnerName = sanitizeCommanderName(players[winnerIndex].commanderName);
+    showDuelPassScreen(nextIndex, `${winnerName} Wins Round ${completedRound}`, `${sanitizeCommanderName(players[nextIndex].commanderName)} plans first for round ${state.duel.round}.`, () => {
+      toast(`Duel round ${state.duel.round} planning phase.`, "good");
+    });
+  }
+
+  function showDuelEndModal(winnerIndex, completedRound) {
+    const winner = state.duel.players[winnerIndex];
+    const loser = state.duel.players[winnerIndex === 0 ? 1 : 0];
+    openModal({
+      title: `${sanitizeCommanderName(winner.commanderName)} Wins the Duel!`,
+      subtitle: `The local match ended after ${completedRound} round${completedRound === 1 ? "" : "s"}.`,
+      body: `<div class="result-banner"><div class="result-icon">🏆</div><h3>${sanitizeCommanderName(winner.commanderName)} is champion</h3><p>${sanitizeCommanderName(loser.commanderName)} reached 0 heart. Both players built their own shops, items, formations, and permanent Blessings.</p></div>`,
+      actions: [
+        { label: "Rematch", className: "primary-button", onClick: () => startLocalDuel(winner.commanderName, loser.commanderName) },
+        { label: "Main menu", className: "small-button", onClick: () => { closeModal(true); showTitleScreen({ allowContinue: false, preserveMode: false }); setTitleMode("duel", true); } }
+      ],
+      locked: true
     });
   }
 
@@ -4566,6 +5225,10 @@
   }
 
   function startNewRun(mode = "expedition", commanderName = getTitleCommanderName()) {
+    if (mode === "duel") {
+      startLocalDuel(commanderName, getTitleCommanderName2());
+      return;
+    }
     if (combat?.raf) cancelAnimationFrame(combat.raf);
     combat = null;
     awakeningQueue = [];
@@ -4579,6 +5242,7 @@
     render();
     saveGame();
     titleHasSavedRun = true;
+    startMusicLoop();
     playSfx("start");
     showStarterDraft();
   }
@@ -4621,7 +5285,7 @@
           const def = UNIT_DEFS[key];
           return `
             <button class="choice-card" data-draft-key="${key}">
-              <span class="choice-icon">${def.icon}</span>
+              <span class="choice-icon">${unitVisualHtml(key, def.icon)}</span>
               <span class="choice-name">${def.name}</span>
               <span class="choice-desc">${TRAIT_INFO[def.element].icon} ${def.element} · ${TRAIT_INFO[def.role].icon} ${def.role}<br>${def.abilityText}</span>
               <span class="draft-card-meta">FREE STARTER · normally ${def.cost} gold</span>
@@ -4661,6 +5325,10 @@
     render();
     autoPlace();
     saveGame();
+    if (state.mode === "duel") {
+      finishDuelStarterDraft();
+      return;
+    }
     toast("Opening team drafted. Rearrange your formation, then begin round 1.", "good");
     if (!state.tutorialSeen) setTimeout(showHelp, 450);
   }
@@ -4715,11 +5383,13 @@
   }
 
 
-  function calculateTeamBonuses(unitData) {
+  function calculateTeamBonuses(unitData, blessingKeys = []) {
     const counts = getTraitCountsFromUnitData(unitData);
+    const blessing = strongestBlessingBonuses(blessingKeys);
     const elementDamage = {};
     ELEMENT_TYPES.forEach(type => {
-      elementDamage[type] = 1 + typeDamageBonus(counts[type] || 0);
+      const typeBonus = typeDamageBonus(counts[type] || 0);
+      elementDamage[type] = 1 + typeBonus + (typeBonus > 0 ? blessing.typeBondBonus : 0);
     });
 
     const bonuses = {
@@ -4731,13 +5401,14 @@
       strikerAttack: 1,
       assassinCritMult: 1.5,
       assassinSpeed: 1,
-      assassinBlink: false
+      assassinBlink: false,
+      blessing
     };
 
     const vanguard = traitTier("Vanguard", counts.Vanguard || 0);
-    if (vanguard === 1) bonuses.vanguardArmor = 20;
-    if (vanguard === 2) bonuses.vanguardArmor = 42;
-    if (vanguard >= 3) bonuses.vanguardArmor = 70;
+    if (vanguard === 1) bonuses.vanguardArmor = 8;
+    if (vanguard === 2) bonuses.vanguardArmor = 18;
+    if (vanguard >= 3) bonuses.vanguardArmor = 30;
 
     const ranger = traitTier("Ranger", counts.Ranger || 0);
     if (ranger === 1) bonuses.rangerSpeed = 1.15;
@@ -4777,6 +5448,7 @@
     const baseAttack = def.attack * STAR_ATTACK_MULT[star];
     const baseAbilityPower = 1 + (star - 1) * 0.22;
     const item = strongestItemBonuses(source.items || []);
+    const blessing = bonuses.blessing || strongestBlessingBonuses([]);
 
     const guardHpGain = source.awakening === "guard" ? baseHp * 0.25 : 0;
     const guardArmor = source.awakening === "guard" ? 12 : 0;
@@ -4791,14 +5463,14 @@
 
     // The strongest source wins for each stat. This prevents stacked armour,
     // attack, speed, health, mana, regeneration and ability-power boosts.
-    let maxHp = baseHp + Math.max(item.hp, guardHpGain);
-    let attack = baseAttack + Math.max(item.attack, baseAttack * Math.max(forceAttackPct, strikerAttackPct));
-    let armor = def.armor + Math.max(item.armor, guardArmor, vanguardArmor);
-    let attackSpeed = def.attackSpeed * (1 + Math.max(item.attackSpeed, rangerSpeedPct, assassinSpeedPct));
-    let abilityPower = baseAbilityPower * (1 + Math.max(item.abilityPower, forceAbilityPct, mysticAbilityPct));
-    let startMana = Math.max(item.startMana, source.awakening === "guard" ? 10 : 0);
-    let regenPerSecond = item.regen;
-    let critChance = 0.05 + item.crit;
+    let maxHp = baseHp + Math.max(item.hp, guardHpGain, baseHp * blessing.hpPct);
+    let attack = baseAttack + Math.max(item.attack, baseAttack * Math.max(forceAttackPct, strikerAttackPct, blessing.attackPct));
+    let armor = def.armor + Math.max(item.armor, guardArmor, vanguardArmor, blessing.armor);
+    let attackSpeed = def.attackSpeed * (1 + Math.max(item.attackSpeed, rangerSpeedPct, assassinSpeedPct, blessing.attackSpeed));
+    let abilityPower = baseAbilityPower * (1 + Math.max(item.abilityPower, forceAbilityPct, mysticAbilityPct, blessing.abilityPower));
+    let startMana = Math.max(item.startMana, source.awakening === "guard" ? 10 : 0, blessing.startMana);
+    let regenPerSecond = Math.max(item.regen, blessing.regen);
+    let critChance = 0.05 + Math.max(item.crit, blessing.crit);
     let critMult = def.role === "Assassin" ? bonuses.assassinCritMult : 1.5;
     let manaMax = def.manaMax;
     let echoAvailable = item.echo;
@@ -4833,7 +5505,7 @@
       shield: 0,
       attack,
       armor,
-      range: def.range,
+      range: def.range + item.range,
       attackSpeed,
       attackInterval: 1000 / Math.max(0.25, attackSpeed),
       abilityPower,
@@ -4857,6 +5529,12 @@
       temporaryRegen: 0,
       temporaryRegenUntil: 0,
       echoAvailable,
+      lifesteal: item.lifesteal,
+      damageReduction: item.damageReduction,
+      manaOnHit: item.manaOnHit,
+      slowOnHit: item.slowOnHit,
+      burnOnHit: item.burnOnHit,
+      reviveAvailable: item.revive,
       actionClass: "",
       actionUntil: 0
     };
@@ -4877,8 +5555,9 @@
     state.selected = null;
     state.inspectedEnemy = null;
     const enemyEntries = state.enemyPreview.map(entry => ({ ...entry }));
-    const playerBonuses = calculateTeamBonuses(playerEntries);
-    const enemyBonuses = calculateTeamBonuses(enemyEntries);
+    const playerBonuses = calculateTeamBonuses(playerEntries, state.blessings || []);
+    const enemyBlessings = state.mode === "duel" ? (getDuelOpponentSnapshot()?.blessings || []) : [];
+    const enemyBonuses = calculateTeamBonuses(enemyEntries, enemyBlessings);
 
     const units = [
       ...playerEntries.map(entry => buildCombatUnit(entry, "player", entry.pos, playerBonuses)),
@@ -5065,12 +5744,16 @@
     if (!attacker.alive || !target.alive || gridDistance(attacker, target) > attacker.range) return;
     const isCrit = Math.random() < attacker.critChance;
     const rawDamage = attacker.attack * (isCrit ? attacker.critMult : 1);
-    dealDamage(attacker, target, rawDamage, isCrit ? "crit" : "damage");
-    attacker.mana = clamp(attacker.mana + 12, 0, attacker.manaMax);
+    const dealt = dealDamage(attacker, target, rawDamage, isCrit ? "crit" : "damage");
+    if (attacker.lifesteal > 0 && dealt > 0) healUnit(attacker, dealt * attacker.lifesteal, false);
+    if (attacker.slowOnHit > 0 && target.alive && Math.random() < attacker.slowOnHit) {
+      target.slowUntil = Math.max(target.slowUntil, combat.elapsed + 1300);
+    }
+    if (attacker.burnOnHit > 0 && target.alive) applyBurn(target, attacker.burnOnHit, 2200);
+    attacker.mana = clamp(attacker.mana + 12 + attacker.manaOnHit, 0, attacker.manaMax);
     target.mana = clamp(target.mana + 6, 0, target.manaMax);
     attacker.actionClass = "attack";
     attacker.actionUntil = combat.elapsed + 260;
-
 
     const slowMultiplier = attacker.slowUntil > combat.elapsed ? 1.35 : 1;
     attacker.attackCooldown = attacker.attackInterval * slowMultiplier;
@@ -5095,6 +5778,7 @@
   }
 
   function applyDamageAmount(attacker, target, damage, kind, show) {
+    damage *= 1 - clamp(target.damageReduction || 0, 0, 0.6);
     let remaining = damage;
     if (target.shield > 0) {
       const absorbed = Math.min(target.shield, remaining);
@@ -5115,6 +5799,15 @@
 
   function killUnit(target, attacker) {
     if (!target.alive) return;
+    if (target.reviveAvailable) {
+      target.reviveAvailable = false;
+      target.hp = Math.max(1, target.maxHp * 0.30);
+      target.shield = Math.max(target.shield, target.maxHp * 0.08);
+      target.mana = Math.min(target.manaMax - 1, 20);
+      target.stunnedUntil = combat.elapsed + 650;
+      addFloating(target, "REVIVE", "heal");
+      return;
+    }
     target.alive = false;
     target.targetId = null;
     addFloating(target, "KO", "ko");
@@ -5605,7 +6298,7 @@
     combat.ended = true;
     if (combat.raf) cancelAnimationFrame(combat.raf);
     const enemySurvivors = livingUnits("enemy").map(unit => ({ star: unit.star, boss: unit.boss }));
-    const playerSurvivors = livingUnits("player").length;
+    const playerSurvivors = livingUnits("player").map(unit => ({ star: unit.star, boss: unit.boss }));
     els.battleTimer.textContent = timedOut ? "Time!" : playerWon ? "Victory!" : "Defeat";
     toast(playerWon ? "Battle won!" : "Your formation was defeated.", playerWon ? "good" : "bad");
     playSfx(playerWon ? "win" : "loss");
@@ -5613,6 +6306,10 @@
   }
 
   function resolveRound(playerWon, enemySurvivors, playerSurvivors, timedOut) {
+    if (state.mode === "duel") {
+      resolveDuelRound(playerWon, enemySurvivors, playerSurvivors, timedOut);
+      return;
+    }
     const completedRound = state.round;
     const interest = Math.min(5, Math.floor(state.gold / 10));
 
@@ -5624,11 +6321,12 @@
 
     const streakBonus = playerWon ? Math.min(3, Math.floor(Math.max(0, state.streak - 1) / 2)) : 0;
     const baseGold = playerWon ? 5 : 4;
-    const reward = baseGold + interest + streakBonus;
+    const blessingGold = strongestBlessingBonuses(state.blessings).roundGold;
+    const reward = baseGold + interest + streakBonus + blessingGold;
     state.gold += reward;
 
     if (playerWon) {
-      addLog(`Round ${completedRound} won${timedOut ? " on remaining health" : ""}: +${reward} gold (${interest} interest${streakBonus ? `, ${streakBonus} streak` : ""}).`, "good");
+      addLog(`Round ${completedRound} won${timedOut ? " on remaining health" : ""}: +${reward} gold (${interest} interest${streakBonus ? `, ${streakBonus} streak` : ""}${blessingGold ? `, ${blessingGold} War Chest` : ""}).`, "good");
     } else {
       const survivorPower = enemySurvivors.reduce((sum, unit) => sum + unit.star + (unit.boss ? 1 : 0), 0);
       const damage = clamp(2 + survivorPower, 2, 18);
@@ -5666,17 +6364,18 @@
     } else {
       state.shop = Array.from({ length: 5 }, () => rollShopUnit(state.level));
     }
+    if (completedRound % 5 === 0) state.pendingBlessingRewards += 1;
+    if (playerWon && completedRound % 3 === 0) state.pendingItemRewards += 1;
     render();
     saveGame();
 
-    if (playerWon && completedRound % 3 === 0) {
-      showLootChoice(completedRound);
-    } else {
+    processPendingRewards(() => {
       toast(`Round ${state.round} planning phase.`, "good");
-    }
+      setTimeout(processAwakeningQueue, 0);
+    });
   }
 
-  function showLootChoice(completedRound) {
+  function showLootChoice(completedRound, onComplete = () => {}) {
     const itemKeys = Object.keys(ITEM_DEFS);
     const shuffled = [...itemKeys].sort(() => Math.random() - 0.5).slice(0, 3);
     const body = document.createElement("div");
@@ -5709,6 +6408,7 @@
         saveGame();
         toast(`${ITEM_DEFS[itemKey].name} added to your inventory.`, "gold");
         playSfx("loot");
+        onComplete();
       });
     });
   }
@@ -5759,6 +6459,80 @@
     if (state.sound) playSfx("select");
     renderStats();
     if (!titleScreenOpen() || titleHasSavedRun) saveGame();
+  }
+
+  function toggleMusic() {
+    state.music = !state.music;
+    if (state.music) startMusicLoop();
+    else stopMusicLoop();
+    renderStats();
+    if (!titleScreenOpen() || titleHasSavedRun) saveGame();
+  }
+
+  function stopMusicLoop() {
+    if (musicTimer) clearInterval(musicTimer);
+    musicTimer = null;
+    if (customMusicAudio) {
+      customMusicAudio.pause();
+      customMusicAudio.currentTime = 0;
+      customMusicAudio = null;
+    }
+  }
+
+  function playMusicVoice(frequency, duration = 0.4, volume = 0.0045, type = "triangle", delay = 0) {
+    if (!state?.music || document.hidden) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const start = ctx.currentTime + delay;
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, start);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, volume), start + 0.035);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+    oscillator.start(start);
+    oscillator.stop(start + duration + 0.04);
+  }
+
+  function playPlaceholderMusicStep() {
+    if (!state?.music || document.hidden) return;
+    const progression = [
+      [220.00, 277.18, 329.63],
+      [196.00, 246.94, 293.66],
+      [174.61, 220.00, 261.63],
+      [196.00, 246.94, 329.63]
+    ];
+    const melody = [440.00, 493.88, 554.37, 493.88, 392.00, 440.00, 493.88, 659.25];
+    const chord = progression[Math.floor(musicStep / 4) % progression.length];
+    const note = melody[musicStep % melody.length];
+    playMusicVoice(note, 0.33, 0.0036, "triangle");
+    if (musicStep % 2 === 0) playMusicVoice(chord[Math.floor(musicStep / 2) % chord.length], 0.75, 0.0026, "sine");
+    musicStep = (musicStep + 1) % 64;
+  }
+
+  function startMusicLoop() {
+    if (!state?.music) return;
+    if (CUSTOM_ASSETS.musicUrl) {
+      if (!customMusicAudio) {
+        customMusicAudio = new Audio(CUSTOM_ASSETS.musicUrl);
+        customMusicAudio.loop = true;
+        customMusicAudio.volume = 0.24;
+      }
+      customMusicAudio.play().catch(() => {});
+      return;
+    }
+    getAudioContext();
+    if (musicTimer) return;
+    playPlaceholderMusicStep();
+    musicTimer = setInterval(playPlaceholderMusicStep, 420);
+  }
+
+  function handleBattleAction() {
+    if (state.mode === "duel" && state.phase === "planning") lockInDuelPlayer();
+    else startBattle();
   }
 
   function getAudioContext() {
@@ -5818,6 +6592,7 @@
   function bindEvents() {
     els.helpButton.addEventListener("click", showHelp);
     els.titleHelpButton.addEventListener("click", showHelp);
+    els.titleMusicButton.addEventListener("click", toggleMusic);
     els.titleSoundButton.addEventListener("click", toggleSound);
     els.titlePlayButton.addEventListener("click", beginFromTitle);
     els.titleContinueButton.addEventListener("click", continueFromTitle);
@@ -5834,9 +6609,21 @@
         beginFromTitle();
       }
     });
+    els.titleName2Input.addEventListener("input", () => {
+      const cleaned = els.titleName2Input.value.replace(/[<>]/g, "").slice(0, 16);
+      if (cleaned !== els.titleName2Input.value) els.titleName2Input.value = cleaned;
+    });
+    els.titleName2Input.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        beginFromTitle();
+      }
+    });
     els.newGameButton.addEventListener("click", confirmNewGame);
+    els.musicButton.addEventListener("click", toggleMusic);
     els.soundButton.addEventListener("click", toggleSound);
-    els.battleButton.addEventListener("click", startBattle);
+    els.teamBuffButton.addEventListener("click", showTeamBuffs);
+    els.battleButton.addEventListener("click", handleBattleAction);
     els.autoPlaceButton.addEventListener("click", autoPlace);
     els.speedButton.addEventListener("click", toggleSpeed);
     els.lockButton.addEventListener("click", toggleShopLock);
@@ -5867,11 +6654,19 @@
       if (modalOpen) return;
       if (event.code === "Space") {
         event.preventDefault();
-        startBattle();
+        handleBattleAction();
       } else if (event.key.toLowerCase() === "r") {
         refreshShop();
       } else if (event.key.toLowerCase() === "e") {
         buyXp();
+      }
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        if (customMusicAudio) customMusicAudio.pause();
+      } else if (state?.music) {
+        startMusicLoop();
       }
     });
   }
