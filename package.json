@@ -1,0 +1,15 @@
+{
+  "name": "aetherboard-auto-chess-online",
+  "version": "5.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Aetherboard Arena browser auto-chess with cross-device WebSocket lobbies.",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test:server": "node tests/server-smoke-test.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
