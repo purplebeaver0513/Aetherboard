@@ -33,6 +33,8 @@ const BOARD_SIZE = 48;
 const PLAYER_BOARD_START = 24;
 const BENCH_SIZE = 12;
 const MAX_DEPLOYED = 8;
+const VALID_COMBAT_ACTIONS = new Set(["freeze", "heal", "wall", "focus"]);
+const COMMAND_GCD_MS = 3300;
 
 const WS_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
@@ -216,6 +218,15 @@ function safeText(value, fallback = "Commander", max = 16) {
     .trim()
     .slice(0, max);
   return clean || fallback;
+}
+
+function seedFromString(value = "") {
+  let hash = 2166136261;
+  for (const char of String(value)) {
+    hash ^= char.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
 }
 
 function safeCode(value) {
@@ -651,6 +662,8 @@ function battlePayload(room, battle, player) {
       id: battle.id,
       round: battle.round,
       seed: battle.seed,
+      environmentSeed: battle.environmentSeed,
+      actionLog: battle.actionLog || [],
       authorityId: battle.authorityId,
       youSide: player.id === battle.aId ? "a" : "b",
       ghost: battle.ghost,
@@ -680,6 +693,7 @@ function beginBattles(room) {
       id: crypto.randomUUID(),
       round: room.round,
       seed: crypto.randomInt(1, 2_147_483_647),
+      environmentSeed: seedFromString(room.code),
       aId: pairing.a.id,
       bId: pairing.b.id,
       aSnapshot: pairing.a.snapshot,
@@ -688,6 +702,8 @@ function beginBattles(room) {
       authorityId: pairing.a.id,
       participantIds: pairing.ghost ? [pairing.a.id] : [pairing.a.id, pairing.b.id],
       startedAt: Date.now(),
+      actionLog: [],
+      actionUsage: new Map(),
       resolved: false,
       result: null
     };
@@ -873,6 +889,67 @@ function resetToLobby(room) {
   broadcastRoom(room);
 }
 
+function relayCombatAction(room, battle, player, message) {
+  if (!battle || battle.resolved || room.status !== "battle") return;
+  if (!battle.participantIds.includes(player.id)) {
+    return jsonSend(player.ws, "error", { code: "NOT_PARTICIPANT", message: "You are not a participant in this battle." });
+  }
+
+  const actionType = String(message.actionType || "");
+  if (!VALID_COMBAT_ACTIONS.has(actionType)) {
+    return jsonSend(player.ws, "error", { code: "BAD_ACTION", message: "Unknown commander action." });
+  }
+
+  const now = Date.now();
+  const usage = battle.actionUsage.get(player.id) || { spellUsed: false, focusUsed: false, lastAt: 0 };
+  if (now - usage.lastAt < COMMAND_GCD_MS) {
+    return jsonSend(player.ws, "error", { code: "COMMAND_COOLDOWN", message: "Commander actions share a short global cooldown." });
+  }
+  if (actionType === "focus" && usage.focusUsed) {
+    return jsonSend(player.ws, "error", { code: "FOCUS_USED", message: "Your Focus Banner was already used this battle." });
+  }
+  if (actionType !== "focus" && usage.spellUsed) {
+    return jsonSend(player.ws, "error", { code: "SPELL_USED", message: "Your commander spell was already used this battle." });
+  }
+
+  let cellIndex = null;
+  if (actionType !== "focus") {
+    const parsed = Number(message.cellIndex);
+    if (!Number.isInteger(parsed) || parsed < 0 || parsed >= BOARD_SIZE) {
+      return jsonSend(player.ws, "error", { code: "BAD_TARGET", message: "Choose a valid board tile." });
+    }
+    cellIndex = parsed;
+  }
+
+  const rawActionId = String(message.clientActionId || "").replace(/[^A-Za-z0-9_\-:.]/g, "").slice(0, 80);
+  const rawSourceId = String(message.targetSourceId || "").replace(/[^A-Za-z0-9_\-:.]/g, "").slice(0, 100);
+  const fallbackX = Number(message.fallbackX);
+  const fallbackY = Number(message.fallbackY);
+  const action = {
+    actionId: rawActionId || crypto.randomUUID(),
+    actorId: player.id,
+    type: actionType,
+    cellIndex,
+    targetSourceId: actionType === "focus" ? (rawSourceId || null) : null,
+    fallbackX: Number.isFinite(fallbackX) ? Math.max(0, Math.min(7, fallbackX)) : null,
+    fallbackY: Number.isFinite(fallbackY) ? Math.max(0, Math.min(5, fallbackY)) : null,
+    atMs: Math.max(0, Math.min(45_000, now - battle.startedAt))
+  };
+
+  if (battle.actionLog.some(entry => entry.actionId === action.actionId)) return;
+  if (actionType === "focus") usage.focusUsed = true;
+  else usage.spellUsed = true;
+  usage.lastAt = now;
+  battle.actionUsage.set(player.id, usage);
+  battle.actionLog.push(action);
+  if (battle.actionLog.length > 12) battle.actionLog.shift();
+
+  for (const participantId of battle.participantIds) {
+    const participant = room.players.get(participantId);
+    jsonSend(participant?.ws, "combat-action", { battleId: battle.id, action });
+  }
+}
+
 function handleMessage(ws, message) {
   const type = String(message?.type || "");
   if (type === "create-room") return createRoom(ws, message);
@@ -919,6 +996,13 @@ function handleMessage(ws, message) {
       player.name = safeText(snapshot.commanderName || player.name, player.name);
       if (allActive(room, item => item.locked && item.snapshot)) beginBattles(room);
       else broadcastRoom(room);
+      break;
+    }
+    case "combat-action": {
+      if (room.status !== "battle") return;
+      const battle = room.battles.get(String(message.battleId || ""));
+      if (!battle || battle.resolved) return;
+      relayCombatAction(room, battle, player, message);
       break;
     }
     case "battle-result": {

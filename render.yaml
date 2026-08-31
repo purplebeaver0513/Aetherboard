@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: aetherboard-online
+    name: aetherboard-hardcore-online
     runtime: node
     region: ohio
     plan: free

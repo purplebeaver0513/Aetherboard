@@ -1,9 +1,9 @@
 {
-  "name": "aetherboard-auto-chess-online",
-  "version": "5.0.0",
+  "name": "aetherboard-auto-chess-hardcore-online",
+  "version": "6.0.0",
   "private": true,
   "type": "module",
-  "description": "Aetherboard Arena browser auto-chess with cross-device WebSocket lobbies.",
+  "description": "Aetherboard Arena browser auto-chess with Hardcore permadeath, active commander spells, dynamic arenas, Black Market rewards, and cross-device WebSocket lobbies.",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
