@@ -1,12 +1,13 @@
 {
-  "name": "aetherboard-auto-chess-hardcore-online",
-  "version": "6.0.0",
+  "name": "aetherboard-auto-chess-v7-hardcore-duel",
+  "version": "7.0.0",
   "private": true,
   "type": "module",
-  "description": "Aetherboard Arena browser auto-chess with Hardcore permadeath, active commander spells, dynamic arenas, Black Market rewards, and cross-device WebSocket lobbies.",
+  "description": "Aetherboard Arena browser auto-chess with local and online Hardcore Duels, 60 spirits, Healer and Buffer roles, active commander spells, dynamic arenas, and cross-device WebSocket lobbies.",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
+    "test": "npm run test:server",
     "test:server": "node tests/server-smoke-test.mjs"
   },
   "engines": {

@@ -19,11 +19,14 @@ const VALID_UNIT_KEYS = new Set([
   "cinderCub", "thornling", "ripplefin", "sparkit", "snowpuff", "gloomimp", "glimmerbug", "pebblit", "breezle", "runelet",
   "frosthorn", "duskmoth", "magmole", "shellsprout", "mosskit", "zapfin", "prismtail", "cloudram", "runebear", "ashwing",
   "bloombeak", "tempestral", "tideclaw", "rootfox", "obsidianOx", "arcwhale", "coralSage", "glacielle", "shadeclaw", "solara",
-  "ironroot", "voidseer", "starmage", "voltDrake", "emberWyrm", "blizzardOwl", "sunlion", "terraTitan", "skySerpent", "aetherion"
+  "ironroot", "voidseer", "starmage", "voltDrake", "emberWyrm", "blizzardOwl", "sunlion", "terraTitan", "skySerpent", "aetherion",
+  "emberMedic", "warflare", "tideNurse", "currentCaller", "bloomDoe", "groveHerald", "pulseHare", "voltConductor", "frostFawn", "rimeBell",
+  "duskLeech", "nightDrummer", "haloDove", "dawnStandard", "clayCleric", "bastionTotem", "zephyrSprite", "galePiper", "runeOracle", "aetherMaestro"
 ]);
 const VALID_ITEM_KEYS = new Set([
   "swiftFeather", "vitalSeed", "arcCrystal", "ironPlate", "razorFang", "echoShell", "titanHeart", "scholarScroll", "manaBattery",
-  "guardianBell", "hunterScope", "drainRune", "nullPrism", "stormCoil", "frostSigil", "emberCharm", "phoenixAsh"
+  "guardianBell", "hunterScope", "drainRune", "nullPrism", "stormCoil", "frostSigil", "emberCharm", "phoenixAsh",
+  "voidCrown", "bloodEngine", "chaosLens", "graveIdol", "forbiddenHourglass"
 ]);
 const VALID_BLESSING_KEYS = new Set([
   "battleTraining", "arcaneTutelage", "swiftFormation", "fortifiedLines", "vitalityRite",
@@ -33,7 +36,7 @@ const BOARD_SIZE = 48;
 const PLAYER_BOARD_START = 24;
 const BENCH_SIZE = 12;
 const MAX_DEPLOYED = 8;
-const VALID_COMBAT_ACTIONS = new Set(["freeze", "heal", "wall", "focus"]);
+const VALID_COMBAT_ACTIONS = new Set(["freeze", "heal", "shield", "focus"]);
 const COMMAND_GCD_MS = 3300;
 
 const WS_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
@@ -263,7 +266,6 @@ function publicPlayer(player, room) {
     lastResult: player.lastResult || null
   };
 }
-
 function publicRoom(room) {
   const players = [...room.players.values()]
     .sort((a, b) => a.seat - b.seat)
@@ -272,6 +274,7 @@ function publicRoom(room) {
   return {
     code: room.code,
     kind: room.kind,
+    hardcore: Boolean(room.hardcore),
     maxPlayers: room.maxPlayers,
     status: room.status,
     round: room.round,
@@ -285,7 +288,6 @@ function publicRoom(room) {
     createdAt: room.createdAt
   };
 }
-
 function broadcast(room, type, payload = {}, filter = null) {
   for (const player of room.players.values()) {
     if (filter && !filter(player)) continue;
@@ -330,7 +332,7 @@ function makePlayer(ws, name, room) {
     ready: false,
     drafted: false,
     locked: false,
-    hp: 30,
+    hp: room.hardcore ? 40 : 30,
     alive: true,
     snapshot: null,
     lastResult: null,
@@ -338,7 +340,6 @@ function makePlayer(ws, name, room) {
     joinedAt: Date.now()
   };
 }
-
 function attachSocket(ws, room, player) {
   player.ws = ws;
   player.connected = true;
@@ -372,7 +373,7 @@ function sanitizeUnit(raw, fallbackId) {
   };
 }
 
-function sanitizeSnapshot(raw) {
+function sanitizeSnapshot(raw, room = null) {
   if (!raw || typeof raw !== "object") return null;
   let rawSize = 0;
   try {
@@ -416,18 +417,71 @@ function sanitizeSnapshot(raw) {
     return id;
   });
 
+  const hardcoreEnabled = Boolean(room?.hardcore);
+  let hardcore = null;
+  if (hardcoreEnabled) {
+    const rawHardcore = raw.hardcore && typeof raw.hardcore === "object" ? raw.hardcore : {};
+    const bannedUnits = [...new Set((Array.isArray(rawHardcore.bannedUnits) ? rawHardcore.bannedUnits : [])
+      .map(value => String(value).slice(0, 40)).filter(value => VALID_UNIT_KEYS.has(value)))].slice(0, 2);
+    const allowed = key => VALID_UNIT_KEYS.has(key) && !bannedUnits.includes(key);
+    const factionDeck = [...new Set((Array.isArray(rawHardcore.factionDeck) ? rawHardcore.factionDeck : [])
+      .map(value => String(value).slice(0, 40)).filter(allowed))].slice(0, 15);
+    const globalPool = [...new Set((Array.isArray(rawHardcore.globalPool) ? rawHardcore.globalPool : [])
+      .map(value => String(value).slice(0, 40)).filter(value => allowed(value) && !factionDeck.includes(value)))].slice(0, 5);
+    const graveyard = (Array.isArray(rawHardcore.graveyard) ? rawHardcore.graveyard : []).slice(-60).map((entry, index) => {
+      if (!entry || !VALID_UNIT_KEYS.has(String(entry.defKey || ""))) return null;
+      const items = Array.isArray(entry.items)
+        ? [...new Set(entry.items.map(value => String(value).slice(0, 40)).filter(value => VALID_ITEM_KEYS.has(value)))].slice(0, 2)
+        : [];
+      return {
+        id: String(entry.id || `grave_${index}`).slice(0, 80),
+        defKey: String(entry.defKey),
+        star: Math.max(1, Math.min(3, Number(entry.star) || 1)),
+        awakening: ["force", "guard"].includes(entry.awakening) ? entry.awakening : null,
+        items,
+        diedRound: Math.max(1, Math.min(9999, Number(entry.diedRound) || 1))
+      };
+    }).filter(Boolean);
+    hardcore = {
+      setupComplete: Boolean(rawHardcore.setupComplete && bannedUnits.length === 2 && factionDeck.length === 15),
+      bannedUnits,
+      factionDeck,
+      globalPool,
+      graveyard,
+      blackMarketVisits: Math.max(0, Math.min(999, Number(rawHardcore.blackMarketVisits) || 0)),
+      blackMarketPasses: Math.max(0, Math.min(999, Number(rawHardcore.blackMarketPasses) || 0)),
+      totalDeaths: Math.max(0, Math.min(9999, Number(rawHardcore.totalDeaths) || graveyard.length)),
+      lastAppliedHardcoreRound: Math.max(0, Math.min(9999, Number(rawHardcore.lastAppliedHardcoreRound) || 0))
+    };
+    if (!hardcore.setupComplete) return null;
+    const permitted = new Set([...factionDeck, ...globalPool]);
+    for (const unit of Object.values(units)) {
+      if (!permitted.has(unit.defKey) || bannedUnits.includes(unit.defKey)) return null;
+    }
+  }
+
+  const maxHp = hardcoreEnabled ? 40 : 30;
+  const sanitizedShop = Array.isArray(raw.shop)
+    ? raw.shop.slice(0, 5).map(value => VALID_UNIT_KEYS.has(String(value)) ? String(value) : null)
+    : Array(5).fill(null);
+  if (hardcore) {
+    const permitted = new Set([...hardcore.factionDeck, ...hardcore.globalPool]);
+    for (let index = 0; index < sanitizedShop.length; index += 1) {
+      if (!permitted.has(sanitizedShop[index]) || hardcore.bannedUnits.includes(sanitizedShop[index])) sanitizedShop[index] = null;
+    }
+  }
+
   return {
     commanderName: safeText(raw.commanderName),
-    hp: Math.max(0, Math.min(30, Number(raw.hp) || 30)),
+    hp: Math.max(0, Math.min(maxHp, Number(raw.hp) || maxHp)),
     gold: Math.max(0, Math.min(9999, Number(raw.gold) || 0)),
     level: Math.max(3, Math.min(8, Number(raw.level) || 3)),
     xp: Math.max(0, Math.min(9999, Number(raw.xp) || 0)),
+    runSeed: Math.max(1, Math.min(2_147_483_647, Number(raw.runSeed) || crypto.randomInt(1, 2_147_483_647))),
     board,
     bench,
     units,
-    shop: Array.isArray(raw.shop)
-      ? raw.shop.slice(0, 5).map(value => VALID_UNIT_KEYS.has(String(value)) ? String(value) : null)
-      : Array(5).fill(null),
+    shop: sanitizedShop,
     shopLocked: Boolean(raw.shopLocked),
     inventory: Array.isArray(raw.inventory)
       ? raw.inventory.slice(0, 30).map(value => String(value).slice(0, 40)).filter(value => VALID_ITEM_KEYS.has(value))
@@ -437,6 +491,7 @@ function sanitizeSnapshot(raw) {
       : [],
     pendingItemRewards: Math.max(0, Math.min(20, Number(raw.pendingItemRewards) || 0)),
     pendingBlessingRewards: Math.max(0, Math.min(20, Number(raw.pendingBlessingRewards) || 0)),
+    pendingBlackMarketRewards: hardcoreEnabled ? Math.max(0, Math.min(20, Number(raw.pendingBlackMarketRewards) || 0)) : 0,
     streak: Math.max(-999, Math.min(999, Number(raw.streak) || 0)),
     battleLog: Array.isArray(raw.battleLog) ? raw.battleLog.slice(-40).map(entry => ({
       text: safeText(entry?.text, "Battle update", 180),
@@ -447,17 +502,74 @@ function sanitizeSnapshot(raw) {
     draftPicksRemaining: Math.max(0, Math.min(3, Number(raw.draftPicksRemaining) || 0)),
     draftHistory: Array.isArray(raw.draftHistory)
       ? raw.draftHistory.slice(0, 3).map(value => String(value).slice(0, 40)).filter(value => VALID_UNIT_KEYS.has(value))
-      : []
+      : [],
+    hardcore
   };
+}
+function sanitizeHardcoreCasualtySide(raw, snapshot) {
+  const report = raw && typeof raw === "object" ? raw : {};
+  const deployed = new Set((snapshot?.board || []).filter(Boolean));
+  const validId = value => {
+    const id = String(value || "").slice(0, 80);
+    return deployed.has(id) && Boolean(snapshot?.units?.[id]) ? id : null;
+  };
+  const protectedUnitIds = [...new Set((Array.isArray(report.protectedUnitIds) ? report.protectedUnitIds : []).map(validId).filter(Boolean))];
+  const lostUnitIds = [...new Set((Array.isArray(report.lostUnitIds) ? report.lostUnitIds : []).map(validId).filter(Boolean))]
+    .filter(id => !protectedUnitIds.includes(id));
+  return { lostUnitIds, protectedUnitIds };
+}
+
+function applyHardcoreCasualties(player, snapshot, report, completedRound) {
+  const applied = { lostUnitIds: [], protectedUnitIds: [], rosterRemaining: Object.keys(snapshot?.units || {}).length };
+  if (!snapshot?.hardcore || !report) return applied;
+
+  for (const id of report.protectedUnitIds || []) {
+    const unit = snapshot.units?.[id];
+    const idolIndex = unit?.items?.indexOf("graveIdol") ?? -1;
+    if (!unit || idolIndex < 0) continue;
+    unit.items.splice(idolIndex, 1);
+    applied.protectedUnitIds.push(id);
+  }
+
+  for (const id of report.lostUnitIds || []) {
+    const unit = snapshot.units?.[id];
+    if (!unit) continue;
+    snapshot.board = snapshot.board.map(value => value === id ? null : value);
+    snapshot.bench = snapshot.bench.map(value => value === id ? null : value);
+    snapshot.hardcore.graveyard.push({
+      id,
+      defKey: unit.defKey,
+      star: unit.star,
+      awakening: unit.awakening,
+      items: [...(unit.items || [])],
+      diedRound: completedRound
+    });
+    snapshot.hardcore.graveyard = snapshot.hardcore.graveyard.slice(-60);
+    snapshot.hardcore.totalDeaths = (snapshot.hardcore.totalDeaths || 0) + 1;
+    delete snapshot.units[id];
+    applied.lostUnitIds.push(id);
+  }
+
+  snapshot.hardcore.lastAppliedHardcoreRound = Math.max(snapshot.hardcore.lastAppliedHardcoreRound || 0, completedRound);
+  applied.rosterRemaining = Object.keys(snapshot.units || {}).length;
+  player.snapshot = snapshot;
+  if (applied.rosterRemaining <= 0) {
+    player.hp = 0;
+    player.alive = false;
+    player.lastResult = "Roster wiped out";
+  }
+  return applied;
 }
 
 function createRoom(ws, message) {
   if (socketMeta.has(ws)) return jsonSend(ws, "error", { code: "ALREADY_IN_ROOM", message: "Leave the current lobby before creating another one." });
   const kind = message.kind === "party" ? "party" : "duel";
+  const hardcore = kind === "duel" && Boolean(message.hardcore);
   const code = randomCode();
   const room = {
     code,
     kind,
+    hardcore,
     maxPlayers: roomCapacity(kind),
     hostId: null,
     status: "lobby",
@@ -476,7 +588,6 @@ function createRoom(ws, message) {
   jsonSend(ws, "room-joined", { playerId: player.id, token: player.token, room: publicRoom(room) });
   broadcastRoom(room);
 }
-
 function joinRoom(ws, message) {
   if (socketMeta.has(ws)) return jsonSend(ws, "error", { code: "ALREADY_IN_ROOM", message: "Leave the current lobby before joining another one." });
   const code = safeCode(message.code);
@@ -598,11 +709,12 @@ function startMatch(room) {
   room.round = 1;
   room.battles.clear();
   room.roundResults.clear();
+  const startingHp = room.hardcore ? 40 : 30;
   for (const player of room.players.values()) {
     player.ready = false;
     player.drafted = false;
     player.locked = false;
-    player.hp = 30;
+    player.hp = startingHp;
     player.alive = true;
     player.snapshot = null;
     player.lastResult = null;
@@ -610,7 +722,6 @@ function startMatch(room) {
   broadcast(room, "match-start", { room: publicRoom(room), reconnect: false });
   broadcastRoom(room);
 }
-
 function allActive(room, predicate) {
   const active = [...room.players.values()].filter(player => player.alive);
   return active.length > 0 && active.every(predicate);
@@ -724,11 +835,20 @@ function addRoundResult(room, playerId, result) {
   room.roundResults.set(playerId, previous);
 }
 
-function resolveBattle(room, battle, winnerSide, survivorPower, timedOut = false, forced = false) {
+function resolveBattle(room, battle, winnerSide, survivorPower, timedOut = false, forced = false, casualtyPayload = null) {
   if (!battle || battle.resolved) return;
   const a = room.players.get(battle.aId);
   const b = room.players.get(battle.bId);
   if (!a || !b) return;
+
+  let aCasualties = null;
+  let bCasualties = null;
+  if (room.hardcore) {
+    const aRaw = sanitizeHardcoreCasualtySide(casualtyPayload?.a, battle.aSnapshot);
+    const bRaw = sanitizeHardcoreCasualtySide(casualtyPayload?.b, battle.bSnapshot);
+    aCasualties = applyHardcoreCasualties(a, battle.aSnapshot, aRaw, battle.round);
+    bCasualties = applyHardcoreCasualties(b, battle.bSnapshot, bRaw, battle.round);
+  }
 
   const winningPlayer = winnerSide === "b" ? b : a;
   const losingPlayer = winnerSide === "b" ? a : b;
@@ -739,7 +859,7 @@ function resolveBattle(room, battle, winnerSide, survivorPower, timedOut = false
   if (battle.ghost) {
     if (winnerSide === "b") {
       a.hp = Math.max(0, a.hp - damage);
-      a.alive = a.hp > 0;
+      a.alive = a.hp > 0 && (!room.hardcore || (aCasualties?.rosterRemaining || 0) > 0);
       a.lastResult = `Lost to ${b.name}'s ghost · -${damage} heart`;
       damagedPlayer = a;
       addRoundResult(room, a.id, {
@@ -751,7 +871,8 @@ function resolveBattle(room, battle, winnerSide, survivorPower, timedOut = false
         ghost: true,
         damageTaken: damage,
         damageDealt: 0,
-        timedOut
+        timedOut,
+        hardcoreCasualties: aCasualties
       });
     } else {
       a.lastResult = `Defeated ${b.name}'s ghost`;
@@ -764,14 +885,22 @@ function resolveBattle(room, battle, winnerSide, survivorPower, timedOut = false
         ghost: true,
         damageTaken: 0,
         damageDealt: 0,
-        timedOut
+        timedOut,
+        hardcoreCasualties: aCasualties
       });
     }
   } else {
     losingPlayer.hp = Math.max(0, losingPlayer.hp - damage);
-    losingPlayer.alive = losingPlayer.hp > 0;
+    if (room.hardcore) {
+      a.alive = a.hp > 0 && (aCasualties?.rosterRemaining || 0) > 0;
+      b.alive = b.hp > 0 && (bCasualties?.rosterRemaining || 0) > 0;
+      if (!a.alive) a.hp = 0;
+      if (!b.alive) b.hp = 0;
+    } else {
+      losingPlayer.alive = losingPlayer.hp > 0;
+    }
     winningPlayer.lastResult = `Defeated ${losingPlayer.name}`;
-    losingPlayer.lastResult = `Lost to ${winningPlayer.name} · -${damage} heart`;
+    losingPlayer.lastResult = losingPlayer.alive ? `Lost to ${winningPlayer.name} · -${damage} heart` : room.hardcore && losingPlayer.hp === 0 ? "Eliminated" : `Lost to ${winningPlayer.name} · -${damage} heart`;
     damagedPlayer = losingPlayer;
     addRoundResult(room, winningPlayer.id, {
       battleId: battle.id,
@@ -782,7 +911,8 @@ function resolveBattle(room, battle, winnerSide, survivorPower, timedOut = false
       ghost: false,
       damageTaken: 0,
       damageDealt: damage,
-      timedOut
+      timedOut,
+      hardcoreCasualties: winnerSide === "a" ? aCasualties : bCasualties
     });
     addRoundResult(room, losingPlayer.id, {
       battleId: battle.id,
@@ -793,7 +923,8 @@ function resolveBattle(room, battle, winnerSide, survivorPower, timedOut = false
       ghost: false,
       damageTaken: damage,
       damageDealt: 0,
-      timedOut
+      timedOut,
+      hardcoreCasualties: winnerSide === "a" ? bCasualties : aCasualties
     });
   }
 
@@ -804,7 +935,8 @@ function resolveBattle(room, battle, winnerSide, survivorPower, timedOut = false
     loserId: battle.ghost && winnerSide === "a" ? null : losingPlayer.id,
     damage: damagedPlayer ? damage : 0,
     timedOut,
-    forced
+    forced,
+    hardcoreCasualties: room.hardcore ? { a: aCasualties, b: bCasualties } : null
   };
 
   for (const participantId of battle.participantIds) {
@@ -819,7 +951,6 @@ function resolveBattle(room, battle, winnerSide, survivorPower, timedOut = false
   if ([...room.battles.values()].every(item => item.resolved)) completeRound(room);
   else broadcastRoom(room);
 }
-
 function completeRound(room) {
   const completedRound = room.round;
   const alive = [...room.players.values()].filter(player => player.alive);
@@ -876,11 +1007,12 @@ function resetToLobby(room) {
   room.round = 1;
   room.battles.clear();
   room.roundResults.clear();
+  const startingHp = room.hardcore ? 40 : 30;
   for (const player of room.players.values()) {
     player.ready = false;
     player.drafted = false;
     player.locked = false;
-    player.hp = 30;
+    player.hp = startingHp;
     player.alive = true;
     player.snapshot = null;
     player.lastResult = null;
@@ -888,7 +1020,6 @@ function resetToLobby(room) {
   broadcast(room, "returned-to-lobby", { room: publicRoom(room) });
   broadcastRoom(room);
 }
-
 function relayCombatAction(room, battle, player, message) {
   if (!battle || battle.resolved || room.status !== "battle") return;
   if (!battle.participantIds.includes(player.id)) {
@@ -989,7 +1120,7 @@ function handleMessage(ws, message) {
     }
     case "submit-formation": {
       if (room.status !== "planning" || !player.alive || player.locked) return;
-      const snapshot = sanitizeSnapshot(message.snapshot);
+      const snapshot = sanitizeSnapshot(message.snapshot, room);
       if (!snapshot) return jsonSend(ws, "error", { code: "BAD_SNAPSHOT", message: "The formation data could not be accepted." });
       player.snapshot = snapshot;
       player.locked = true;
@@ -1011,7 +1142,7 @@ function handleMessage(ws, message) {
       if (!battle || battle.resolved) return;
       if (battle.authorityId !== player.id) return jsonSend(ws, "error", { code: "NOT_AUTHORITY", message: "This client is not the battle authority." });
       const winnerSide = message.winnerSide === "b" ? "b" : "a";
-      resolveBattle(room, battle, winnerSide, message.survivorPower, Boolean(message.timedOut));
+      resolveBattle(room, battle, winnerSide, message.survivorPower, Boolean(message.timedOut), false, message.hardcoreCasualties || null);
       break;
     }
     case "return-lobby": {
