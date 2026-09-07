@@ -1,3 +1,5 @@
+import "./public/rules.js";
+const RULES = globalThis.AetherRules;
 import http from "node:http";
 import crypto from "node:crypto";
 import fs from "node:fs";
@@ -15,14 +17,7 @@ const ROOM_IDLE_MS = 30 * 60 * 1000;
 const RECONNECT_GRACE_MS = 2 * 60 * 1000;
 const BATTLE_REPORT_TIMEOUT_MS = 90 * 1000;
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-const VALID_UNIT_KEYS = new Set([
-  "cinderCub", "thornling", "ripplefin", "sparkit", "snowpuff", "gloomimp", "glimmerbug", "pebblit", "breezle", "runelet",
-  "frosthorn", "duskmoth", "magmole", "shellsprout", "mosskit", "zapfin", "prismtail", "cloudram", "runebear", "ashwing",
-  "bloombeak", "tempestral", "tideclaw", "rootfox", "obsidianOx", "arcwhale", "coralSage", "glacielle", "shadeclaw", "solara",
-  "ironroot", "voidseer", "starmage", "voltDrake", "emberWyrm", "blizzardOwl", "sunlion", "terraTitan", "skySerpent", "aetherion",
-  "emberMedic", "warflare", "tideNurse", "currentCaller", "bloomDoe", "groveHerald", "pulseHare", "voltConductor", "frostFawn", "rimeBell",
-  "duskLeech", "nightDrummer", "haloDove", "dawnStandard", "clayCleric", "bastionTotem", "zephyrSprite", "galePiper", "runeOracle", "aetherMaestro"
-]);
+const VALID_UNIT_KEYS = new Set(Object.keys(RULES.units));
 const VALID_ITEM_KEYS = new Set([
   "swiftFeather", "vitalSeed", "arcCrystal", "ironPlate", "razorFang", "echoShell", "titanHeart", "scholarScroll", "manaBattery",
   "guardianBell", "hunterScope", "drainRune", "nullPrism", "stormCoil", "frostSigil", "emberCharm", "phoenixAsh",
@@ -36,8 +31,10 @@ const BOARD_SIZE = 48;
 const PLAYER_BOARD_START = 24;
 const BENCH_SIZE = 12;
 const MAX_DEPLOYED = 8;
-const VALID_COMBAT_ACTIONS = new Set(["freeze", "heal", "shield", "focus"]);
-const COMMAND_GCD_MS = 3300;
+const VALID_COMBAT_ACTIONS = new Set(["freeze", "aoe", "shield", "focus"]);
+const COMMAND_GCD_MS = 3500;
+const MATCHMAKING_QUEUE_TTL_MS = 10 * 60 * 1000;
+const MAX_MATCHMAKING_QUEUE_SIZE = 500;
 
 const WS_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
@@ -206,6 +203,11 @@ const WebSocket = SimpleWebSocket;
 
 const rooms = new Map();
 const socketMeta = new WeakMap();
+const queuedSockets = new WeakMap();
+const matchmakingQueues = new Map([
+  ["duel:standard", []],
+  ["duel:hardcore", []]
+]);
 
 function jsonSend(ws, type, payload = {}) {
   if (!ws || ws.readyState !== WebSocket.OPEN) return false;
@@ -263,7 +265,8 @@ function publicPlayer(player, room) {
     locked: player.locked,
     hp: player.hp,
     alive: player.alive,
-    lastResult: player.lastResult || null
+    lastResult: player.lastResult || null,
+    commander: RULES.normalizeCommander(player.commander)
   };
 }
 function publicRoom(room) {
@@ -275,6 +278,10 @@ function publicRoom(room) {
     code: room.code,
     kind: room.kind,
     hardcore: Boolean(room.hardcore),
+    environmentSeed: room.environmentSeed || null,
+    bannedUnits: room.bannedUnits || [],
+    rulesVersion: 9,
+    access: room.access === "matchmaking" ? "matchmaking" : "private",
     maxPlayers: room.maxPlayers,
     status: room.status,
     round: room.round,
@@ -332,6 +339,7 @@ function makePlayer(ws, name, room) {
     ready: false,
     drafted: false,
     locked: false,
+    commander: RULES.normalizeCommander(),
     hp: room.hardcore ? 40 : 30,
     alive: true,
     snapshot: null,
@@ -373,7 +381,7 @@ function sanitizeUnit(raw, fallbackId) {
   };
 }
 
-function sanitizeSnapshot(raw, room = null) {
+function sanitizeSnapshot(raw, room = null, player = null) {
   if (!raw || typeof raw !== "object") return null;
   let rawSize = 0;
   try {
@@ -421,13 +429,7 @@ function sanitizeSnapshot(raw, room = null) {
   let hardcore = null;
   if (hardcoreEnabled) {
     const rawHardcore = raw.hardcore && typeof raw.hardcore === "object" ? raw.hardcore : {};
-    const bannedUnits = [...new Set((Array.isArray(rawHardcore.bannedUnits) ? rawHardcore.bannedUnits : [])
-      .map(value => String(value).slice(0, 40)).filter(value => VALID_UNIT_KEYS.has(value)))].slice(0, 2);
-    const allowed = key => VALID_UNIT_KEYS.has(key) && !bannedUnits.includes(key);
-    const factionDeck = [...new Set((Array.isArray(rawHardcore.factionDeck) ? rawHardcore.factionDeck : [])
-      .map(value => String(value).slice(0, 40)).filter(allowed))].slice(0, 15);
-    const globalPool = [...new Set((Array.isArray(rawHardcore.globalPool) ? rawHardcore.globalPool : [])
-      .map(value => String(value).slice(0, 40)).filter(value => allowed(value) && !factionDeck.includes(value)))].slice(0, 5);
+    const bannedUnits = [...(room.bannedUnits || RULES.randomBans(room.environmentSeed))];
     const graveyard = (Array.isArray(rawHardcore.graveyard) ? rawHardcore.graveyard : []).slice(-60).map((entry, index) => {
       if (!entry || !VALID_UNIT_KEYS.has(String(entry.defKey || ""))) return null;
       const items = Array.isArray(entry.items)
@@ -443,10 +445,10 @@ function sanitizeSnapshot(raw, room = null) {
       };
     }).filter(Boolean);
     hardcore = {
-      setupComplete: Boolean(rawHardcore.setupComplete && bannedUnits.length === 2 && factionDeck.length === 15),
+      setupComplete: true,
+      randomBans: true,
+      banSeed: room.environmentSeed,
       bannedUnits,
-      factionDeck,
-      globalPool,
       graveyard,
       blackMarketVisits: Math.max(0, Math.min(999, Number(rawHardcore.blackMarketVisits) || 0)),
       blackMarketPasses: Math.max(0, Math.min(999, Number(rawHardcore.blackMarketPasses) || 0)),
@@ -454,7 +456,7 @@ function sanitizeSnapshot(raw, room = null) {
       lastAppliedHardcoreRound: Math.max(0, Math.min(9999, Number(rawHardcore.lastAppliedHardcoreRound) || 0))
     };
     if (!hardcore.setupComplete) return null;
-    const permitted = new Set([...factionDeck, ...globalPool]);
+    const permitted = VALID_UNIT_KEYS;
     for (const unit of Object.values(units)) {
       if (!permitted.has(unit.defKey) || bannedUnits.includes(unit.defKey)) return null;
     }
@@ -465,7 +467,7 @@ function sanitizeSnapshot(raw, room = null) {
     ? raw.shop.slice(0, 5).map(value => VALID_UNIT_KEYS.has(String(value)) ? String(value) : null)
     : Array(5).fill(null);
   if (hardcore) {
-    const permitted = new Set([...hardcore.factionDeck, ...hardcore.globalPool]);
+    const permitted = VALID_UNIT_KEYS;
     for (let index = 0; index < sanitizedShop.length; index += 1) {
       if (!permitted.has(sanitizedShop[index]) || hardcore.bannedUnits.includes(sanitizedShop[index])) sanitizedShop[index] = null;
     }
@@ -473,11 +475,13 @@ function sanitizeSnapshot(raw, room = null) {
 
   return {
     commanderName: safeText(raw.commanderName),
+    commander: RULES.normalizeCommander(player?.commander),
+    arenaIntroSeen: typeof raw.arenaIntroSeen === "string" ? raw.arenaIntroSeen.slice(0,80) : null,
     hp: Math.max(0, Math.min(maxHp, Number(raw.hp) || maxHp)),
     gold: Math.max(0, Math.min(9999, Number(raw.gold) || 0)),
     level: Math.max(3, Math.min(8, Number(raw.level) || 3)),
     xp: Math.max(0, Math.min(9999, Number(raw.xp) || 0)),
-    runSeed: Math.max(1, Math.min(2_147_483_647, Number(raw.runSeed) || crypto.randomInt(1, 2_147_483_647))),
+    runSeed: room?.environmentSeed || 1,
     board,
     bench,
     units,
@@ -552,6 +556,7 @@ function applyHardcoreCasualties(player, snapshot, report, completedRound) {
 
   snapshot.hardcore.lastAppliedHardcoreRound = Math.max(snapshot.hardcore.lastAppliedHardcoreRound || 0, completedRound);
   applied.rosterRemaining = Object.keys(snapshot.units || {}).length;
+  snapshot.commander = RULES.normalizeCommander(player.commander);
   player.snapshot = snapshot;
   if (applied.rosterRemaining <= 0) {
     player.hp = 0;
@@ -561,8 +566,134 @@ function applyHardcoreCasualties(player, snapshot, report, completedRound) {
   return applied;
 }
 
+function matchmakingKey(hardcore = false) {
+  return `duel:${hardcore ? "hardcore" : "standard"}`;
+}
+
+function pruneMatchmakingQueue(key) {
+  const queue = matchmakingQueues.get(key) || [];
+  const now = Date.now();
+  const active = [];
+  for (const entry of queue) {
+    const meta = queuedSockets.get(entry.ws);
+    const valid = entry.ws?.readyState === WebSocket.OPEN
+      && meta?.entryId === entry.id
+      && now - entry.joinedAt <= MATCHMAKING_QUEUE_TTL_MS;
+    if (valid) active.push(entry);
+    else if (meta?.entryId === entry.id) queuedSockets.delete(entry.ws);
+  }
+  matchmakingQueues.set(key, active);
+  return active;
+}
+
+function broadcastMatchmakingQueue(key) {
+  const queue = pruneMatchmakingQueue(key);
+  const hardcore = key.endsWith(":hardcore");
+  queue.forEach((entry, index) => {
+    jsonSend(entry.ws, "queue-state", {
+      queue: {
+        kind: "duel",
+        hardcore,
+        position: index + 1,
+        total: queue.length,
+        joinedAt: entry.joinedAt,
+        status: "waiting"
+      }
+    });
+  });
+}
+
+function removeFromMatchmakingQueue(ws, { notify = true, reason = "cancelled" } = {}) {
+  const meta = queuedSockets.get(ws);
+  if (!meta) return false;
+  const queue = matchmakingQueues.get(meta.key) || [];
+  const next = queue.filter(entry => entry.id !== meta.entryId);
+  matchmakingQueues.set(meta.key, next);
+  queuedSockets.delete(ws);
+  if (notify) jsonSend(ws, "queue-left", { reason });
+  broadcastMatchmakingQueue(meta.key);
+  return true;
+}
+
+function createMatchmadeRoom(firstEntry, secondEntry, hardcore) {
+  const code = randomCode();
+  const room = {
+    code,
+    kind: "duel",
+    hardcore: Boolean(hardcore),
+    access: "matchmaking",
+    maxPlayers: 2,
+    hostId: null,
+    status: "lobby",
+    round: 1,
+    players: new Map(),
+    battles: new Map(),
+    roundResults: new Map(),
+    createdAt: Date.now(),
+    lastActivity: Date.now()
+  };
+  const entries = [firstEntry, secondEntry];
+  const matched = entries.map(entry => ({ entry, player: makePlayer(entry.ws, entry.name, room) }));
+  for (const { player } of matched) room.players.set(player.id, player);
+  room.hostId = matched[0].player.id;
+  rooms.set(code, room);
+  for (const { entry, player } of matched) {
+    attachSocket(entry.ws, room, player);
+    jsonSend(entry.ws, "match-found", {
+      playerId: player.id,
+      token: player.token,
+      room: publicRoom(room)
+    });
+  }
+  broadcastRoom(room);
+  startMatch(room);
+}
+
+function tryMatchmaking(key) {
+  const queue = pruneMatchmakingQueue(key);
+  while (queue.length >= 2) {
+    const first = queue.shift();
+    const second = queue.shift();
+    queuedSockets.delete(first.ws);
+    queuedSockets.delete(second.ws);
+    createMatchmadeRoom(first, second, key.endsWith(":hardcore"));
+  }
+  matchmakingQueues.set(key, queue);
+  broadcastMatchmakingQueue(key);
+}
+
+function joinMatchmakingQueue(ws, message) {
+  if (socketMeta.has(ws)) {
+    return jsonSend(ws, "error", { code: "ALREADY_IN_ROOM", message: "Leave the current match before entering matchmaking." });
+  }
+  if (queuedSockets.has(ws)) {
+    const meta = queuedSockets.get(ws);
+    broadcastMatchmakingQueue(meta.key);
+    return;
+  }
+  const hardcore = Boolean(message.hardcore);
+  const key = matchmakingKey(hardcore);
+  const queue = pruneMatchmakingQueue(key);
+  if (queue.length >= MAX_MATCHMAKING_QUEUE_SIZE) {
+    return jsonSend(ws, "error", { code: "QUEUE_FULL", message: "The matchmaking queue is currently full. Try again shortly." });
+  }
+  const entry = {
+    id: crypto.randomUUID(),
+    ws,
+    name: safeText(message.name),
+    hardcore,
+    joinedAt: Date.now()
+  };
+  queue.push(entry);
+  matchmakingQueues.set(key, queue);
+  queuedSockets.set(ws, { key, entryId: entry.id });
+  broadcastMatchmakingQueue(key);
+  tryMatchmaking(key);
+}
+
 function createRoom(ws, message) {
   if (socketMeta.has(ws)) return jsonSend(ws, "error", { code: "ALREADY_IN_ROOM", message: "Leave the current lobby before creating another one." });
+  if (queuedSockets.has(ws)) return jsonSend(ws, "error", { code: "ALREADY_QUEUED", message: "Leave matchmaking before creating a private lobby." });
   const kind = message.kind === "party" ? "party" : "duel";
   const hardcore = kind === "duel" && Boolean(message.hardcore);
   const code = randomCode();
@@ -570,6 +701,7 @@ function createRoom(ws, message) {
     code,
     kind,
     hardcore,
+    access: "private",
     maxPlayers: roomCapacity(kind),
     hostId: null,
     status: "lobby",
@@ -590,9 +722,10 @@ function createRoom(ws, message) {
 }
 function joinRoom(ws, message) {
   if (socketMeta.has(ws)) return jsonSend(ws, "error", { code: "ALREADY_IN_ROOM", message: "Leave the current lobby before joining another one." });
+  if (queuedSockets.has(ws)) return jsonSend(ws, "error", { code: "ALREADY_QUEUED", message: "Leave matchmaking before joining a private lobby." });
   const code = safeCode(message.code);
   const room = rooms.get(code);
-  if (!room) return jsonSend(ws, "error", { code: "ROOM_NOT_FOUND", message: "That lobby code was not found." });
+  if (!room || room.access === "matchmaking") return jsonSend(ws, "error", { code: "ROOM_NOT_FOUND", message: "That private lobby code was not found." });
   if (room.status !== "lobby") return jsonSend(ws, "error", { code: "MATCH_STARTED", message: "That lobby has already started." });
   if (room.players.size >= room.maxPlayers) return jsonSend(ws, "error", { code: "ROOM_FULL", message: "That lobby is full." });
   const player = makePlayer(ws, message.name, room);
@@ -706,6 +839,8 @@ function leaveRoom(ws, explicit = true) {
 
 function startMatch(room) {
   room.status = "draft";
+  room.environmentSeed = crypto.randomInt(1, 2_147_483_647);
+  room.bannedUnits = room.hardcore ? RULES.randomBans(room.environmentSeed) : [];
   room.round = 1;
   room.battles.clear();
   room.roundResults.clear();
@@ -717,6 +852,7 @@ function startMatch(room) {
     player.hp = startingHp;
     player.alive = true;
     player.snapshot = null;
+    player.commander = RULES.normalizeCommander();
     player.lastResult = null;
   }
   broadcast(room, "match-start", { room: publicRoom(room), reconnect: false });
@@ -774,6 +910,7 @@ function battlePayload(room, battle, player) {
       round: battle.round,
       seed: battle.seed,
       environmentSeed: battle.environmentSeed,
+      elapsedMs: Math.max(0, Math.min(45_000, Date.now() - battle.startedAt)),
       actionLog: battle.actionLog || [],
       authorityId: battle.authorityId,
       youSide: player.id === battle.aId ? "a" : "b",
@@ -804,11 +941,11 @@ function beginBattles(room) {
       id: crypto.randomUUID(),
       round: room.round,
       seed: crypto.randomInt(1, 2_147_483_647),
-      environmentSeed: seedFromString(room.code),
+      environmentSeed: room.environmentSeed,
       aId: pairing.a.id,
       bId: pairing.b.id,
-      aSnapshot: pairing.a.snapshot,
-      bSnapshot: pairing.b.snapshot,
+      aSnapshot: JSON.parse(JSON.stringify(pairing.a.snapshot)),
+      bSnapshot: JSON.parse(JSON.stringify(pairing.b.snapshot)),
       ghost: pairing.ghost,
       authorityId: pairing.a.id,
       participantIds: pairing.ghost ? [pairing.a.id] : [pairing.a.id, pairing.b.id],
@@ -1015,6 +1152,7 @@ function resetToLobby(room) {
     player.hp = startingHp;
     player.alive = true;
     player.snapshot = null;
+    player.commander = RULES.normalizeCommander();
     player.lastResult = null;
   }
   broadcast(room, "returned-to-lobby", { room: publicRoom(room) });
@@ -1022,67 +1160,51 @@ function resetToLobby(room) {
 }
 function relayCombatAction(room, battle, player, message) {
   if (!battle || battle.resolved || room.status !== "battle") return;
-  if (!battle.participantIds.includes(player.id)) {
-    return jsonSend(player.ws, "error", { code: "NOT_PARTICIPANT", message: "You are not a participant in this battle." });
+  const reject=(code,text)=>jsonSend(player.ws,"error",{code,message:text});
+  if (!battle.participantIds.includes(player.id)) return reject("NOT_PARTICIPANT","You are not a participant in this battle.");
+  const type=String(message.actionType || "");
+  if (!VALID_COMBAT_ACTIONS.has(type)) return reject("BAD_ACTION","Unknown commander action.");
+  const actionId=String(message.clientActionId || "").replace(/[^A-Za-z0-9_\-:.]/g,"").slice(0,80) || crypto.randomUUID();
+  const duplicate=battle.actionLog.find(a=>a.actionId===actionId && a.actorId===player.id);
+  if (duplicate) return jsonSend(player.ws,"combat-action",{battleId:battle.id,action:duplicate});
+  if (battle.actionLog.some(a=>a.actionId===actionId)) return reject("BAD_ACTION_ID","Action identifier already used.");
+  const now=Date.now(), usage=battle.actionUsage.get(player.id) || {used:{},lastAt:0};
+  if (now-usage.lastAt < COMMAND_GCD_MS) return reject("COMMAND_COOLDOWN","Commander actions share a 3.5-second cooldown.");
+  if (usage.used[type]) return reject("ROUND_LIMIT","That action was already used this round.");
+  const budget=player.commander;
+  if (type==='freeze' && budget.freezeLeft<=0) return reject("NO_CHARGES","All five Freezes have been spent this match.");
+  if (type==='aoe' && (!budget.aoeChoice || budget.aoeLeft<=0)) return reject("NO_CHARGES","All three area attacks have been spent this match.");
+  let cellIndex=null, targetSourceId=null, fallbackX=null, fallbackY=null;
+  const source=battle.aId===player.id?battle.bSnapshot:battle.aSnapshot;
+  if (type==='focus') {
+    targetSourceId=String(message.targetSourceId||"").replace(/[^A-Za-z0-9_\-:.]/g,"").slice(0,100);
+    if (!source?.units?.[targetSourceId] || !source.board.includes(targetSourceId)) return reject("BAD_TARGET","Choose an opposing deployed spirit.");
+    const x=Number(message.fallbackX), y=Number(message.fallbackY);
+    fallbackX=Number.isInteger(x)?Math.max(0,Math.min(7,x)):null;
+    fallbackY=Number.isInteger(y)?Math.max(0,Math.min(5,y)):null;
+  } else {
+    const n=Number(message.cellIndex);
+    if (message.cellIndex===null || !Number.isInteger(n) || n<0 || n>=BOARD_SIZE || RULES.arenaForRound(room.round,room.environmentSeed).blocked.includes(n)) return reject("BAD_TARGET","Choose a walkable board tile.");
+    cellIndex=n;
   }
-
-  const actionType = String(message.actionType || "");
-  if (!VALID_COMBAT_ACTIONS.has(actionType)) {
-    return jsonSend(player.ws, "error", { code: "BAD_ACTION", message: "Unknown commander action." });
-  }
-
-  const now = Date.now();
-  const usage = battle.actionUsage.get(player.id) || { spellUsed: false, focusUsed: false, lastAt: 0 };
-  if (now - usage.lastAt < COMMAND_GCD_MS) {
-    return jsonSend(player.ws, "error", { code: "COMMAND_COOLDOWN", message: "Commander actions share a short global cooldown." });
-  }
-  if (actionType === "focus" && usage.focusUsed) {
-    return jsonSend(player.ws, "error", { code: "FOCUS_USED", message: "Your Focus Banner was already used this battle." });
-  }
-  if (actionType !== "focus" && usage.spellUsed) {
-    return jsonSend(player.ws, "error", { code: "SPELL_USED", message: "Your commander spell was already used this battle." });
-  }
-
-  let cellIndex = null;
-  if (actionType !== "focus") {
-    const parsed = Number(message.cellIndex);
-    if (!Number.isInteger(parsed) || parsed < 0 || parsed >= BOARD_SIZE) {
-      return jsonSend(player.ws, "error", { code: "BAD_TARGET", message: "Choose a valid board tile." });
-    }
-    cellIndex = parsed;
-  }
-
-  const rawActionId = String(message.clientActionId || "").replace(/[^A-Za-z0-9_\-:.]/g, "").slice(0, 80);
-  const rawSourceId = String(message.targetSourceId || "").replace(/[^A-Za-z0-9_\-:.]/g, "").slice(0, 100);
-  const fallbackX = Number(message.fallbackX);
-  const fallbackY = Number(message.fallbackY);
-  const action = {
-    actionId: rawActionId || crypto.randomUUID(),
-    actorId: player.id,
-    type: actionType,
-    cellIndex,
-    targetSourceId: actionType === "focus" ? (rawSourceId || null) : null,
-    fallbackX: Number.isFinite(fallbackX) ? Math.max(0, Math.min(7, fallbackX)) : null,
-    fallbackY: Number.isFinite(fallbackY) ? Math.max(0, Math.min(5, fallbackY)) : null,
-    atMs: Math.max(0, Math.min(45_000, now - battle.startedAt))
-  };
-
-  if (battle.actionLog.some(entry => entry.actionId === action.actionId)) return;
-  if (actionType === "focus") usage.focusUsed = true;
-  else usage.spellUsed = true;
-  usage.lastAt = now;
-  battle.actionUsage.set(player.id, usage);
+  // Validate fully, then atomically spend the per-player match charge.
+  if (type==='freeze') budget.freezeLeft--;
+  if (type==='aoe') budget.aoeLeft--;
+  usage.used[type]=true; usage.lastAt=now;
+  battle.actionUsage.set(player.id,usage);
+  const action={actionId,actorId:player.id,type,cellIndex,targetSourceId,fallbackX,fallbackY,
+    aoeChoice:budget.aoeChoice,remaining:RULES.normalizeCommander(budget),
+    atMs:Math.max(0,Math.min(45_000,now-battle.startedAt))};
   battle.actionLog.push(action);
-  if (battle.actionLog.length > 12) battle.actionLog.shift();
-
-  for (const participantId of battle.participantIds) {
-    const participant = room.players.get(participantId);
-    jsonSend(participant?.ws, "combat-action", { battleId: battle.id, action });
-  }
+  // Battle-start snapshots are immutable for replay. Planning/reconnect snapshots reflect spending.
+  if (player.snapshot) player.snapshot.commander=RULES.normalizeCommander(budget);
+  for (const id of battle.participantIds) jsonSend(room.players.get(id)?.ws,"combat-action",{battleId:battle.id,action});
 }
 
 function handleMessage(ws, message) {
   const type = String(message?.type || "");
+  if (type === "join-queue") return joinMatchmakingQueue(ws, message);
+  if (type === "leave-queue") return removeFromMatchmakingQueue(ws, { notify: true, reason: "cancelled" });
   if (type === "create-room") return createRoom(ws, message);
   if (type === "join-room") return joinRoom(ws, message);
   if (type === "resume-room") return resumeRoom(ws, message);
@@ -1113,6 +1235,8 @@ function handleMessage(ws, message) {
     }
     case "draft-complete": {
       if (room.status !== "draft" || !player.alive) return;
+      if (!RULES.aoe[message.commander?.aoeChoice]) return jsonSend(ws,"error",{code:"NO_LOADOUT",message:"Choose an area attack before drafting."});
+      if (!player.commander.aoeChoice) player.commander.aoeChoice = message.commander.aoeChoice;
       player.drafted = true;
       if (allActive(room, item => item.drafted)) startPlanning(room);
       else broadcastRoom(room);
@@ -1120,8 +1244,9 @@ function handleMessage(ws, message) {
     }
     case "submit-formation": {
       if (room.status !== "planning" || !player.alive || player.locked) return;
-      const snapshot = sanitizeSnapshot(message.snapshot, room);
+      const snapshot = sanitizeSnapshot(message.snapshot, room, player);
       if (!snapshot) return jsonSend(ws, "error", { code: "BAD_SNAPSHOT", message: "The formation data could not be accepted." });
+      snapshot.commander = RULES.normalizeCommander(player.commander);
       player.snapshot = snapshot;
       player.locked = true;
       player.name = safeText(snapshot.commanderName || player.name, player.name);
@@ -1146,6 +1271,7 @@ function handleMessage(ws, message) {
       break;
     }
     case "return-lobby": {
+      if (room.access === "matchmaking") return jsonSend(ws, "error", { code: "MATCHMADE_ROOM", message: "Public matches return to the queue instead of reopening as a private lobby." });
       if (room.hostId !== player.id) return jsonSend(ws, "error", { code: "HOST_ONLY", message: "Only the host can return the room to the lobby." });
       if (room.status !== "complete") return;
       resetToLobby(room);
@@ -1191,7 +1317,15 @@ function serveFile(req, res) {
   }
   if (requestUrl.pathname === "/health") {
     res.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
-    res.end(JSON.stringify({ ok: true, rooms: rooms.size, uptime: Math.round(process.uptime()) }));
+    res.end(JSON.stringify({
+      ok: true,
+      rooms: rooms.size,
+      matchmaking: {
+        standard: pruneMatchmakingQueue("duel:standard").length,
+        hardcore: pruneMatchmakingQueue("duel:hardcore").length
+      },
+      uptime: Math.round(process.uptime())
+    }));
     return;
   }
   let pathname;
@@ -1217,7 +1351,7 @@ function serveFile(req, res) {
     }
     const headers = {
       "Content-Type": mimeTypes[path.extname(absolute).toLowerCase()] || "application/octet-stream",
-      "Cache-Control": path.basename(absolute) === "index.html" ? "no-store" : "public, max-age=3600"
+      "Cache-Control": ["index.html", "rules.js"].includes(path.basename(absolute)) ? "no-store" : "public, max-age=3600"
     };
     res.writeHead(200, headers);
     fs.createReadStream(absolute).pipe(res);
@@ -1270,6 +1404,7 @@ function acceptWebSocket(request, socket, head) {
   });
   ws.on("close", () => {
     sockets.delete(ws);
+    removeFromMatchmakingQueue(ws, { notify: false, reason: "disconnected" });
     leaveRoom(ws, false);
   });
   ws.on("error", error => console.warn("WebSocket error", error.message));
@@ -1290,6 +1425,26 @@ const heartbeat = setInterval(() => {
 
 const cleanup = setInterval(() => {
   const now = Date.now();
+  for (const [key, queue] of matchmakingQueues.entries()) {
+    let changed = false;
+    const active = [];
+    for (const entry of queue) {
+      const meta = queuedSockets.get(entry.ws);
+      const expired = now - entry.joinedAt > MATCHMAKING_QUEUE_TTL_MS;
+      const connected = entry.ws?.readyState === WebSocket.OPEN && meta?.entryId === entry.id;
+      if (connected && !expired) {
+        active.push(entry);
+      } else {
+        changed = true;
+        if (meta?.entryId === entry.id) queuedSockets.delete(entry.ws);
+        if (connected && expired) jsonSend(entry.ws, "queue-timeout", { message: "Matchmaking timed out. Join the queue again to keep searching." });
+      }
+    }
+    if (changed) {
+      matchmakingQueues.set(key, active);
+      broadcastMatchmakingQueue(key);
+    }
+  }
   for (const room of rooms.values()) {
     if (room.status === "battle") {
       const overdue = [...room.battles.values()].filter(battle =>

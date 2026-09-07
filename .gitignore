@@ -3,4 +3,13 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 .env
+.env.*
 *.local
+# Local tunnel binaries and credentials are not game assets.
+cloudflared*.exe
+cloudflared*.msi
+.cloudflare*/
+config.yml
+config.yaml
+cert.pem
+*.log

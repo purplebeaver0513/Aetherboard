@@ -1,64 +1,16 @@
-# GitHub Upload Checklist
+# Version 9 — GitHub upload checklist
 
-Upload **everything inside this extracted folder** to the root of one GitHub repository.
+- [ ] Stop the old server before replacing code during a match.
+- [ ] Extract the ZIP, rather than uploading the ZIP itself.
+- [ ] Upload the contents of the extracted project to the repository root.
+- [ ] Include `public/index.html` **and the new `public/rules.js`**.
+- [ ] Include `server.js`, `package.json`, `package-lock.json`, `tests/`, launchers and documentation.
+- [ ] Keep custom assets under `public/assets/` and reapply your `CUSTOM_ASSETS` paths when replacing HTML.
+- [ ] Do not upload `node_modules/`, Cloudflare executables, tokens, personal tunnel configs, or `.env` files.
+- [ ] Run `npm test` and `npm start` with Node.js 22 or newer.
+- [ ] Check `http://localhost:8080` and `/health`.
+- [ ] Refresh both devices on the same public/tunnel address and start a new V9 match.
 
-## The repository front page should directly show
+## Manual Node Web Service settings
 
-- `public/`
-- `tests/`
-- `docs/`
-- `server.js`
-- `package.json`
-- `package-lock.json`
-- `render.yaml`
-- `Dockerfile`
-- `START_AETHERBOARD.bat`
-- `start-aetherboard.sh`
-- `README.md`
-- `CHANGELOG_V7.md`
-- `.gitignore`
-- `.dockerignore`
-
-## Do not upload
-
-- The ZIP file by itself
-- `node_modules/`
-- Temporary logs
-- Old `.bak` files
-
-## Before deploying
-
-Run locally:
-
-```bash
-npm start
-```
-
-Open:
-
-```text
-http://localhost:8080
-```
-
-Run the server test:
-
-```bash
-npm test
-```
-
-## Manual Render Web Service settings
-
-```text
-Language: Node
-Branch: main
-Root Directory: leave blank
-Build Command: npm install --omit=dev
-Start Command: npm start
-Health Check Path: /health
-```
-
-The server health endpoint is:
-
-```text
-/health
-```
+No Blueprint is required. Build: `npm install --omit=dev`. Start: `npm start`. Health check: `/health`. Leave Root Directory blank when package.json is directly in the repository root.

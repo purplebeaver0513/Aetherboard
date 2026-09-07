@@ -1,351 +1,203 @@
-# Aetherboard Arena — Version 7: Hardcore Duels & Support Classes
+# Aetherboard Arena — Version 9: Shifting Arenas
 
-Aetherboard Arena is an original browser auto-chess prototype with solo play, same-device Local Duel, and cross-device private multiplayer lobbies. Version 7 adds Hardcore rules to both Local Duel and two-device Online Duel, expands the roster from 40 to 60 spirits, adds Healer and Buffer roles to every elemental type, replaces Terrain Wall with Aegis Shield, and repairs Focus Banner targeting.
+A complete browser auto-chess prototype with solo Expedition / Endless / Hardcore, same-device Local Duel, public online 1v1 matchmaking, and private cross-device Duel / Party rooms. Original characters and procedural audio are placeholders for your future custom assets.
 
-The current emoji creatures, generated sound effects, and procedural music are placeholders. The code contains centralized asset hooks so custom character artwork and music can be added later.
+**Start a fresh run when updating from V7 or V8.** Version 9 has a different roster and new run-wide spell charges. It uses a new save namespace; older local saves are left untouched rather than partially migrated. Everyone in a multiplayer match must load the V9 client from the same V9 server.
 
-## Version 7 highlights
+## Start on your computer
 
-- Hardcore Local Duel and Hardcore Online Duel
-- 40 starting heart in Hardcore Duel
-- Permanent death and graveyards for both duel players
-- Private two-spirit bans for each player
-- No role bans: every class remains available
-- Private 15-spirit Faction Decks plus five-spirit Global Pools
-- Black Market rewards every five rounds, including a clear Pass option for zero heart
-- 60 total spirits
-- One Healer and one Buffer in every type
-- New Healer and Buffer class synergies
-- Aegis Shield commander spell in place of Terrain Wall
-- Fixed Focus Banner selection and forced targeting
-- Existing dynamic maps, weather, items, Team Blessings, music, and non-stacking stat rules retained
+Requirements: Node.js 22 or newer. No third-party runtime dependencies are required.
 
-## Screenshots
+Extract the entire repository. In the folder containing `server.js` and `package.json`, run:
 
-### Hardcore Online Duel selection
-
-![Hardcore Online Duel title screen](docs/screenshots/v7-hardcore-online-title.png)
-
-### Black Market pass option
-
-![Black Market with pass option](docs/screenshots/v7-black-market-pass.png)
-
-### Support units and repaired Focus Banner
-
-![Support-unit combat and Focus Banner](docs/screenshots/v7-support-combat-focus.png)
-
-## Repository structure
-
-```text
-public/
-  assets/
-  index.html
-
-tests/
-  server-smoke-test.mjs
-
-server.js
-package.json
-package-lock.json
-render.yaml
-Dockerfile
-START_AETHERBOARD.bat
-start-aetherboard.sh
-README.md
-CHANGELOG_V7.md
-GITHUB_UPLOAD_CHECKLIST.md
-.gitignore
-.dockerignore
-```
-
-## Quick local start
-
-### Requirements
-
-- Node.js 22 or newer
-- A modern browser such as Chrome, Edge, Firefox, or Safari
-
-### Windows
-
-Double-click:
-
-```text
-START_AETHERBOARD.bat
-```
-
-Or open Command Prompt in the repository folder and run:
-
-```bat
+```sh
 npm start
 ```
 
-### macOS or Linux
+Open `http://localhost:8080`. The server health check is `http://localhost:8080/health`. The Windows launcher `START_AETHERBOARD.bat` and shell launcher `start-aetherboard.sh` are included.
 
-Run:
+**Keep `public/rules.js` alongside `public/index.html`.** The browser and server share this new file for the roster, arena generation, random bans, elemental weaknesses, and area-attack definitions. Copying only the HTML file will not install the update.
 
-```bash
-./start-aetherboard.sh
+## Using your existing Cloudflare tunnel
+
+The forwarding destination is unchanged: `http://localhost:8080`.
+
+1. Stop the old game server with Ctrl+C. Do not run two copies on port 8080.
+2. Extract this version into a new project folder and start `npm start` there.
+3. Keep your existing `cloudflared` process running, or restart it from wherever you keep its executable:
+
+```powershell
+.\cloudflared.exe tunnel --url http://localhost:8080
 ```
 
-Or:
+4. Open the public address currently printed by the tunnel on both devices. Refresh the page before starting a new room. A restarted Quick Tunnel may produce a different address.
 
-```bash
-npm start
-```
+The executable is not included in this repository. Do not upload your `cloudflared.exe`, personal tunnel configuration, account token, or credentials to GitHub. Keep the game server, tunnel, and host computer running during a match. A tunnel is not an independently hosted, always-on game server.
 
-Then open:
+## Online modes retained
+
+**Main Server Queue:** automatic public 1v1 matchmaking, with separate Standard and Hardcore queues. The first compatible pair starts automatically. There is no separate global Aetherboard master server: everyone must use the same running server.
+
+**Private Lobby:** invite-code two-player Duel, optionally Hardcore, or Standard Party for two to four devices. Parties retain rotating pairings and ghost battles when needed. Ready up, start, privately draft, then lock formations.
+
+Hardcore is available in solo and two-player duels; Party remains Standard. Same-device Local Duel retains private pass-and-play, but active combat commands remain disabled because one person physically holds both players' controls. Use an Online Duel on separate devices for active spells.
+
+## Random arenas: three-round chapters
+
+Arena layouts are procedurally generated from a run or server match seed, not selected from six fixed tile arrangements. The six themes remain Ember Foundry, Verdant Chasm, Frozen Pass, Storm Coast, Moonlit Ruins, and Sky Bastion.
+
+- Rounds **1–3** share the first map, weather, hazards, obstacles, and buff nodes.
+- Rounds **4–6** share a new one, then 7–9, 10–12, and so on.
+- Consecutive chapters use different themes. Future layouts may naturally recur; randomness is not a promise of infinite unique layouts.
+- Both halves are mirrored for fairness. The generator verifies that walkable cells remain connected and leaves useful deployment space.
+- All players in an online match receive the same server-seeded arena chapter.
+- Newly blocked deployment cells automatically move affected spirits to legal cells, or to the bench when necessary.
+- At the start of a new chapter, a central arena card appears, then shrinks/fades into the persistent arena-information chip. The chip shows the round range, rounds remaining, and weather. Reduced-motion users receive a simpler transition.
+
+The central announcement appears after required draft/reward dialogs close, rather than interrupting a player's choice. It is informational and does not consume turns.
+
+### Readable tile effects
+
+| Tile | Effect |
+|---|---|
+| Speed node | +20% attack speed for a spirit deployed there |
+| Ward node | +20 armour for a spirit deployed there |
+| Mana node | +25 starting mana for a spirit deployed there |
+| Lava | Non-Fire spirits lose 3% maximum health every two seconds while standing there |
+| Ice | Non-Ice spirits attack 15% slower and take 25% longer to move while standing there |
+| Brush | 15% dodge while standing there; 25% for Nature |
+| Mana current | +4 mana per second while standing there |
+| Blocked terrain | Cannot deploy or path through this tile |
+
+Deployment nodes apply for the battle; they do not require the spirit to remain on that tile. Hazards/brush/currents use the spirit's current position. Strongest same-stat bonuses still win. Tile effects use outlines, patterns, icons, short labels, and hover explanations rather than relying only on colour.
+
+## Cleaner interface
+
+The larger **Armory / Items** panel is now on the left, immediately below Types & Roles. Click a spirit and then an item to equip it. The **Battle Log** is on the right, below the selected-spirit card, in a compact independently scrolling panel. The display keeps the latest 12 log entries; the run retains up to 40 internally. Notifications are capped at three simultaneously.
+
+The arena remains central, the shop and bench stay below it, and side-panel cards no longer compress over one another. Mobile uses a stacked, scrollable layout rather than squeezing a desktop interface onto one screen.
+
+## Hardcore without manual deck setup
+
+Each new Hardcore run/match automatically bans **two individual spirits**, selected from the available roster. Both online duel players receive the same server-selected bans. The selection is shown at the beginning and in Run Info.
+
+No role ban, manual ban-selection step, Faction Deck, or 15-unit deck builder remains. Shops and starter drafts use the full remaining roster with existing cost/level odds. Random bans stay fixed for the whole match, rather than changing every round. There are 54 eligible spirits after the two bans.
+
+Permanent death, lost equipment, separate graveyards, Grave Idol protection, roster-wipe elimination, and health-priced Black Markets remain. Every fifth eligible Hardcore round opens a market. **Pass This Market / Pass · spend 0 heart** remains available; passing advances normally and spends nothing.
+
+## Roster: 56 spirits across eight elements
+
+Earth and Wind are removed from the roster, normal shop, draft pools, enemy roster, server's accepted unit catalogue, and type UI. The remaining elements are **Fire, Water, Nature, Electric, Ice, Shadow, Light, Arcane**. Each has seven spirits, including a Healer and a Buffer with different costs and effectiveness.
+
+The request to add one more to each type was implemented as **one additional spirit for each remaining element**, not dual-element creatures.
+
+| New spirit | Element | Role | Cost | Ability |
+|---|---|---|---:|---|
+| Coalback | Fire | Vanguard | 3 | Furnace Guard: shield itself and burn nearby enemies with a burst |
+| Mist Otter | Water | Assassin | 2 | Undertow: blink to a weak target and heal from the hit |
+| Brambletoad | Nature | Vanguard | 2 | Bramble Shelter: self-shield and heal an injured ally |
+| Tesla Lynx | Electric | Striker | 3 | Capacitor Burst: strike and slow several nearby enemies |
+| Icecarapace | Ice | Striker | 3 | Cold Snap: clustered damage and slowing |
+| Veilhound | Shadow | Ranger | 2 | Veil Bolt: bonus pressure against an already wounded enemy |
+| Lumenkit | Light | Striker | 1 | Dawn Pounce: strike its target and gain a small shield |
+| Glyph Mantis | Arcane | Assassin | 4 | Rift Cut: teleporting attack with a partial mana refund |
+
+Existing non-stacking stats, the reduced Vanguard armour bonuses (8 / 18 / 30 at 2 / 4 / 6), support-role effects, items, awakenings, and Type Bond tiers remain.
+
+## Elemental weaknesses
+
+Typed direct damage is **1.25×** against a weakness and **0.8×** in the reverse matchup. Other pairs, including same-type fights, are neutral. This multiplier is separate from Type Bond damage. Healing, shields, untyped terrain damage, and damage-over-time without an attacker do not gain these multipliers.
+
+| Strong element → vulnerable element | Game reasoning |
+|---|---|
+| Water → Fire | Water extinguishes flame |
+| Fire → Nature | Fire burns vegetation |
+| Fire → Ice | Heat melts ice |
+| Ice → Nature | Frost damages growth |
+| Nature → Electric | Roots and dry bark resist electricity; a game abstraction |
+| Electric → Water | Water conducts the shock |
+| Light → Shadow | Light dispels darkness |
+| Shadow → Arcane | Corruption disrupts ordered runes |
+| Arcane → Light | Magic bends and refracts light |
+
+The last three form a fantasy counter-triangle, not a real-world scientific claim. No element is immune to another element's attacks. Open **Weaknesses** above the trait list for the chart; a selected spirit shows its strong and weak matchups.
+
+## Commander spells: limited resources
+
+Rally Pulse is removed as a commander action. Before the free starter draft, each commander chooses one area attack for the whole run:
+
+| Choice | Element | Shape / role | Base hit before armour and type multipliers |
+|---|---|---|---|
+| Meteor Crash | Fire | Radius 1, concentrated burst | 125 + 8 × round + 8% of target maximum health |
+| Thunder Bloom | Electric | Radius 2, wider coverage | 80 + 5 × round + 4% of target maximum health |
+| Void Rupture | Shadow | Radius 1, anti-shield | Remove up to 25% of target maximum health from its shield, then 90 + 6 × round + 6% of target maximum health damage |
+
+Radius uses grid Manhattan distance (diamond-shaped on this square board). These are **initial tuning values**, not balance proven through competitive playtesting.
+
+| Action | Key | Per-round limit | Whole-run/match limit |
+|---|---|---:|---:|
+| Freeze | 1 | Once | 5 uses |
+| Chosen area attack | 2 | Once | 3 uses |
+| Aegis Shield | 3 | Once | No additional match cap |
+| Focus Banner | F | Once | No additional match cap |
+
+**Freeze and the area attack are separate allowances.** You may use both in the same battle, waiting for the shared 3.5-second commander cooldown. Shield and Focus remain additional actions with the same cooldown. Charges do not reset each round, on rewards, or when reconnecting. Only starting a new run/match resets them. Each online player has a separate budget.
+
+Click an action, then a tile or target. Escape cancels targeting. A local invalid target does not spend a charge. Online casts wait for server confirmation; a target can move or die before an accepted cast resolves. The server rejects malformed targets, repeat casts, exhausted budgets, and attempts to refill charges through a formation snapshot. Repeated network delivery of the same action does not charge twice. Loadout selection is locked server-side after drafting.
+
+Online simulation stays at **Live ×1**, independent of solo speed controls. Reconnect replay uses the immutable battle-start budgets plus the server action log, then catches up to the active battle.
+
+## Repository / manual deployment
+
+Upload the extracted project contents, not the ZIP itself. Keep `server.js`, `package.json`, and `public/` directly in the repository root. The newly added `public/rules.js` is essential.
+
+For a manually configured Node Web Service (no Blueprint needed):
 
 ```text
-http://localhost:8080
-```
-
-Check the multiplayer server with:
-
-```text
-http://localhost:8080/health
-```
-
-A successful response contains `"ok": true`.
-
-## Playing across devices on the same Wi-Fi
-
-1. Start the server on one computer with `npm start`.
-2. Keep the terminal window open.
-3. Find that computer's local IPv4 address using `ipconfig` on Windows or `ifconfig`/`ip addr` on macOS or Linux.
-4. On another device connected to the same network, open `http://HOST-IP:8080`.
-5. Select Online Duel or Online Party, create a lobby, and share the six-character room code.
-
-Do not use `localhost` on the second device. On that device, `localhost` refers to the second device itself.
-
-## Game modes
-
-### 25-Round Expedition
-
-A finite solo run with bosses every five rounds and a final victory at round 25.
-
-### Endless Ascension
-
-A solo survival run that keeps scaling until the commander is defeated.
-
-### Hardcore Expedition
-
-A solo 25-round run with permanent spirit death, two individual spirit bans, a 15-spirit Faction Deck, a five-spirit Global Pool, graveyard records, and health-priced Black Markets.
-
-### Local Duel
-
-Two players privately draft and plan on one device. Select Local Duel on the title screen, then enable **Hardcore Duel** to use permanent-death rules.
-
-Active commander spells are disabled during same-device Local Duel so the person physically holding the device does not receive an unfair intervention advantage.
-
-### Online Duel
-
-Two players join a private lobby from separate devices. Select Online Duel and enable **Hardcore Duel** before creating the room to start a Hardcore lobby.
-
-In Hardcore Online Duel:
-
-- Both players begin with 40 heart.
-- Each player privately bans two individual spirits.
-- Each player builds a private 15-spirit Faction Deck.
-- Every role remains available because role bans were removed.
-- Knocked-out deployed spirits die permanently.
-- Grave Idol can prevent one permanent death and then shatters.
-- A player is eliminated when commander heart reaches zero or the entire owned roster is wiped out.
-- Black Market and Team Blessing choices occur every five completed rounds.
-- Players may pass on the Black Market and lose no heart.
-
-### Online Party
-
-Two to four players join a private lobby and rotate through matchups. Party currently uses the standard multiplayer rules; Hardcore applies to Duel only.
-
-## Hardcore setup
-
-### Private spirit bans
-
-Each Hardcore player bans exactly two individual spirits. There is no role-ban step. Healers, Buffers, Vanguards, Rangers, Mystics, Strikers, and Assassins remain available if the player includes them in the Faction Deck.
-
-### Faction Deck
-
-Each player selects exactly 15 allowed spirits. The deck must include enough low-cost units to support the starter draft and early shop.
-
-The personal shop draws from:
-
-- The player's 15-spirit Faction Deck
-- A smaller five-spirit Global Pool
-
-The two duel players can therefore use different available rosters.
-
-## Permanent death
-
-At the end of a Hardcore battle, each deployed spirit that was knocked out is removed from the player's board, bench, and owned collection. Its equipped items are lost with it. Casualties are added to the graveyard history.
-
-### Grave Idol
-
-Grave Idol prevents one permanent death. The protected spirit returns to the roster and the Idol is consumed.
-
-### Roster wipe
-
-If a Hardcore player owns no surviving spirits after casualties are processed, that player is eliminated even if commander heart would otherwise remain.
-
-## Black Market
-
-A Hardcore Black Market opens every five completed rounds before the ordinary Team Blessing reward.
-
-Offers can include:
-
-- Corrupted equipment
-- Corrupted spirits
-- Soul Stitch resurrection
-- Forbidden Promotion
-- Blood Contract gold and XP
-
-Purchases cost commander heart rather than gold and cannot reduce the player below one heart.
-
-The player can always select **Pass This Market** or **Pass · spend 0 heart**. Passing records the visit, takes no item, and costs no heart.
-
-## Healer and Buffer classes
-
-Version 7 adds 20 support spirits: one Healer and one Buffer for each of the ten elemental types. Costs and strength vary, so some are cheap early-game specialists while others are expensive team-wide carries.
-
-| Type | Healer | Cost | Main effect | Buffer | Cost | Main effect |
-|---|---|---:|---|---|---:|---|
-| Fire | Ember Medic | 2 | Heals two allies and grants small shields | Warflare | 1 | Raises two carries' attack |
-| Water | Tide Nurse | 1 | Strong single-target healing and mana | Current Caller | 3 | Speeds three allies and grants mana |
-| Nature | Bloom Doe | 3 | Heals three allies and adds regeneration | Grove Herald | 2 | Grants armour and regeneration |
-| Electric | Pulse Hare | 2 | Heals two allies and jump-starts mana | Volt Conductor | 4 | Greatly speeds four allies and grants mana |
-| Ice | Frost Fawn | 1 | Heals two allies and grants ice shields | Rime Bell | 3 | Grants armour and damage reduction |
-| Shadow | Dusk Leech | 4 | Damages an enemy and heals two allies | Night Drummer | 2 | Adds attack and critical chance |
-| Light | Halo Dove | 5 | Powerful full-team healing and shields | Dawn Standard | 4 | Adds ability power and shields |
-| Earth | Clay Cleric | 3 | Heals two allies and grants sturdy shields | Bastion Totem | 5 | Fortifies the entire team |
-| Wind | Zephyr Sprite | 2 | Heals three allies and briefly speeds them | Gale Piper | 3 | Adds speed and critical chance |
-| Arcane | Rune Oracle | 4 | Heals three allies and floods them with mana | Aether Maestro | 5 | Full-team attack and ability empowerment |
-
-### Healer synergy
-
-- 2 Healers: Healers restore 12% more
-- 4 Healers: Healers restore 25% more
-- 6 Healers: Healers restore 42% more
-
-### Buffer synergy
-
-- 2 Buffers: buffs are 10% stronger and 15% longer
-- 4 Buffers: buffs are 22% stronger and 30% longer
-- 6 Buffers: buffs are 38% stronger and 50% longer
-
-Support buffs follow the existing clean-stat rule. Different sources affecting the same stat do not pile up uncontrollably; the strongest current source applies. Equal-strength temporary buffs may refresh their duration.
-
-## Active commander controls
-
-Supported solo and online battles allow one commander spell and one Focus Banner per player per battle. They share a global cooldown.
-
-| Key | Command | Effect |
-|---|---|---|
-| `1` | Localized Freeze | Stuns and slows enemies near the selected tile |
-| `2` | Rally Pulse | Heals allies near the selected tile |
-| `3` | Aegis Shield | Shields allies near the selected tile |
-| `F` | Focus Banner | Selects an enemy and forces living allies to prioritize it for five seconds |
-| `Esc` | Cancel targeting | Exits commander targeting mode |
-
-### Focus Banner repair
-
-Enemy combat units become selectable while Focus targeting is active. The marked enemy receives a visible target icon, the command stores the correct opposing-side target, and allied units repeatedly refresh their forced target while the five-second mark remains active.
-
-### Aegis Shield
-
-Terrain Wall has been removed. Aegis Shield targets a board area and gives nearby allied spirits a shield worth 24% of their maximum health. The spell must be aimed near at least one living ally.
-
-## Non-stacking stat system
-
-For each stat, only the strongest applicable source is used. For example, armour from a class synergy, item, Awakening, positional node, weather effect, Team Blessing, and Buffer spell does not all add together.
-
-Type Bond damage remains a separate composition reward and uses only the highest unlocked type tier.
-
-## Custom assets
-
-Place future files inside:
-
-```text
-public/assets/
-```
-
-Then edit this section near the beginning of the script in `public/index.html`:
-
-```js
-const CUSTOM_ASSETS = {
-  unitImages: {
-    emberMedic: "assets/ember-medic.png",
-    warflare: "assets/warflare.png"
-  },
-  musicUrl: "assets/aetherboard-theme.mp3"
-};
-```
-
-A mapped unit image replaces that spirit's emoji in the shop, draft, bench, board, previews, and profile. Units without an image continue using placeholders.
-
-When the client and server are hosted together, leave this blank:
-
-```js
-const ONLINE_CONFIG = {
-  serverUrl: ""
-};
-```
-
-## Uploading to GitHub
-
-Upload the extracted contents of this repository to the root of a GitHub repository. The GitHub repository's first page should directly show `public`, `tests`, `server.js`, `package.json`, and the other root files.
-
-Do not upload only the ZIP. Do not upload `node_modules`.
-
-See `GITHUB_UPLOAD_CHECKLIST.md` for the exact checklist.
-
-## Manual Render deployment
-
-This project can be deployed as a normal **Web Service** without using Blueprint.
-
-Use these settings:
-
-```text
-Service type: Web Service
-Language: Node
-Branch: main
-Root Directory: leave blank when server.js is at the repository root
+Root Directory: blank when package.json is at the repository root
 Build Command: npm install --omit=dev
 Start Command: npm start
 Health Check Path: /health
 ```
 
-Select the available compute plan for your account. The included `render.yaml` is optional and can remain in the repository even when you configure the Web Service manually.
+The server reads `PORT` from the environment and defaults to 8080. It binds to `HOST` or `0.0.0.0`. The optional `render.yaml` and Dockerfile remain included, but manual deployment does not require a Blueprint.
 
-After deployment, open the service URL and then test:
+## Custom artwork and soundtrack
 
-```text
-https://YOUR-SERVICE.onrender.com/health
+Place images/audio in `public/assets/`. Edit `CUSTOM_ASSETS` in `public/index.html`:
+
+```js
+const CUSTOM_ASSETS = {
+  unitImages: {
+    cinderCub: "assets/cinder-cub.png",
+    coalback: "assets/coalback.png"
+  },
+  musicUrl: "assets/aetherboard-theme.mp3"
+};
 ```
 
-## Tests
+Units without an image keep their emoji placeholder. An empty music URL uses the procedural placeholder soundtrack. Music and effects have separate controls. No external assets or downloaded music are bundled.
 
-Run:
+## Validation
 
-```bash
+```sh
 npm test
 ```
 
-The included server smoke test launches a temporary server and verifies:
+This runs seeded rules/layout tests, real-WebSocket public/private lobby and Hardcore smoke tests, and six-round commander-charge/reconnection tests. Node.js 22+ supplies the WebSocket client used by tests. Test servers use local ports 18117 and 18118 and terminate after testing.
 
-- Hardcore Online Duel room creation
-- 40-heart starting values
-- Two-device room joining
-- Formation validation with new Healer and Buffer units
-- Aegis Shield action relay
-- Grave Idol permanent-death protection
-- Hardcore roster-wipe elimination
-
-The browser game has also been tested for the 60-unit catalog, Healer/Buffer coverage across all ten types, Hardcore Local Duel setup without role bans, Aegis Shield application, Focus Banner targeting, and support spell casting.
+See `TESTING_V9.md` for the actual validation record. Functional checks establish that rules execute; they do not establish final competitive balance.
 
 ## Prototype limitations
 
-This remains a casual prototype rather than a production competitive service.
+- Rooms, queues, and authoritative spell budgets are held in process memory. Restarting the server removes active matches. Use one server instance.
+- A designated participant still calculates combat and reports results. Server validation of rosters, bans, and spell budgets is **not complete anti-cheat**; account authentication, persistent storage, and server-side combat remain future production work.
+- There are no permanent online rankings, skill-based matching, bots filling public queues, or guaranteed hosting included.
+- Brief WebSocket disconnects can resume a seat within the existing two-minute grace period. Private planning data still depends on that browser's saved snapshot; clearing storage or changing browsers is not a guaranteed recovery path.
+- Save namespaces separate V9 from older versions. Do not mix old clients with this server.
 
-- Active rooms are stored in server memory and disappear if the server restarts.
-- There are no accounts, database-backed rankings, public matchmaking, or moderation tools yet.
-- A designated participant currently runs the deterministic battle simulation and reports the result. A commercial competitive release should move full battle authority to the server and add stronger validation and anti-cheat.
-- Hardcore is available in solo Expedition, Local Duel, and Online Duel. Online Party remains standard mode.
+## Screenshots
+
+![V9 area-attack choice and automatic bans](docs/screenshots/v9-loadout.png)
+![V9 terrain announcement](docs/screenshots/v9-arena-arrival.png)
+![V9 battlefield and inventory layout](docs/screenshots/v9-board-desktop.png)

@@ -1,7 +1,7 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-echo Starting Aetherboard Arena Version 7...
+echo Starting Aetherboard Arena Version 9...
 echo.
 npm start
 echo.

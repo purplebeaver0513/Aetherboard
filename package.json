@@ -1,14 +1,16 @@
 {
-  "name": "aetherboard-auto-chess-v7-hardcore-duel",
-  "version": "7.0.0",
+  "name": "aetherboard-auto-chess-v9-arena",
+  "version": "9.0.0",
   "private": true,
   "type": "module",
-  "description": "Aetherboard Arena browser auto-chess with local and online Hardcore Duels, 60 spirits, Healer and Buffer roles, active commander spells, dynamic arenas, and cross-device WebSocket lobbies.",
+  "description": "Aetherboard Arena: 56 spirits, eight elements, randomized three-round arenas, automatic Hardcore bans, limited-use area spells, public matchmaking and private multiplayer.",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "npm run test:server",
-    "test:server": "node tests/server-smoke-test.mjs"
+    "test": "npm run test:rules && npm run test:server && npm run test:commands",
+    "test:server": "node tests/server-smoke-test.mjs",
+    "test:rules": "node tests/rules-test.mjs",
+    "test:commands": "node tests/commander-server-test.mjs"
   },
   "engines": {
     "node": ">=22"

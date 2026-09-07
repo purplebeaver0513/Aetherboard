@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: aetherboard-v7-online
+    name: aetherboard-v9-online
     runtime: node
     region: ohio
     plan: free
