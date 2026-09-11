@@ -1,0 +1,67 @@
+--- a/public/index.html
++++ b/public/index.html
+@@ -4159,7 +4159,9 @@
+         settled = true;
+         resolve(socket);
+         const saved = resumeExisting ? loadOnlineSession() : null;
+-        if (saved && !onlineNet.room) onlineSend("resume-room", saved);
++        // This is a new transport, even when the old room is still cached.
++        // Reclaim the seat so the server can resume the existing match phase.
++        if (saved) onlineSend("resume-room", saved);
+       });
+       socket.addEventListener("message", event => handleOnlineMessage(event));
+       socket.addEventListener("close", () => {
+@@ -7579,19 +7581,28 @@
+   }
+   function processPendingRewards(onComplete = () => {}) {
+     if (!state || state.phase !== "planning") return;
++    // A reward remains pending while its modal is open. A planning reconnect
++    // can replace that modal and save again before the player has chosen.
++    const completeReward = field => {
++      let completed = false;
++      return () => {
++        if (completed) return;
++        completed = true;
++        state[field] = Math.max(0, state[field] - 1);
++        saveGame();
++        processPendingRewards(onComplete);
++      };
++    };
+     if (state.pendingBlackMarketRewards > 0) {
+-      state.pendingBlackMarketRewards -= 1;
+-      showBlackMarket(Math.max(5, state.round - 1), () => processPendingRewards(onComplete));
++      showBlackMarket(Math.max(5, state.round - 1), completeReward("pendingBlackMarketRewards"));
+       return;
+     }
+     if (state.pendingBlessingRewards > 0) {
+-      state.pendingBlessingRewards -= 1;
+-      showBlessingChoice(Math.max(5, state.round - 1), () => processPendingRewards(onComplete));
++      showBlessingChoice(Math.max(5, state.round - 1), completeReward("pendingBlessingRewards"));
+       return;
+     }
+     if (state.pendingItemRewards > 0) {
+-      state.pendingItemRewards -= 1;
+-      showLootChoice(Math.max(3, state.round - 1), () => processPendingRewards(onComplete));
++      showLootChoice(Math.max(3, state.round - 1), completeReward("pendingItemRewards"));
+       return;
+     }
+     onComplete();
+@@ -8009,6 +8020,8 @@
+     playSfx("buy");
+     if (state.mode === "online") saveOnlineGameState();
+     if (state.draftPicksRemaining > 0) {
++      // Persist each accepted pick, not only the completed three-spirit draft.
++      if (state.mode !== "online") saveGame();
+       showStarterDraft();
+       return;
+     }
+@@ -9858,7 +9871,8 @@
+     titleHasSavedRun = Boolean(loaded);
+     state = loaded || createFreshState("expedition", loadProfile().name);
+     prepareEnemy();
+-    if (!state.shop.some(Boolean) && !(hardcoreRulesActive() && !state.hardcore?.setupComplete)) {
++    // An all-null saved shop is sold out, not an uninitialized new shop.
++    if (!loaded && !state.shop.some(Boolean) && !(hardcoreRulesActive() && !state.hardcore?.setupComplete)) {
+       state.shop = Array.from({ length: 5 }, () => rollShopUnit(state.level));
+     }
+     awakeningQueue = allUnitLocations()

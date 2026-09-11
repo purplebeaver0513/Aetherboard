@@ -1,16 +1,19 @@
-# Version 9 — GitHub upload checklist
+# Version 10 repository upload
 
-- [ ] Stop the old server before replacing code during a match.
-- [ ] Extract the ZIP, rather than uploading the ZIP itself.
-- [ ] Upload the contents of the extracted project to the repository root.
-- [ ] Include `public/index.html` **and the new `public/rules.js`**.
-- [ ] Include `server.js`, `package.json`, `package-lock.json`, `tests/`, launchers and documentation.
-- [ ] Keep custom assets under `public/assets/` and reapply your `CUSTOM_ASSETS` paths when replacing HTML.
-- [ ] Do not upload `node_modules/`, Cloudflare executables, tokens, personal tunnel configs, or `.env` files.
-- [ ] Run `npm test` and `npm start` with Node.js 22 or newer.
-- [ ] Check `http://localhost:8080` and `/health`.
-- [ ] Refresh both devices on the same public/tunnel address and start a new V9 match.
+Extract the full ZIP into a separate folder. Keep your current working folder as a backup and preserve local custom art/configuration.
 
-## Manual Node Web Service settings
+The repository root should directly contain `server.js`, `package.json`, `package-lock.json`, `public/`, `tests/`, `render.yaml` and `Dockerfile`. Upload the extracted contents, not the ZIP or another outer folder.
 
-No Blueprint is required. Build: `npm install --omit=dev`. Start: `npm start`. Health check: `/health`. Leave Root Directory blank when package.json is directly in the repository root.
+Include the new files:
+
+```text
+public/pixel-art.js
+public/pixel-theme.css
+public/assets/pixel/    (all contents)
+```
+
+Do not upload Node modules, Cloudflare executables, tunnel configurations, certificates, tokens or `.env` files. The existing `.gitignore` covers these.
+
+Run `npm test` and test one disposable duel locally before committing. Deployment commands and `/health` are unchanged. This update does not require Blueprint. Schedule any host restart between matches because rooms remain in server memory.
+
+See `UPGRADE_1_0_1.md` for installation and rollback, and `TESTING_1_0_1.md` for actual validation limits.

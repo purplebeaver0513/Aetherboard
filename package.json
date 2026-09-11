@@ -1,16 +1,20 @@
 {
   "name": "aetherboard-auto-chess-v9-arena",
-  "version": "9.0.0",
+  "version": "1.0.1",
   "private": true,
   "type": "module",
   "description": "Aetherboard Arena: 56 spirits, eight elements, randomized three-round arenas, automatic Hardcore bans, limited-use area spells, public matchmaking and private multiplayer.",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "npm run test:rules && npm run test:server && npm run test:commands",
+    "test": "npm run test:rules && npm run test:server && npm run test:commands && npm run test:client && npm run test:http && npm run test:art && npm run test:animation",
     "test:server": "node tests/server-smoke-test.mjs",
     "test:rules": "node tests/rules-test.mjs",
-    "test:commands": "node tests/commander-server-test.mjs"
+    "test:commands": "node tests/commander-server-test.mjs",
+    "test:client": "node --test tests/client-compat-test.mjs",
+    "test:http": "node --test tests/http-contract-test.mjs",
+    "test:art": "node --test tests/pixel-art-test.mjs",
+    "test:animation": "node --test tests/animation-art-test.mjs"
   },
   "engines": {
     "node": ">=22"
